@@ -37,8 +37,12 @@
 #include "DataFormats/CaloRecHit/interface/CaloClusterFwd.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h" 
 #include "RecoParticleFlow/PFProducer/interface/Utils.h"
-
-#include "../interface/ElectronMVAEstimator.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "EGamma/EGammaAnalysisTools/interface/ElectronMVAEstimator.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 
 
@@ -70,8 +74,8 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
   ParameterSet conf_;
 
   //  ElectronMVAEstimator *fMVASiDanV2;
-  ElectronMVAEstimator* fMVASiDanV2;
-
+  ElectronMVAEstimator* fMVANonTrig;
+ 
   unsigned int ev;
       // ----------member data ---------------------------
 
@@ -92,10 +96,11 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
   conf_(iConfig)
 
 {
-   // = new ElectronMVAEstimator();
- //  fMVASiDanV2->initialize("BDTCat_BDTG_SiDanV2",
-// 			  "/mnt/data2/OutputBatchTMVA/EmanueleV12/weights/DanieleMVA_BDTCat_BDTG_SiDanV2.weights.xml",
-// 			  ElectronMVAEstimator::kNonTrig);
+  fMVANonTrig = new ElectronMVAEstimator();
+  fMVANonTrig->initialize("BDTCat_BDTG_SiDanV2",
+			  "/mnt/data2/OutputBatchTMVA/EmanueleV12/weights/DanieleMVA_BDTCat_BDTG_SiDanV2.weights.xml",
+			  ElectronMVAEstimator::kNonTrig);
+
   
   edm::Service<TFileService> fs;
 
@@ -122,21 +127,48 @@ void
 ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
-  InputTag egammaLabel(string("gsfElectrons"));
+  InputTag gsfEleLabel(string("gsfElectrons"));
   Handle<GsfElectronCollection> theEGammaCollection;
-  iEvent.getByLabel(egammaLabel,theEGammaCollection);
+  iEvent.getByLabel(gsfEleLabel,theEGammaCollection);
   const GsfElectronCollection theEGamma = *(theEGammaCollection.product());
 
 
-  InputTag  MCTruthCollection(string("generator"));
+  InputTag  mcTruthLabel(string("generator"));
   edm::Handle<edm::HepMCProduct> pMCTruth;
-  iEvent.getByLabel(MCTruthCollection,pMCTruth);
+  iEvent.getByLabel(mcTruthLabel,pMCTruth);
   const HepMC::GenEvent* genEvent = pMCTruth->GetEvent();
 
+  InputTag  vertexLabel(string("offlinePrimaryVertices"));
+  Handle<reco::VertexCollection> thePrimaryVertexColl;
+  iEvent.getByLabel(vertexLabel,thePrimaryVertexColl);
+  
+  Vertex dummy;
+  const Vertex *pv = &dummy;
+  if (thePrimaryVertexColl->size() != 0) {
+    pv = &*thePrimaryVertexColl->begin();
+  } else { // create a dummy PV
+    Vertex::Error e;
+    e(0, 0) = 0.0015 * 0.0015;
+    e(1, 1) = 0.0015 * 0.0015;
+    e(2, 2) = 15. * 15.;
+    Vertex::Point p(0, 0, 0);
+    dummy = Vertex(p, e, 0, 0, 0);
+  }
+  
 
+
+  InputTag  reducedEBRecHitCollection(string("reducedEcalRecHitsEB"));
+  InputTag  reducedEERecHitCollection(string("reducedEcalRecHitsEE"));
+
+  EcalClusterLazyTools lazyTools(iEvent, iSetup, reducedEBRecHitCollection, reducedEERecHitCollection);
+  
+  edm::ESHandle<TransientTrackBuilder> builder;
+  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", builder);
+  TransientTrackBuilder thebuilder = *(builder.product());
+  
 
   bool debug = true;
-
+  bool debugMVAclass = true;
 
   ev++;
 
@@ -166,10 +198,13 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	float dphi = Utils::mpi_pi(phimc - phireco);
 	float dR = sqrt(deta*deta + dphi*dphi);
 
-	if(dR < 0.1) {
-	  if(debug)
-	    cout << " niente " << endl;
+	
 
+	if(dR < 0.1) {
+	  double myMVANonTrig = fMVANonTrig->mvaValue((theEGamma[j]),*pv,thebuilder,lazyTools,debugMVAclass);
+	  if(debug)		
+	    cout << " MyMVA " << myMVANonTrig << endl;
+			      
 	} 
       } // End Loop on RECO electrons
     } // End if MC electrons selection

@@ -1,5 +1,7 @@
 #include <TFile.h>
 #include "../interface/ElectronMVAEstimator.h"
+#include <cmath>
+using namespace std;
 
 #ifndef STANDALONE
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -18,13 +20,10 @@
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
-
-
 using namespace reco;
 #endif
-#include <cmath>
 
-using namespace std;
+
 
 
 
@@ -325,9 +324,9 @@ Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem,
 
 //--------------------------------------------------------------------------------------------------
 #ifndef STANDALONE
-Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron *ele, 
-					const reco::Vertex vertex, 
-					const TransientTrackBuilder *transientTrackBuilder,					
+Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele, 
+					const reco::Vertex& vertex, 
+					const TransientTrackBuilder& transientTrackBuilder,					
 					EcalClusterLazyTools myEcalCluster,
 					bool printDebug) {
   
@@ -337,50 +336,50 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron *ele,
   }
   
   bool validKF= false; 
-  reco::TrackRef myTrackRef = ele->closestCtfTrackRef();
+  reco::TrackRef myTrackRef = ele.closestCtfTrackRef();
   validKF = (myTrackRef.isAvailable());
   validKF = (myTrackRef.isNonnull());  
 
-  fMVAVar_fbrem           =  ele->fbrem();
-  fMVAVar_deta            =  ele->deltaEtaSuperClusterTrackAtVtx();
-  fMVAVar_dphi            =  ele->deltaPhiSuperClusterTrackAtVtx();
-  fMVAVar_see             =  ele->sigmaIetaIeta();    //EleSigmaIEtaIEta
-  fMVAVar_etawidth        =  ele->superCluster()->etaWidth();
-  fMVAVar_phiwidth        =  ele->superCluster()->phiWidth();
-  fMVAVar_HoE             =  ele->hadronicOverEm();
-  fMVAVar_EoP             =  ele->eSuperClusterOverP();
-  fMVAVar_e1x5e5x5        =  (ele->e5x5()) !=0. ? 1.-(ele->e1x5()/ele->e5x5()) : -1. ;
-  fMVAVar_EoPout          =  ele->eSeedClusterOverPout();
-  fMVAVar_eleEoPout       =  ele->eEleClusterOverPout();
-  fMVAVar_detacalo        =  ele->deltaEtaSeedClusterTrackAtCalo();
+  fMVAVar_fbrem           =  ele.fbrem();
+  fMVAVar_deta            =  ele.deltaEtaSuperClusterTrackAtVtx();
+  fMVAVar_dphi            =  ele.deltaPhiSuperClusterTrackAtVtx();
+  fMVAVar_see             =  ele.sigmaIetaIeta();    //EleSigmaIEtaIEta
+  fMVAVar_etawidth        =  ele.superCluster()->etaWidth();
+  fMVAVar_phiwidth        =  ele.superCluster()->phiWidth();
+  fMVAVar_HoE             =  ele.hadronicOverEm();
+  fMVAVar_EoP             =  ele.eSuperClusterOverP();
+  fMVAVar_e1x5e5x5        =  (ele.e5x5()) !=0. ? 1.-(ele.e1x5()/ele.e5x5()) : -1. ;
+  fMVAVar_EoPout          =  ele.eSeedClusterOverPout();
+  fMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
+  fMVAVar_detacalo        =  ele.deltaEtaSeedClusterTrackAtCalo();
   fMVAVar_kfchi2          =  (validKF) ? myTrackRef->normalizedChi2() : 0 ;
   fMVAVar_kfhits          =  (validKF) ? myTrackRef->hitPattern().trackerLayersWithMeasurement() : -1. ; 
   //  fMVAVar_kfhits          =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ;   // for analysist save also this 
 
 
-  std::vector<float> vCov = myEcalCluster.localCovariances(*(ele->superCluster()->seed())) ;
+  std::vector<float> vCov = myEcalCluster.localCovariances(*(ele.superCluster()->seed())) ;
   if (!isnan(vCov[2])) fMVAVar_spp = sqrt (vCov[2]);   //EleSigmaIPhiIPhi
   else fMVAVar_spp = 0.;
 
-  fMVAVar_IoEmIoP         =  (1.0/(ele->superCluster()->energy())) - (1.0 / ele->p());  // in the future to be changed with ele->gsfTrack()->p()
-  fMVAVar_nbrems          =  fabs(ele->numberOfBrems());
-  fMVAVar_R9              =  myEcalCluster.e3x3(*(ele->superCluster()->seed())) / ele->superCluster()->rawEnergy();
-  fMVAVar_dphicalo        =  ele->deltaPhiSeedClusterTrackAtCalo();   
-  fMVAVar_gsfchi2         =  ele->gsfTrack()->normalizedChi2();  // to be checked 
-  fMVAVar_PreShowerOverRaw=  ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy();
+  fMVAVar_IoEmIoP         =  (1.0/(ele.superCluster()->energy())) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
+  fMVAVar_nbrems          =  fabs(ele.numberOfBrems());
+  fMVAVar_R9              =  myEcalCluster.e3x3(*(ele.superCluster()->seed())) / ele.superCluster()->rawEnergy();
+  fMVAVar_dphicalo        =  ele.deltaPhiSeedClusterTrackAtCalo();   
+  fMVAVar_gsfchi2         =  ele.gsfTrack()->normalizedChi2();  // to be checked 
+  fMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
   
-  fMVAVar_eta             =  ele->superCluster()->eta();         
-  fMVAVar_pt              =  ele->pt();                          
+  fMVAVar_eta             =  ele.superCluster()->eta();         
+  fMVAVar_pt              =  ele.pt();                          
   fMVAVar_matchConv       =  0;  // to be changed!!!
  
 
   // for triggering electrons get the impact parameteres
   if(fMVAType == kTrig) {
     //d0
-    if (ele->gsfTrack().isNonnull()) {
-      fMVAVar_d0 = (-1.0)*ele->gsfTrack()->dxy(vertex.position()); 
-    } else if (ele->closestCtfTrackRef().isNonnull()) {
-      fMVAVar_d0 = (-1.0)*ele->closestCtfTrackRef()->dxy(vertex.position()); 
+    if (ele.gsfTrack().isNonnull()) {
+      fMVAVar_d0 = (-1.0)*ele.gsfTrack()->dxy(vertex.position()); 
+    } else if (ele.closestCtfTrackRef().isNonnull()) {
+      fMVAVar_d0 = (-1.0)*ele.closestCtfTrackRef()->dxy(vertex.position()); 
     } else {
       fMVAVar_d0 = -9999.0;
     }
@@ -388,10 +387,10 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron *ele,
     //default values for IP3D
     fMVAVar_ip3d = -999.0; 
     // fMVAVar_ip3dSig = 0.0;
-    if (ele->gsfTrack().isNonnull()) {
-      const double gsfsign   = ( (-ele->gsfTrack()->dxy(vertex.position()))   >=0 ) ? 1. : -1.;
+    if (ele.gsfTrack().isNonnull()) {
+      const double gsfsign   = ( (-ele.gsfTrack()->dxy(vertex.position()))   >=0 ) ? 1. : -1.;
       
-      const reco::TransientTrack &tt = transientTrackBuilder->build(ele->gsfTrack()); 
+      const reco::TransientTrack &tt = transientTrackBuilder.build(ele.gsfTrack()); 
       const std::pair<bool,Measurement1D> &ip3dpv =  IPTools::absoluteImpactParameter3D(tt,vertex);
       if (ip3dpv.first) {
 	double ip3d = gsfsign*ip3dpv.second.value();

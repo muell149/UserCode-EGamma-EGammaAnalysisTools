@@ -52,9 +52,9 @@ class ElectronMVAEstimator{
   void bindVariables();
 
 #ifndef STANDALONE
-  Double_t mvaValue(const reco::GsfElectron *ele, 
-		    const reco::Vertex vertex, 
-		    const TransientTrackBuilder *transientTrackBuilder,
+  Double_t mvaValue(const reco::GsfElectron& ele, 
+		    const reco::Vertex& vertex, 
+		    const TransientTrackBuilder& transientTrackBuilder,
 		    EcalClusterLazyTools myEcalCluster,
 		    bool printDebug = kFALSE);
 #endif
