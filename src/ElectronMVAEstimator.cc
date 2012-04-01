@@ -400,7 +400,7 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
       }
     }
   }
-
+  
 
   // evaluate
   bindVariables();
@@ -432,6 +432,8 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
 	 << " dphicalo " << fMVAVar_dphicalo  
 	 << " gsfchi2 " << fMVAVar_gsfchi2  
 	 << " PreShowerOverRaw " << fMVAVar_PreShowerOverRaw  
+	 << " d0 " << fMVAVar_d0  
+	 << " ip3d " << fMVAVar_ip3d  
 	 << " eta " << fMVAVar_eta  
 	 << " pt " << fMVAVar_pt << endl;
     cout << " ### MVA " << mva << endl;
