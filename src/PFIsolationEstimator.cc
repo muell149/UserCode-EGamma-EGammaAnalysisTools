@@ -1,6 +1,7 @@
 #include <TFile.h>
 #include "../interface/PFIsolationEstimator.h"
 #include <cmath>
+#include "DataFormats/Math/interface/deltaR.h"
 using namespace std;
 
 #ifndef STANDALONE
@@ -39,7 +40,7 @@ PFIsolationEstimator::~PFIsolationEstimator()
 }
 
 //--------------------------------------------------------------------------------------------------
-void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, Int_t iParticleType ) {
+void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
 
   setParticleType(iParticleType);
 
@@ -113,7 +114,7 @@ void PFIsolationEstimator::initializePhotonIsolation( Bool_t  bApplyVeto ){
 /*
 
 //--------------------------------------------------------------------------------------------------
-Float_t PFIsolationEstimator::fElectronIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection > ) 
+float PFIsolationEstimator::fElectronIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) 
 {
   
   fIsolation=0.0;
@@ -124,20 +125,20 @@ Float_t PFIsolationEstimator::fElectronIsolation(const reco::PFCandidate * pfCan
 }
  
 //--------------------------------------------------------------------------------------------------
-Float_t PFIsolationEstimator::fPhotonIsolation(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >) {
+float PFIsolationEstimator::fPhotonIsolation(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl,const reco::VertexCollection& vertices) {
   
   return fIsolation;
 }
 
 
 //--------------------------------------------------------------------------------------------------
-Float_t* PFIsolationEstimator::fElectronIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >) {
+float* PFIsolationEstimator::fElectronIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) {
   
   return fIsolationInRings;
 }
  
 //--------------------------------------------------------------------------------------------------
-Float_t* PFIsolationEstimator::fPhotonIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >) {
+float* PFIsolationEstimator::fPhotonIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) {
   
   return fIsolationInRings;
 }
@@ -145,14 +146,20 @@ Float_t* PFIsolationEstimator::fPhotonIsolationInRings(const reco::PFCandidate *
 
  
 //--------------------------------------------------------------------------------------------------
-Float_t PFIsolationEstimator::fGetIsolation(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >) {
-  
+float PFIsolationEstimator::fGetIsolation(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) {
+  setRingSize(fConeSize);
+  SetNumbersOfRings(1);
+
+  fGetIsolationInRings( pfCandidate, pfParticlesColl, vertices);
+
   return fIsolation;
 }
 
 
 //--------------------------------------------------------------------------------------------------
-Float_t* PFIsolationEstimator::fGetIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >) {
+vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) {
+
+  
   
   return fIsolationInRings;
 }
