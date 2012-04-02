@@ -43,7 +43,7 @@
 #include "EGamma/EGammaAnalysisTools/interface/ElectronMVAEstimator.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-
+#include "TrackingTools/IPTools/interface/IPTools.h"
 
 #include <cmath>
 #include <vector>
@@ -276,8 +276,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   ev++;
 
-  if(debug)
-    cout << "************************* New Event:: " << ev << " *************************" << endl;
+ 
 
   // Validation from generator events 
 
@@ -367,7 +366,8 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  
 	  h_mva_nontrig->Fill(myMVANonTrigMethod1);
 
-
+	  if(debug)
+	    cout << "************************* New Good Event:: " << ev << " *************************" << endl;
 	  if(debug)		
 	    cout << "Non-Triggering:: MyMVA Method-1 " << myMVANonTrigMethod1 << " MyMVA Method-2 " << myMVANonTrigMethod2 << endl;
 
@@ -377,15 +377,43 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 	  bool elePresel = trainTrigPresel(theEGamma[j]);
 	  double myMVATrigMethod1 = -1.;
-	  if(elePresel)
-	    myMVATrigMethod1 = myMVATrig->mvaValue((theEGamma[j]),*pv,thebuilder,lazyTools,true); 
-
+	  double myMVATrigMethod2 = -1.;
+	  if(elePresel) {
+	    myMVATrigMethod1 = myMVATrig->mvaValue((theEGamma[j]),*pv,thebuilder,lazyTools,debugMVAclass); 
+	    myMVATrigMethod2 = myMVATrig->mvaValue( myMVAVar_fbrem, 
+						    myMVAVar_kfchi2,
+						    myMVAVar_kfhits,
+						    myMVAVar_gsfchi2,
+						    myMVAVar_deta,
+						    myMVAVar_dphi,
+						    myMVAVar_detacalo,
+						    // myMVAVar_dphicalo,
+						    myMVAVar_see,
+						    myMVAVar_spp,
+						    myMVAVar_etawidth,
+						    myMVAVar_phiwidth,
+						    myMVAVar_e1x5e5x5,
+						    myMVAVar_R9,
+						    //myMVAVar_nbrems,
+						    myMVAVar_HoE,
+						    myMVAVar_EoP,
+						    myMVAVar_IoEmIoP,
+						    myMVAVar_eleEoPout,
+						    myMVAVar_PreShowerOverRaw,
+						    // myMVAVar_EoPout,
+						    myMVAVar_d0,
+						    myMVAVar_ip3d,
+						    myMVAVar_eta,
+						    myMVAVar_pt,
+						    debugMyVar);
+	  }
 
 	  h_mva_trig->Fill(myMVATrigMethod1);
 
 	  if(debug)	
-	    cout << "Triggering:: ElePreselection " << elePresel  << " MyMVA Method-1 " << myMVATrigMethod1 << endl;
-		      
+	    cout << "Triggering:: ElePreselection " << elePresel  
+		 << " MyMVA Method-1 " << myMVATrigMethod1 
+	  << " MyMVA Method-2 " << myMVATrigMethod2 << endl;
 	} 
       } // End Loop on RECO electrons
     } // End if MC electrons selection
@@ -440,37 +468,31 @@ void ElectronAnalyzer::myVar(const reco::GsfElectron& ele,
   myMVAVar_pt              =  ele.pt();                          
  
 
-  // for triggering electrons get the impact parameteres
-  //  if(myMVAType == kTrig) {
+
   //d0
-//   if (ele.gsfTrack().isNonnull()) {
-//       myMVAVar_d0 = (-1.0)*ele.gsfTrack()->dxy(vertex.position()); 
-//     } else if (ele.closestCtfTrackRef().isNonnull()) {
-//       myMVAVar_d0 = (-1.0)*ele.closestCtfTrackRef()->dxy(vertex.position()); 
-//     } else {
-//       myMVAVar_d0 = -9999.0;
-//     }
-    
-//     //default values for IP3D
-//     myMVAVar_ip3d = -999.0; 
-//     // myMVAVar_ip3dSig = 0.0;
-//     if (ele.gsfTrack().isNonnull()) {
-//       const double gsfsign   = ( (-ele.gsfTrack()->dxy(vertex.position()))   >=0 ) ? 1. : -1.;
-      
-//       const reco::TransientTrack &tt = transientTrackBuilder.build(ele.gsfTrack()); 
-//       const std::pair<bool,Measurement1D> &ip3dpv =  IPTools::absoluteImpactParameter3D(tt,vertex);
-//       if (ip3dpv.first) {
-// 	double ip3d = gsfsign*ip3dpv.second.value();
-// 	//double ip3derr = ip3dpv.second.error();  
-// 	myMVAVar_ip3d = ip3d; 
-// 	// myMVAVar_ip3dSig = ip3d/ip3derr;
-//       }
-//     }
-//   }
+  if (ele.gsfTrack().isNonnull()) {
+    myMVAVar_d0 = (-1.0)*ele.gsfTrack()->dxy(vertex.position()); 
+  } else if (ele.closestCtfTrackRef().isNonnull()) {
+    myMVAVar_d0 = (-1.0)*ele.closestCtfTrackRef()->dxy(vertex.position()); 
+  } else {
+    myMVAVar_d0 = -9999.0;
+  }
   
-
-  // evaluate
-
+  //default values for IP3D
+  myMVAVar_ip3d = -999.0; 
+  // myMVAVar_ip3dSig = 0.0;
+  if (ele.gsfTrack().isNonnull()) {
+    const double gsfsign   = ( (-ele.gsfTrack()->dxy(vertex.position()))   >=0 ) ? 1. : -1.;
+    
+    const reco::TransientTrack &tt = transientTrackBuilder.build(ele.gsfTrack()); 
+    const std::pair<bool,Measurement1D> &ip3dpv =  IPTools::absoluteImpactParameter3D(tt,vertex);
+    if (ip3dpv.first) {
+      double ip3d = gsfsign*ip3dpv.second.value();
+	//double ip3derr = ip3dpv.second.error();  
+      myMVAVar_ip3d = ip3d; 
+      // myMVAVar_ip3dSig = ip3d/ip3derr;
+    }
+  }
 
 
   if(printDebug) {
@@ -496,8 +518,8 @@ void ElectronAnalyzer::myVar(const reco::GsfElectron& ele,
 	 << " eleEoPout " << myMVAVar_eleEoPout  
 	 << " EoPout " << myMVAVar_EoPout  
 	 << " PreShowerOverRaw " << myMVAVar_PreShowerOverRaw  
-// 	 << " d0 " << myMVAVar_d0  
-// 	 << " ip3d " << myMVAVar_ip3d  
+	 << " d0 " << myMVAVar_d0  
+	 << " ip3d " << myMVAVar_ip3d  
 	 << " eta " << myMVAVar_eta  
 	 << " pt " << myMVAVar_pt << endl;
   }
