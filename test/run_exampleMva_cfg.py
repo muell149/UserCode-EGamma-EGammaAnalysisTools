@@ -11,8 +11,8 @@ process.GlobalTag.globaltag = 'START42_V12::All'
 process.source = cms.Source(
     "PoolSource",
     fileNames = cms.untracked.vstring(
-#    '/store/relval/CMSSW_4_4_0_pre8/RelValSingleGammaPt35/GEN-SIM-RECO/START44_V3-v1/0030/76A5E848-72C7-E011-AEA1-002354EF3BE1.root'
-    'file:/data/benedet/Fall11_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_0.root'
+    'rfio:/castor/cern.ch/user/b/benedet/Fall11_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_0.root'
+   # 'file:/data/benedet/Fall11_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_0.root'
   ),
     secondaryFileNames = cms.untracked.vstring(),
     noEventSort = cms.untracked.bool(True),

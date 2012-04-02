@@ -60,26 +60,26 @@ class ElectronMVAEstimator{
 #endif
   
   Double_t mvaValue(Double_t fbrem, 
-		    Double_t deta,
-		    Double_t dphi,
-		    Double_t see,
-		    Double_t etawidth,
-		    Double_t phiwidth,
-		    Double_t HoE,
-		    Double_t EoP,
-		    Double_t e1x5e5x5,
-		    Double_t EoPout,
-		    Double_t eleEoPout,
-		    Double_t detacalo,
 		    Double_t kfchi2,
 		    Int_t    kfhits,
-		    Double_t spp,
-		    Double_t IoEmIoP,
-		    Int_t    nbrems,
-		    Double_t R9,
-		    Double_t dphicalo,
 		    Double_t gsfchi2,
+		    Double_t deta,
+		    Double_t dphi,
+		    Double_t detacalo,
+		    //Double_t dphicalo,
+		    Double_t see,
+		    Double_t spp,
+		    Double_t etawidth,
+		    Double_t phiwidth,
+		    Double_t e1x5e5x5,
+		    Double_t R9,
+		    //Int_t    nbrems,
+		    Double_t HoE,
+		    Double_t EoP,
+		    Double_t IoEmIoP,
+		    Double_t eleEoPout,
 		    Double_t PreShowerOverRaw,
+		    //Double_t EoPout,
 		    Double_t d0,
 		    Double_t ip3d,
 		    Double_t eta,
@@ -87,26 +87,26 @@ class ElectronMVAEstimator{
 		    Bool_t printDebug = kFALSE );
  
   Double_t mvaValue(Double_t fbrem, 
-		    Double_t deta,
-		    Double_t dphi,
-		    Double_t see,
-		    Double_t etawidth,
-		    Double_t phiwidth,
-		    Double_t HoE,
-		    Double_t EoP,
-		    Double_t e1x5e5x5,
-		    Double_t EoPout,
-		    Double_t eleEoPout,
-		    Double_t detacalo,
 		    Double_t kfchi2,
 		    Int_t    kfhits,
-		    Double_t spp,
-		    Double_t IoEmIoP,
-		    Int_t    nbrems,
-		    Double_t R9,
-		    Double_t dphicalo,
 		    Double_t gsfchi2,
+		    Double_t deta,
+		    Double_t dphi,
+		    Double_t detacalo,
+		    //Double_t dphicalo,
+		    Double_t see,
+		    Double_t spp,
+		    Double_t etawidth,
+		    Double_t phiwidth,
+		    Double_t e1x5e5x5,
+		    Double_t R9,
+		    //Int_t    nbrems,
+		    Double_t HoE,
+		    Double_t EoP,
+		    Double_t IoEmIoP,
+		    Double_t eleEoPout,
 		    Double_t PreShowerOverRaw,
+		    //Double_t EoPout,
 		    Double_t eta,
 		    Double_t pt,
 		    Bool_t printDebug = kFALSE );
@@ -120,32 +120,36 @@ class ElectronMVAEstimator{
   
   Bool_t                    fisInitialized;
   Bool_t                    fPrintMVADebug;
-  Float_t                   fMVAVar_fbrem; 
-  Float_t                   fMVAVar_deta;
-  Float_t                   fMVAVar_dphi;
-  Float_t                   fMVAVar_see;
-  Float_t                   fMVAVar_etawidth;
-  Float_t                   fMVAVar_phiwidth;
-  Float_t                   fMVAVar_HoE;
-  Float_t                   fMVAVar_EoP;
-  Float_t                   fMVAVar_e1x5e5x5;
-  Float_t                   fMVAVar_EoPout;
-  Float_t                   fMVAVar_eleEoPout;
-  Float_t                   fMVAVar_detacalo;
+  Float_t                   fMVAVar_fbrem;
   Float_t                   fMVAVar_kfchi2;
   Float_t                   fMVAVar_kfhits;
-  Float_t                   fMVAVar_spp;
-  Float_t                   fMVAVar_IoEmIoP;
-  Float_t                   fMVAVar_nbrems;
-  Float_t                   fMVAVar_R9;
-  Float_t                   fMVAVar_dphicalo;
   Float_t                   fMVAVar_gsfchi2;
+
+  Float_t                   fMVAVar_deta;
+  Float_t                   fMVAVar_dphi;
+  Float_t                   fMVAVar_detacalo;
+  //Float_t                   fMVAVar_dphicalo;
+
+  Float_t                   fMVAVar_see;
+  Float_t                   fMVAVar_spp;
+  Float_t                   fMVAVar_etawidth;
+  Float_t                   fMVAVar_phiwidth;
+  Float_t                   fMVAVar_e1x5e5x5;
+  Float_t                   fMVAVar_R9;
+  //Float_t                   fMVAVar_nbrems;
+
+  Float_t                   fMVAVar_HoE;
+  Float_t                   fMVAVar_EoP;
+  Float_t                   fMVAVar_IoEmIoP;
+  Float_t                   fMVAVar_eleEoPout;
   Float_t                   fMVAVar_PreShowerOverRaw;
+  //Float_t                   fMVAVar_EoPout;
+
   Float_t                   fMVAVar_d0;
   Float_t                   fMVAVar_ip3d;
+
   Float_t                   fMVAVar_eta;
   Float_t                   fMVAVar_pt;
-  Int_t                     fMVAVar_matchConv;
   
 
 };

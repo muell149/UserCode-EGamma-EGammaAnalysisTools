@@ -85,36 +85,40 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
   ParameterSet conf_;
 
   //  ElectronMVAEstimator *fMVASiDanV2;
-  ElectronMVAEstimator* fMVANonTrig;
-  ElectronMVAEstimator* fMVATrig;
-
+  ElectronMVAEstimator* myMVANonTrig;
+  ElectronMVAEstimator* myMVATrig;
+  
   TMVA::Reader             *myTMVAReader;
-  Float_t                   myMVAVar_fbrem; 
-  Float_t                   myMVAVar_deta;
-  Float_t                   myMVAVar_dphi;
-  Float_t                   myMVAVar_see;
-  Float_t                   myMVAVar_etawidth;
-  Float_t                   myMVAVar_phiwidth;
-  Float_t                   myMVAVar_HoE;
-  Float_t                   myMVAVar_EoP;
-  Float_t                   myMVAVar_e1x5e5x5;
-  Float_t                   myMVAVar_EoPout;
-  Float_t                   myMVAVar_eleEoPout;
-  Float_t                   myMVAVar_detacalo;
+  Float_t                   myMVAVar_fbrem;
   Float_t                   myMVAVar_kfchi2;
   Float_t                   myMVAVar_kfhits;
-  Float_t                   myMVAVar_spp;
-  Float_t                   myMVAVar_IoEmIoP;
-  Float_t                   myMVAVar_nbrems;
-  Float_t                   myMVAVar_R9;
-  Float_t                   myMVAVar_dphicalo;
   Float_t                   myMVAVar_gsfchi2;
+  
+  Float_t                   myMVAVar_deta;
+  Float_t                   myMVAVar_dphi;
+  Float_t                   myMVAVar_detacalo;
+  Float_t                   myMVAVar_dphicalo;
+
+  Float_t                   myMVAVar_see;
+  Float_t                   myMVAVar_spp;
+  Float_t                   myMVAVar_etawidth;
+  Float_t                   myMVAVar_phiwidth;
+  Float_t                   myMVAVar_e1x5e5x5;
+  Float_t                   myMVAVar_R9;
+  Float_t                   myMVAVar_nbrems;
+
+  Float_t                   myMVAVar_HoE;
+  Float_t                   myMVAVar_EoP;
+  Float_t                   myMVAVar_IoEmIoP;
+  Float_t                   myMVAVar_eleEoPout;
   Float_t                   myMVAVar_PreShowerOverRaw;
+  Float_t                   myMVAVar_EoPout;
+
   Float_t                   myMVAVar_d0;
   Float_t                   myMVAVar_ip3d;
+
   Float_t                   myMVAVar_eta;
   Float_t                   myMVAVar_pt;
-  Int_t                     myMVAVar_matchConv;          
  
   unsigned int ev;
       // ----------member data ---------------------------
@@ -122,25 +126,25 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
 
   TH1F* h_mva_nontrig,*h_mva_trig;
   TH1F* h_fbrem; 
-  TH1F* h_deta;
-  TH1F* h_dphi;
-  TH1F* h_see;
-  TH1F* h_etawidth;
-  TH1F* h_phiwidth;
-  TH1F* h_HoE;
-  TH1F* h_EoP;
-  TH1F* h_e1x5e5x5;
-  TH1F* h_EoPout;
-  TH1F* h_eleEoPout;
-  TH1F* h_detacalo;
   TH1F* h_kfchi2;
   TH1F* h_kfhits;
+  TH1F* h_gsfchi2;
+  TH1F* h_deta;
+  TH1F* h_dphi;
+  TH1F* h_detacalo;
+  TH1F* h_dphicalo;
+  TH1F* h_see;
   TH1F* h_spp;
-  TH1F* h_IoEmIoP;
+  TH1F* h_etawidth;
+  TH1F* h_phiwidth;
+  TH1F* h_e1x5e5x5;
   TH1F* h_nbrems;
   TH1F* h_R9;
-  TH1F* h_dphicalo;
-  TH1F* h_gsfchi2;
+  TH1F* h_HoE;
+  TH1F* h_EoP;
+  TH1F* h_IoEmIoP;
+  TH1F* h_eleEoPout;
+  TH1F* h_EoPout;
   TH1F* h_PreShowerOverRaw;
   TH1F* h_pt;
 };
@@ -162,16 +166,16 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
 {
 
   ev = 0;
-  fMVANonTrig = new ElectronMVAEstimator();
-  fMVANonTrig->initialize("BDTCat_BDTG_SiDanV2",
-			  "/mnt/data2/OutputBatchTMVA/EmanueleV12/weights/DanieleMVA_BDTCat_BDTG_SiDanV2.weights.xml",
+  myMVANonTrig = new ElectronMVAEstimator();
+  myMVANonTrig->initialize("BDTCat_BDTG_NonTrigV0",
+			  "/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTGCat_NonTrigV0.weights.xml",
 			  ElectronMVAEstimator::kNonTrig);
 
-  fMVATrig = new ElectronMVAEstimator();
-  fMVATrig->initialize("BDTCat_BDTG_SiDanV2",
-		       "/mnt/data2/OutputBatchTMVA/EmanueleTrigV4/weights/DanieleMVA_BDTCat_BDTG_SiDanV2.weights.xml",
-		       ElectronMVAEstimator::kTrig);
-
+  myMVATrig = new ElectronMVAEstimator();
+  myMVATrig->initialize("BDTCat_BDTG_SiDanV2",
+			"/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTGCat_TrigV0.weights.xml",
+			ElectronMVAEstimator::kTrig);
+  
 
   
   edm::Service<TFileService> fs;
@@ -181,25 +185,26 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
 
 
   h_fbrem = fs->make<TH1F>("h_fbrem"," ",100,-1.,1.);
-  h_deta = fs->make<TH1F>("h_deta"," ",100,0.,0.06);
-  h_dphi = fs->make<TH1F>("h_dphi"," ",100,0.,0.3);
-  h_see = fs->make<TH1F>("h_see"," ",100,0.,0.06);
-  h_etawidth = fs->make<TH1F>("h_etawidth"," ",100,0.,0.1);
-  h_phiwidth = fs->make<TH1F>("h_phiwidth"," ",100,0.,0.2);
-  h_HoE = fs->make<TH1F>("h_HoE"," ",100,0.,0.5);
-  h_EoP = fs->make<TH1F>("h_EoP"," ",100,0.,5.);
-  h_e1x5e5x5 = fs->make<TH1F>("h_e1x5e5x5"," ",100,-0.1,1.1);
-  h_EoPout = fs->make<TH1F>("h_EoPout"," ",100,0.,5.);
-  h_eleEoPout = fs->make<TH1F>("h_eleEoPout"," ",100,0.,5.);
-  h_detacalo = fs->make<TH1F>("h_detacalo"," ",100,0.,0.05);
   h_kfchi2 = fs->make<TH1F>("h_kfchi2"," ",100,0,15);
   h_kfhits = fs->make<TH1F>("h_kfhits"," ",25,0,25);
-  h_spp = fs->make<TH1F>("h_spp"," ",100,0.,0.09);
-  h_IoEmIoP = fs->make<TH1F>("h_IoEmIoP"," ",100,-0.15,0.15);
-  h_nbrems = fs->make<TH1F>("h_nbrems"," ",100,0.,10);
-  h_R9 = fs->make<TH1F>("h_R9"," ",100,0.,2.);
-  h_dphicalo = fs->make<TH1F>("h_dphicalo"," ",100,0.,0.2);
   h_gsfchi2 = fs->make<TH1F>("h_gsfchi2"," ",100,0.,50);
+
+  h_deta = fs->make<TH1F>("h_deta"," ",100,0.,0.06);
+  h_dphi = fs->make<TH1F>("h_dphi"," ",100,0.,0.3);
+  h_detacalo = fs->make<TH1F>("h_detacalo"," ",100,0.,0.05);
+  h_dphicalo = fs->make<TH1F>("h_dphicalo"," ",100,0.,0.2);
+  h_see = fs->make<TH1F>("h_see"," ",100,0.,0.06);
+  h_spp = fs->make<TH1F>("h_spp"," ",100,0.,0.09);
+  h_etawidth = fs->make<TH1F>("h_etawidth"," ",100,0.,0.1);
+  h_phiwidth = fs->make<TH1F>("h_phiwidth"," ",100,0.,0.2);
+  h_e1x5e5x5 = fs->make<TH1F>("h_e1x5e5x5"," ",100,-0.1,1.1);
+  h_R9 = fs->make<TH1F>("h_R9"," ",100,0.,2.);
+  h_nbrems = fs->make<TH1F>("h_nbrems"," ",100,0.,10);
+  h_HoE = fs->make<TH1F>("h_HoE"," ",100,0.,0.5);
+  h_EoP = fs->make<TH1F>("h_EoP"," ",100,0.,5.);
+  h_IoEmIoP = fs->make<TH1F>("h_IoEmIoP"," ",100,-0.15,0.15);
+  h_eleEoPout = fs->make<TH1F>("h_eleEoPout"," ",100,0.,5.);
+  h_EoPout = fs->make<TH1F>("h_EoPout"," ",100,0.,5.);
   h_PreShowerOverRaw = fs->make<TH1F>("h_PreShowerOverRaw"," ",100,0.,0.3);
   h_pt = fs->make<TH1F>("h_pt"," ",100,0.,50);
 
@@ -303,59 +308,63 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 	  // ********************* Non-Triggering electrons
 
-	  double myMVANonTrigMethod1 = fMVANonTrig->mvaValue((theEGamma[j]),*pv,thebuilder,lazyTools,debugMVAclass);
+	  double myMVANonTrigMethod1 = myMVANonTrig->mvaValue((theEGamma[j]),*pv,thebuilder,lazyTools,debugMVAclass);
 
 
 	  myVar((theEGamma[j]),*pv,thebuilder,lazyTools,debugMyVar);
 	  myBindVariables();
+
 	  h_fbrem->Fill(myMVAVar_fbrem); 
-	  h_deta->Fill( myMVAVar_deta);
-	  h_dphi->Fill(myMVAVar_dphi);
-	  h_see->Fill(myMVAVar_see);
-	  h_etawidth->Fill(myMVAVar_etawidth);
-	  h_phiwidth->Fill(myMVAVar_phiwidth);
-	  h_HoE->Fill(myMVAVar_HoE);
-	  h_EoP->Fill( myMVAVar_EoP);
-	  h_e1x5e5x5->Fill(myMVAVar_e1x5e5x5);
-	  h_EoPout->Fill(myMVAVar_EoPout);
-	  h_eleEoPout->Fill(  myMVAVar_eleEoPout);
-	  h_detacalo->Fill( myMVAVar_detacalo);
 	  h_kfchi2->Fill(myMVAVar_kfchi2);
 	  h_kfhits->Fill( myMVAVar_kfhits);
-	  h_spp->Fill(myMVAVar_spp);
-	  h_IoEmIoP->Fill(myMVAVar_IoEmIoP);
-	  h_nbrems->Fill( myMVAVar_nbrems);
-	  h_R9->Fill(myMVAVar_R9);
-	  h_dphicalo->Fill(myMVAVar_dphicalo);
 	  h_gsfchi2->Fill(myMVAVar_gsfchi2);
+
+	  h_deta->Fill( myMVAVar_deta);
+	  h_dphi->Fill(myMVAVar_dphi);
+	  h_detacalo->Fill( myMVAVar_detacalo);
+	  h_dphicalo->Fill(myMVAVar_dphicalo);
+
+	  h_see->Fill(myMVAVar_see);
+	  h_spp->Fill(myMVAVar_spp);
+	  h_etawidth->Fill(myMVAVar_etawidth);
+	  h_phiwidth->Fill(myMVAVar_phiwidth);
+	  h_e1x5e5x5->Fill(myMVAVar_e1x5e5x5);
+	  h_R9->Fill(myMVAVar_R9);
+	  h_nbrems->Fill( myMVAVar_nbrems);
+
+	  h_HoE->Fill(myMVAVar_HoE);
+	  h_EoP->Fill( myMVAVar_EoP);
+	  h_IoEmIoP->Fill(myMVAVar_IoEmIoP);
+	  h_eleEoPout->Fill(  myMVAVar_eleEoPout);
+	  h_EoPout->Fill(myMVAVar_EoPout);
 	  h_PreShowerOverRaw->Fill(myMVAVar_PreShowerOverRaw);
 	  h_pt->Fill(myMVAVar_pt);
 	  
-	  double myMVANonTrigMethod2 = fMVANonTrig->mvaValue( myMVAVar_fbrem, 
-						     myMVAVar_deta,
-						     myMVAVar_dphi,
-						     myMVAVar_see,
-						     myMVAVar_etawidth,
-						     myMVAVar_phiwidth,
-						     myMVAVar_HoE,
-						     myMVAVar_EoP,
-						     myMVAVar_e1x5e5x5,
-						     myMVAVar_EoPout,
-						     myMVAVar_eleEoPout,
-						     myMVAVar_detacalo,
-						     myMVAVar_kfchi2,
-						     myMVAVar_kfhits,
-						     myMVAVar_spp,
-						     myMVAVar_IoEmIoP,
-						     myMVAVar_nbrems,
-						     myMVAVar_R9,
-						     myMVAVar_dphicalo,
-						     myMVAVar_gsfchi2,
-						     myMVAVar_PreShowerOverRaw,
-						     myMVAVar_eta,
-						     myMVAVar_pt,
-						     debugMyVar);
-
+	  double myMVANonTrigMethod2 = myMVANonTrig->mvaValue( myMVAVar_fbrem, 
+							       myMVAVar_kfchi2,
+							       myMVAVar_kfhits,
+							       myMVAVar_gsfchi2,
+							       myMVAVar_deta,
+							       myMVAVar_dphi,
+							       myMVAVar_detacalo,
+							       // myMVAVar_dphicalo,
+							       myMVAVar_see,
+							       myMVAVar_spp,
+							       myMVAVar_etawidth,
+							       myMVAVar_phiwidth,
+							       myMVAVar_e1x5e5x5,
+							       myMVAVar_R9,
+							       //myMVAVar_nbrems,
+							       myMVAVar_HoE,
+							       myMVAVar_EoP,
+							       myMVAVar_IoEmIoP,
+							       myMVAVar_eleEoPout,
+							       myMVAVar_PreShowerOverRaw,
+							       // myMVAVar_EoPout,
+							       myMVAVar_eta,
+							       myMVAVar_pt,
+							       debugMyVar);
+	  
 	  h_mva_nontrig->Fill(myMVANonTrigMethod1);
 
 
@@ -369,7 +378,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  bool elePresel = trainTrigPresel(theEGamma[j]);
 	  double myMVATrigMethod1 = -1.;
 	  if(elePresel)
-	    myMVATrigMethod1 = fMVATrig->mvaValue((theEGamma[j]),*pv,thebuilder,lazyTools,true); 
+	    myMVATrigMethod1 = myMVATrig->mvaValue((theEGamma[j]),*pv,thebuilder,lazyTools,true); 
 
 
 	  h_mva_trig->Fill(myMVATrigMethod1);
@@ -398,42 +407,43 @@ void ElectronAnalyzer::myVar(const reco::GsfElectron& ele,
   validKF = (myTrackRef.isNonnull());  
 
   myMVAVar_fbrem           =  ele.fbrem();
-  myMVAVar_deta            =  ele.deltaEtaSuperClusterTrackAtVtx();
-  myMVAVar_dphi            =  ele.deltaPhiSuperClusterTrackAtVtx();
-  myMVAVar_see             =  ele.sigmaIetaIeta();    //EleSigmaIEtaIEta
-  myMVAVar_etawidth        =  ele.superCluster()->etaWidth();
-  myMVAVar_phiwidth        =  ele.superCluster()->phiWidth();
-  myMVAVar_HoE             =  ele.hadronicOverEm();
-  myMVAVar_EoP             =  ele.eSuperClusterOverP();
-  myMVAVar_e1x5e5x5        =  (ele.e5x5()) !=0. ? 1.-(ele.e1x5()/ele.e5x5()) : -1. ;
-  myMVAVar_EoPout          =  ele.eSeedClusterOverPout();
-  myMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
-  myMVAVar_detacalo        =  ele.deltaEtaSeedClusterTrackAtCalo();
   myMVAVar_kfchi2          =  (validKF) ? myTrackRef->normalizedChi2() : 0 ;
   myMVAVar_kfhits          =  (validKF) ? myTrackRef->hitPattern().trackerLayersWithMeasurement() : -1. ; 
-  //  myMVAVar_kfhits          =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ;   // for analysist save also this 
+  //  myMVAVar_kfhits          =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ;   // for analysist save also this  
+  myMVAVar_gsfchi2         =  ele.gsfTrack()->normalizedChi2();  // to be checked 
+  
 
+  myMVAVar_deta            =  ele.deltaEtaSuperClusterTrackAtVtx();
+  myMVAVar_dphi            =  ele.deltaPhiSuperClusterTrackAtVtx();
+  myMVAVar_detacalo        =  ele.deltaEtaSeedClusterTrackAtCalo();
+  myMVAVar_dphicalo        =  ele.deltaPhiSeedClusterTrackAtCalo();   
 
+  myMVAVar_see             =  ele.sigmaIetaIeta();    //EleSigmaIEtaIEta
   std::vector<float> vCov = myEcalCluster.localCovariances(*(ele.superCluster()->seed())) ;
   if (!isnan(vCov[2])) myMVAVar_spp = sqrt (vCov[2]);   //EleSigmaIPhiIPhi
   else myMVAVar_spp = 0.;
-
-  myMVAVar_IoEmIoP         =  (1.0/(ele.superCluster()->energy())) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
-  myMVAVar_nbrems          =  fabs(ele.numberOfBrems());
+  myMVAVar_etawidth        =  ele.superCluster()->etaWidth();
+  myMVAVar_phiwidth        =  ele.superCluster()->phiWidth();
+  myMVAVar_e1x5e5x5        =  (ele.e5x5()) !=0. ? 1.-(ele.e1x5()/ele.e5x5()) : -1. ;
   myMVAVar_R9              =  myEcalCluster.e3x3(*(ele.superCluster()->seed())) / ele.superCluster()->rawEnergy();
-  myMVAVar_dphicalo        =  ele.deltaPhiSeedClusterTrackAtCalo();   
-  myMVAVar_gsfchi2         =  ele.gsfTrack()->normalizedChi2();  // to be checked 
+  myMVAVar_nbrems          =  fabs(ele.numberOfBrems());
+  
+  myMVAVar_HoE             =  ele.hadronicOverEm();
+  myMVAVar_EoP             =  ele.eSuperClusterOverP();
+  myMVAVar_IoEmIoP         =  (1.0/(ele.superCluster()->energy())) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
+  myMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
+  myMVAVar_EoPout          =  ele.eSeedClusterOverPout();
   myMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
+
   
   myMVAVar_eta             =  ele.superCluster()->eta();         
   myMVAVar_pt              =  ele.pt();                          
-  myMVAVar_matchConv       =  0;  // to be changed!!!
  
 
   // for triggering electrons get the impact parameteres
   //  if(myMVAType == kTrig) {
-//     //d0
-//     if (ele.gsfTrack().isNonnull()) {
+  //d0
+//   if (ele.gsfTrack().isNonnull()) {
 //       myMVAVar_d0 = (-1.0)*ele.gsfTrack()->dxy(vertex.position()); 
 //     } else if (ele.closestCtfTrackRef().isNonnull()) {
 //       myMVAVar_d0 = (-1.0)*ele.closestCtfTrackRef()->dxy(vertex.position()); 
@@ -465,29 +475,31 @@ void ElectronAnalyzer::myVar(const reco::GsfElectron& ele,
 
   if(printDebug) {
     cout << " My Local Variables " << endl; 
-     cout << " fbrem " <<  myMVAVar_fbrem  
-	  << " deta " <<  myMVAVar_deta  
-	  << " dphi " << myMVAVar_dphi  
-	  << " see " << myMVAVar_see  
-	  << " etawidth " << myMVAVar_etawidth  
-	  << " phiwidth " << myMVAVar_phiwidth  
-	  << " HoE " << myMVAVar_HoE  
-	  << " EoP " << myMVAVar_EoP  
-	  << " e1x5e5x5 " << myMVAVar_e1x5e5x5  
-	  << " EoPout " << myMVAVar_EoPout  
-	  << " eleEoPout " << myMVAVar_eleEoPout  
-	  << " detacalo " << myMVAVar_detacalo  
-	  << " kfchi2 " << myMVAVar_kfchi2  
-	  << " mykfhits " << myMVAVar_kfhits  
-	  << " spp " << myMVAVar_spp  
-	  << " IoEmIoP " << myMVAVar_IoEmIoP  
-	  << " mynbrems " << myMVAVar_nbrems  
-	  << " R9 " << myMVAVar_R9  
-	  << " dphicalo " << myMVAVar_dphicalo  
-	  << " gsfchi2 " << myMVAVar_gsfchi2  
-	  << " PreShowerOverRaw " << myMVAVar_PreShowerOverRaw  
-	  << " eta " << myMVAVar_eta  
-	  << " pt " << myMVAVar_pt << endl;
+    cout << " fbrem " <<  myMVAVar_fbrem  
+      	 << " kfchi2 " << myMVAVar_kfchi2  
+	 << " mykfhits " << myMVAVar_kfhits  
+	 << " gsfchi2 " << myMVAVar_gsfchi2  
+	 << " deta " <<  myMVAVar_deta  
+	 << " dphi " << myMVAVar_dphi  
+      	 << " detacalo " << myMVAVar_detacalo  
+	 << " dphicalo " << myMVAVar_dphicalo  
+	 << " see " << myMVAVar_see  
+	 << " spp " << myMVAVar_spp  
+	 << " etawidth " << myMVAVar_etawidth  
+	 << " phiwidth " << myMVAVar_phiwidth  
+	 << " e1x5e5x5 " << myMVAVar_e1x5e5x5  
+	 << " R9 " << myMVAVar_R9  
+	 << " mynbrems " << myMVAVar_nbrems  
+	 << " HoE " << myMVAVar_HoE  
+	 << " EoP " << myMVAVar_EoP  
+	 << " IoEmIoP " << myMVAVar_IoEmIoP  
+	 << " eleEoPout " << myMVAVar_eleEoPout  
+	 << " EoPout " << myMVAVar_EoPout  
+	 << " PreShowerOverRaw " << myMVAVar_PreShowerOverRaw  
+// 	 << " d0 " << myMVAVar_d0  
+// 	 << " ip3d " << myMVAVar_ip3d  
+	 << " eta " << myMVAVar_eta  
+	 << " pt " << myMVAVar_pt << endl;
   }
   return;
 }
