@@ -41,6 +41,7 @@ PFIsolationEstimator::~PFIsolationEstimator()
 //--------------------------------------------------------------------------------------------------
 void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, Int_t iParticleType ) {
 
+  setParticleType(iParticleType);
 
   //By default check for an option vertex association
   checkClosestZVertex = kTRUE;
@@ -98,6 +99,15 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, Int_t iParticleType )
 
   fisInitialized = kTRUE;
 
+}
+
+
+void PFIsolationEstimator::initializeElectronIsolation( Bool_t  bApplyVeto ){
+  initialize(bApplyVeto,kElectron);
+}
+
+void PFIsolationEstimator::initializePhotonIsolation( Bool_t  bApplyVeto ){
+  initialize(bApplyVeto,kPhoton);
 }
 
 /*

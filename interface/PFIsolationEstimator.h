@@ -50,8 +50,10 @@ class PFIsolationEstimator{
     kPhoton  =  1            // MVA for triggering electrons
   };
   
-  void     initialize( Bool_t  bApplyVeto, Int_t iParticleType );
-  
+  void     initialize( Bool_t  bApplyVeto, Int_t iParticleType);
+  void     initializeElectronIsolation( Bool_t  bApplyVeto );
+  void     initializePhotonIsolation( Bool_t  bApplyVeto );
+
   Bool_t   isInitialized() const { return fisInitialized; }
   
 
@@ -69,6 +71,8 @@ class PFIsolationEstimator{
   int chargedHadronVertex( const reco::VertexCollection& vertices, const reco::PFCandidate& pfcand ) const;
 
   void setConeSize(Float_t fValue = 0.4){ fConeSize = fValue;};
+
+  void setParticleType(Int_t iValue){iParticleType = iValue;};
 
   //Veto booleans
   void setApplyVeto(Bool_t bValue = kTRUE){  bApplyVeto = bValue;};
@@ -101,7 +105,15 @@ class PFIsolationEstimator{
   void setRectangleDeltaEtaVetoEndcapNeutrals(Float_t fValue = -1.){fRectangleDeltaEtaVetoEndcapNeutrals=fValue;};
   void setRectangleDeltaEtaVetoEndcapCharged(Float_t fValue = -1.){fRectangleDeltaEtaVetoEndcapPhotons=fValue;};
 
+  Float_t getIsolationPhoton(){ return fIsolationPhoton; };
+  Float_t getIsolationNeutral(){ return fIsolationNeutral; };
+  Float_t getIsolationCharged(){ return fIsolationCharged; };
+  Float_t getIsolationChargedAll(){ return fIsolationChargedAll; };
 
+  Float_t getIsolationInRingsPhoton(){ return fIsolationInRingsPhoton; };
+  Float_t getIsolationInRingsNeutral(){ return fIsolationInRingsNeutral; };
+  Float_t getIsolationInRingsCharged(){ return fIsolationInRingsCharged; };
+  Float_t getIsolationInRingsChargedAll(){ return fIsolationInRingsChargedAll; };
 
 #ifndef STANDALONE
  
@@ -121,8 +133,11 @@ class PFIsolationEstimator{
   Float_t                   fIsolationChargedAll;
   
   Float_t                   fIsolationInRings[10];
-  
-  
+  Float_t                   fIsolationInRingsPhoton[10];
+  Float_t                   fIsolationInRingsNeutral[10];
+  Float_t                   fIsolationInRingsCharged[10];  
+  Float_t                   fIsolationInRingsChargedAll[10];
+
   Bool_t                    checkClosestZVertex;
   Float_t                   fConeSize;
   Bool_t                    bApplyVeto;
