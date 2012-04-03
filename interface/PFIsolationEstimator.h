@@ -52,19 +52,14 @@ class PFIsolationEstimator{
     kPhoton  =  1            // MVA for triggering electrons
   };
   
-  void     initialize( Bool_t  bApplyVeto, int iParticleType);
-  void     initializeElectronIsolation( Bool_t  bApplyVeto );
-  void     initializePhotonIsolation( Bool_t  bApplyVeto );
 
+  void     initializeElectronIsolation( Bool_t  bApplyVeto, float  fConeSize = 0.4 );
+  void     initializePhotonIsolation( Bool_t  bApplyVeto, float  fConeSize = 0.4  );
+  void     initializeElectronIsolationInRings( Bool_t  bApplyVeto, int iNumberOfRings, float fRingSize );
+  void     initializePhotonIsolationInRings( Bool_t  bApplyVeto, int iNumberOfRings, float fRingSize  );
+  void     initializeRings(int iNumberOfRings, float fRingSize);
   Bool_t   isInitialized() const { return fisInitialized; }
   
-
-  /*  float fElectronIsolation(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >);
-  float fPhotonIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >);
-
-  float* fElectronIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >);
-  float* fPhotonIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >);
-  */
 
   float fGetIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl,const reco::VertexCollection& vertices );
   vector<float >  fGetIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices );
@@ -107,6 +102,10 @@ class PFIsolationEstimator{
   void setRectangleDeltaEtaVetoEndcapNeutrals(float fValue = -1.){fRectangleDeltaEtaVetoEndcapNeutrals=fValue;};
   void setRectangleDeltaEtaVetoEndcapCharged(float fValue = -1.){fRectangleDeltaEtaVetoEndcapPhotons=fValue;};
 
+  //Veto implementation
+  
+  
+  
   float getIsolationPhoton(){ return fIsolationPhoton; };
   float getIsolationNeutral(){ return fIsolationNeutral; };
   float getIsolationCharged(){ return fIsolationCharged; };
@@ -181,6 +180,8 @@ class PFIsolationEstimator{
   int                     iNumberOfRings;
   float                   fRingSize;
 
+
+  void     initialize( Bool_t  bApplyVeto, int iParticleType);
 };
 
 #endif

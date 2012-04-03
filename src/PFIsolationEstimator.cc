@@ -46,9 +46,9 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
 
   //By default check for an option vertex association
   checkClosestZVertex = kTRUE;
-
+  
   //Default cone size is 0.4 for electrons and photons
-  setConeSize(0.4);
+  //  setConeSize(0.4);
   
   //Apply vetoes
   setApplyVeto(bApplyVeto);
@@ -103,55 +103,65 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
 }
 
 
-void PFIsolationEstimator::initializeElectronIsolation( Bool_t  bApplyVeto ){
+//--------------------------------------------------------------------------------------------------
+void PFIsolationEstimator::initializeElectronIsolation( Bool_t  bApplyVeto,float  fConeSize){
   initialize(bApplyVeto,kElectron);
+  initializeRings(1, fConeSize);
+
 }
 
-void PFIsolationEstimator::initializePhotonIsolation( Bool_t  bApplyVeto ){
+//--------------------------------------------------------------------------------------------------
+void PFIsolationEstimator::initializePhotonIsolation( Bool_t  bApplyVeto, float fConeSize ){
   initialize(bApplyVeto,kPhoton);
+  initializeRings(1, fConeSize);
 }
 
-/*
 
 //--------------------------------------------------------------------------------------------------
-float PFIsolationEstimator::fElectronIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) 
-{
-  
-  fIsolation=0.0;
-
-  
-  
-  return fIsolation;
+void PFIsolationEstimator::initializeElectronIsolationInRings( Bool_t  bApplyVeto, int iNumberOfRings, float fRingSize ){
+  initialize(bApplyVeto,kElectron);
+  initializeRings(iNumberOfRings, fRingSize);
 }
+
+//--------------------------------------------------------------------------------------------------
+void PFIsolationEstimator::initializePhotonIsolationInRings( Bool_t  bApplyVeto, int iNumberOfRings, float fRingSize  ){
+  initialize(bApplyVeto,kPhoton);
+  initializeRings(iNumberOfRings, fRingSize);
+}
+
+
+//--------------------------------------------------------------------------------------------------
+void PFIsolationEstimator::initializeRings(int iNumberOfRings, float fRingSize){
  
-//--------------------------------------------------------------------------------------------------
-float PFIsolationEstimator::fPhotonIsolation(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl,const reco::VertexCollection& vertices) {
-  
-  return fIsolation;
-}
-
-
-//--------------------------------------------------------------------------------------------------
-float* PFIsolationEstimator::fElectronIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) {
-  
-  return fIsolationInRings;
-}
+  setRingSize(fRingSize);
+  SetNumbersOfRings(iNumberOfRings);
  
-//--------------------------------------------------------------------------------------------------
-float* PFIsolationEstimator::fPhotonIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) {
-  
-  return fIsolationInRings;
-}
-*/
+  fIsolationInRings.clear();
+  for(int isoBin =0;isoBin<iNumberOfRings;isoBin++){
+    float fTemp = 0.0;
+    fIsolationInRings.push_back(fTemp);
+    
+    float fTempPhoton = 0.0;
+    fIsolationInRingsPhoton.push_back(fTempPhoton);
 
+    float fTempNeutral = 0.0;
+    fIsolationInRingsNeutral.push_back(fTempNeutral);
+
+    float fTempCharged = 0.0;
+    fIsolationInRingsCharged.push_back(fTempCharged);
+
+    float fTempChargedAll = 0.0;
+    fIsolationInRingsChargedAll.push_back(fTempChargedAll);
+
+  }
+}
+  
  
 //--------------------------------------------------------------------------------------------------
 float PFIsolationEstimator::fGetIsolation(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) {
-  setRingSize(fConeSize);
-  SetNumbersOfRings(1);
-
+ 
   fGetIsolationInRings( pfCandidate, pfParticlesColl, vertices);
-
+  fIsolation = fIsolationInRings[0];
   return fIsolation;
 }
 
@@ -159,12 +169,37 @@ float PFIsolationEstimator::fGetIsolation(const reco::PFCandidate * pfCandidate,
 //--------------------------------------------------------------------------------------------------
 vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices) {
 
+  for(int isoBin =0;isoBin<iNumberOfRings;isoBin++){
+    fIsolationInRings[isoBin]=0.;
+    fIsolationInRingsPhoton[isoBin]=0.;
+    fIsolationInRingsNeutral[isoBin]=0.;
+    fIsolationInRingsCharged[isoBin]=0.;
+    fIsolationInRingsChargedAll[isoBin]=0.;
+  }
   
-  
+  for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
+
+    const reco::PFCandidate& pfParticle= (*pfParticlesColl)[iPF]; 
+
+    if(pfParticle.pdgId()==22){
+      
+    }else if(abs(pfParticle.pdgId())==130){
+
+    }else if(abs(pfParticle.pdgId()) == 11 ||abs(pfParticle.pdgId()) == 13 || abs(pfParticle.pdgId()) == 211){
+      
+    }
+  }
+
+ 
+  for(int isoBin =0;isoBin<iNumberOfRings;isoBin++){
+    fIsolationInRings[isoBin]= fIsolationInRingsPhoton[isoBin]+ fIsolationInRingsNeutral[isoBin] +  fIsolationInRingsCharged[isoBin];
+  }
+
   return fIsolationInRings;
 }
 
 
+//--------------------------------------------------------------------------------------------------
 int PFIsolationEstimator::chargedHadronVertex( const reco::VertexCollection& vertices, const reco::PFCandidate& pfcand ) const {
 
   //code copied from Florian's PFNoPU class
