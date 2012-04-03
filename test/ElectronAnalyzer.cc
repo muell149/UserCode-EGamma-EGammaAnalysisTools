@@ -167,12 +167,15 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
 
   ev = 0;
   myMVANonTrig = new ElectronMVAEstimator();
-  myMVANonTrig->initialize("BDTCat_BDTG_NonTrigV0",
-			  "/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTGCat_NonTrigV0.weights.xml",
-			  ElectronMVAEstimator::kNonTrig);
 
+  // NOTE: it is better if you copy the MVA weight files locally
+  myMVANonTrig->initialize("BDTCat_BDTG_NonTrigV0",
+			   "/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTGCat_NonTrigV0.weights.xml", 
+			   ElectronMVAEstimator::kNonTrig);
+  
+  // NOTE: it is better if you copy the MVA weight files locally
   myMVATrig = new ElectronMVAEstimator();
-  myMVATrig->initialize("BDTCat_BDTG_SiDanV2",
+  myMVATrig->initialize("BDTCat_BDTG_TrigV0",
 			"/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTGCat_TrigV0.weights.xml",
 			ElectronMVAEstimator::kTrig);
   
