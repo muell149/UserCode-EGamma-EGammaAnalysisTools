@@ -115,51 +115,7 @@ void MakeTestMVAMacro_000::Loop()
       if(matchConv == 1)
 	continue;
       
-      
-      
-      if(fbrem < -1.)
-	fbrem = -1.;	
-      
-      deta = fabs(deta);
-      if(deta > 0.06)
-	deta = 0.06;
-      
-      
-      dphi = fabs(dphi);
-      if(dphi > 0.6)
-	dphi = 0.6;
-      
-      if(EoP > 20.)
-	EoP = 20.;
-      
-      if(eleEoPout > 20.)
-	eleEoPout = 20.;
-  
-      
-      detacalo = fabs(detacalo);
-      if(detacalo > 0.2)
-	detacalo = 0.2;
-      
-      
-      if(e1x5e5x5 < -1.)
-	e1x5e5x5 = -1;
-
-      if(e1x5e5x5 > 2.)
-	e1x5e5x5 = 2.; 
-      
-      if(R9 > 5)
-	R9 = 5;
-      
-      if(gsfchi2 > 200.)
-	gsfchi2 = 200;
-      
- 
-      if(kfchi2 > 10.)
-	kfchi2 = 10.;
-
- 
-
- 
+    
 
       if(myMVANonTrigV0 == 0)
 	cout << " MVA not init!!! " <<endl;

@@ -378,7 +378,9 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
   fMVAVar_see             =  ele.sigmaIetaIeta();    //EleSigmaIEtaIEta
   std::vector<float> vCov = myEcalCluster.localCovariances(*(ele.superCluster()->seed())) ;
   if (!isnan(vCov[2])) fMVAVar_spp = sqrt (vCov[2]);   //EleSigmaIPhiIPhi
-  else fMVAVar_spp = 0.;  
+  else fMVAVar_spp = 0.;    
+  // fMVAVar_sigmaIEtaIPhi = vCov[1];  //  save also this in your ntuple 
+
   fMVAVar_etawidth        =  ele.superCluster()->etaWidth();
   fMVAVar_phiwidth        =  ele.superCluster()->phiWidth();
   fMVAVar_e1x5e5x5        =  (ele.e5x5()) !=0. ? 1.-(ele.e1x5()/ele.e5x5()) : -1. ;
