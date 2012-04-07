@@ -9,45 +9,98 @@
 bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint,
     const reco::GsfElectronRef &ele,
     const edm::Handle<reco::ConversionCollection> &conversions,
-    const math::XYZPoint &beamspot,
-    const reco::Vertex &vertex,
-    const IsoDepositVals &isoVals,
+    const reco::BeamSpot &beamspot,
+    const edm::Handle<reco::VertexCollection> &vtxs,
+    const double &iso_ch,
+    const double &iso_em,
+    const double &iso_nh,
     const double &rho)
 {
-    unsigned int mask = TestWP(workingPoint, ele, conversions, beamspot, vertex, isoVals, rho);
+
+    // get the mask
+    unsigned int mask = TestWP(workingPoint, ele, conversions, beamspot, vtxs, iso_ch, iso_em, iso_nh, rho);
+
+    // check if the desired WP passed
     if ((mask & PassAll) == PassAll) return true;
     return false;
+}
+
+bool EgammaCutBasedEleId::PassTriggerCuts(const reco::GsfElectronRef &ele)
+{
+
+    // get the variables
+    bool isEB           = ele->isEB() ? true : false;
+    float pt            = ele->pt();
+    float dEtaIn        = ele->deltaEtaSuperClusterTrackAtVtx();
+    float dPhiIn        = ele->deltaPhiSuperClusterTrackAtVtx();
+    float sigmaIEtaIEta = ele->sigmaIetaIeta();
+    float hoe           = ele->hadronicOverEm();
+    float trackIso      = ele->dr03TkSumPt();
+    float ecalIso       = ele->dr03EcalRecHitSumEt();
+    float hcalIso       = ele->dr03HcalTowerSumEt();
+
+    // test the trigger cuts
+    return EgammaCutBasedEleId::PassTriggerCuts(isEB, pt, dEtaIn, dPhiIn, sigmaIEtaIEta, hoe, trackIso, ecalIso, hcalIso);
+
+}
+
+bool EgammaCutBasedEleId::PassEoverPCuts(const reco::GsfElectronRef &ele)
+{
+
+    // get the variables
+    float eta           = ele->superCluster()->eta();
+    float eopin         = ele->eSuperClusterOverP();
+    float fbrem         = ele->fbrem();    
+
+    // test the eop/fbrem cuts
+    return EgammaCutBasedEleId::PassEoverPCuts(eta, eopin, fbrem);
+
 }
 
 unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
     const reco::GsfElectronRef &ele,
     const edm::Handle<reco::ConversionCollection> &conversions,
-    const math::XYZPoint &beamspot,
-    const reco::Vertex & vertex,
-    const IsoDepositVals &isoVals,
+    const reco::BeamSpot &beamspot,
+    const edm::Handle<reco::VertexCollection> &vtxs,
+    const double &iso_ch,
+    const double &iso_em,
+    const double &iso_nh,
     const double &rho)
 {
 
     // get the ID variables from the electron object
+
+    // kinematic variables
     bool isEB           = ele->isEB() ? true : false;
     float pt            = ele->pt();
     float eta           = ele->superCluster()->eta();
+
+    // id variables
     float dEtaIn        = ele->deltaEtaSuperClusterTrackAtVtx();
     float dPhiIn        = ele->deltaPhiSuperClusterTrackAtVtx();
     float sigmaIEtaIEta = ele->sigmaIetaIeta();
     float hoe           = ele->hadronicOverEm();
     float ooemoop       = (1.0/ele->superCluster()->energy() - 1.0/ele->p());
-    float d0vtx         = ele->gsfTrack()->dxy(vertex.position());
-    float dzvtx         = ele->gsfTrack()->dz(vertex.position());
-    float iso_nh        = (*(isoVals[3]))[ele];
-    float iso_ch        = (*(isoVals[0]))[ele];
-    float iso_em        = (*(isoVals[1]))[ele];
-    float vtxFit        = ConversionTools::hasMatchedConversion(*ele, conversions, beamspot);
-    float mHits         = ele->gsfTrack()->trackerExpectedHitsInner().numberOfHits(); 
+
+    // impact parameter variables
+    float d0vtx         = 0.0;
+    float dzvtx         = 0.0;
+    if (vtxs->size() > 0) {
+        reco::VertexRef vtx(vtxs, 0);    
+        d0vtx = ele->gsfTrack()->dxy(vtx->position());
+        dzvtx = ele->gsfTrack()->dz(vtx->position());
+    } else {
+        d0vtx = ele->gsfTrack()->dxy();
+        dzvtx = ele->gsfTrack()->dz();
+    }
+
+    // conversion rejection variables
+    bool vtxFitConversion = ConversionTools::hasMatchedConversion(*ele, conversions, beamspot.position());
+    float mHits = ele->gsfTrack()->trackerExpectedHitsInner().numberOfHits(); 
 
     // get the mask value
     unsigned int mask = EgammaCutBasedEleId::TestWP(workingPoint, isEB, pt, eta, dEtaIn, dPhiIn,
-        sigmaIEtaIEta, hoe, ooemoop, d0vtx, dzvtx, iso_nh, iso_ch, iso_em, vtxFit, mHits, rho);
+        sigmaIEtaIEta, hoe, ooemoop, d0vtx, dzvtx, iso_ch, iso_em, iso_nh, vtxFitConversion, mHits, rho);
 
     // return the mask value
     return mask;
@@ -58,19 +111,49 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
 
 unsigned int EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint, const bool isEB, const float pt, const float eta,
     const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
-    const float ooemoop, const float d0vtx, const float dzvtx, const float iso_nh, const float iso_ch, const float iso_em, 
-    const bool vtxFit, const unsigned int mHits, const double rho)
+    const float ooemoop, const float d0vtx, const float dzvtx, const float iso_ch, const float iso_em, const float iso_nh, 
+    const bool vtxFitConversion, const unsigned int mHits, const double rho)
 {
     unsigned int mask = EgammaCutBasedEleId::TestWP(workingPoint, isEB, pt, eta, dEtaIn, dPhiIn,
-        sigmaIEtaIEta, hoe, ooemoop, d0vtx, dzvtx, iso_nh, iso_ch, iso_em, vtxFit, mHits, rho);
+        sigmaIEtaIEta, hoe, ooemoop, d0vtx, dzvtx, iso_nh, iso_ch, iso_em, vtxFitConversion, mHits, rho);
     if ((mask & PassAll) == PassAll) return true;
+    return false;
+}
+
+bool EgammaCutBasedEleId::PassTriggerCuts(const bool isEB, const float pt, const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
+    const float trackIso, const float ecalIso, const float hcalIso)
+{
+
+    if (trackIso / pt > 0.2) return false;
+    if (ecalIso / pt > 0.2 ) return false;
+    if (hcalIso / pt > 0.2 ) return false;
+   
+    float cut_dEtaIn[2]         = {0.007, 0.009};
+    float cut_dPhiIn[2]         = {0.15, 0.10};
+    float cut_sigmaIEtaIEta[2]  = {0.01, 0.03};
+    float cut_hoe[2]            = {0.12, 0.10};
+
+    // choose cut if barrel or endcap
+    unsigned int idx = isEB ? 0 : 1;
+    if (fabs(dEtaIn) < cut_dEtaIn[idx])             return false;
+    if (fabs(dPhiIn) < cut_dPhiIn[idx])             return false;
+    if (sigmaIEtaIEta < cut_sigmaIEtaIEta[idx])     return false;
+    if (hoe < cut_hoe[idx])                         return false;
+
+    return true; 
+}
+
+bool EgammaCutBasedEleId::PassEoverPCuts(const float eta, const float eopin, const float fbrem)
+{
+    if (fbrem > 0.15)                           return true;
+    else if (fabs(eta) < 1.0 && eopin > 0.95)   return true;
     return false;
 }
 
 unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint, const bool isEB, const float pt, const float eta,
     const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe, 
-    const float ooemoop, const float d0vtx, const float dzvtx, const float iso_nh, const float iso_ch, const float iso_em, 
-    const bool vtxFit, const unsigned int mHits, const double rho)
+    const float ooemoop, const float d0vtx, const float dzvtx, const float iso_ch, const float iso_em, const float iso_nh, 
+    const bool vtxFitConversion, const unsigned int mHits, const double rho)
 {
 
     unsigned int mask = 0;
@@ -99,7 +182,7 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint, const bool i
     } 
     else if (workingPoint == EgammaCutBasedEleId::LOOSE) {
         cut_dEtaIn[0]        = 0.007; cut_dEtaIn[1]        = 0.009;
-        cut_dPhiIn[0]        = 0.015; cut_dPhiIn[1]        = 0.010;
+        cut_dPhiIn[0]        = 0.150; cut_dPhiIn[1]        = 0.100;
         cut_sigmaIEtaIEta[0] = 0.010; cut_sigmaIEtaIEta[1] = 0.030;
         cut_hoe[0]           = 0.120; cut_hoe[1]           = 0.100;
         cut_ooemoop[0]       = 0.050; cut_ooemoop[1]       = 0.050;
@@ -116,7 +199,7 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint, const bool i
     } 
     else if (workingPoint == EgammaCutBasedEleId::MEDIUM) {
         cut_dEtaIn[0]        = 0.004; cut_dEtaIn[1]        = 0.007;
-        cut_dPhiIn[0]        = 0.006; cut_dPhiIn[1]        = 0.003;
+        cut_dPhiIn[0]        = 0.060; cut_dPhiIn[1]        = 0.030;
         cut_sigmaIEtaIEta[0] = 0.010; cut_sigmaIEtaIEta[1] = 0.030;
         cut_hoe[0]           = 0.120; cut_hoe[1]           = 0.100;
         cut_ooemoop[0]       = 0.050; cut_ooemoop[1]       = 0.050;
@@ -133,7 +216,7 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint, const bool i
     } 
     else if (workingPoint == EgammaCutBasedEleId::TIGHT) {
         cut_dEtaIn[0]        = 0.004; cut_dEtaIn[1]        = 0.005;
-        cut_dPhiIn[0]        = 0.003; cut_dPhiIn[1]        = 0.002;
+        cut_dPhiIn[0]        = 0.030; cut_dPhiIn[1]        = 0.020;
         cut_sigmaIEtaIEta[0] = 0.010; cut_sigmaIEtaIEta[1] = 0.030;
         cut_hoe[0]           = 0.120; cut_hoe[1]           = 0.100;
         cut_ooemoop[0]       = 0.050; cut_ooemoop[1]       = 0.050;
@@ -154,16 +237,9 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint, const bool i
 
     // choose cut if barrel or endcap
     unsigned int idx = isEB ? 0 : 1;
-    float etaAbs = fabs(eta);
 
     // effective area for isolation
-    float AEff = 0.18;
-    if (etaAbs > 1.0 && etaAbs <= 1.479) AEff = 0.19;
-    if (etaAbs > 1.479 && etaAbs <= 2.0) AEff = 0.21;
-    if (etaAbs > 2.0 && etaAbs <= 2.2) AEff = 0.38;
-    if (etaAbs > 2.2 && etaAbs <= 2.3) AEff = 0.61;
-    if (etaAbs > 2.3 && etaAbs <= 2.4) AEff = 0.73;
-    if (etaAbs > 2.4) AEff = 0.78;
+    float AEff = EgammaCutBasedEleId::GetEffectiveArea(eta);
 
     // apply to neutrals
     double rhoPrime = std::max(rho, 0.0);
@@ -180,12 +256,40 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint, const bool i
     if (fabs(ooemoop) < cut_ooemoop[idx])           mask |= OOEMOOP;
     if (fabs(d0vtx) < cut_d0vtx[idx])               mask |= D0VTX;
     if (fabs(dzvtx) < cut_dzvtx[idx])               mask |= DZVTX;
-    if (cut_vtxFit[idx] && vtxFit)                  mask |= VTXFIT;
+    if (!cut_vtxFit[idx] || !vtxFitConversion)      mask |= VTXFIT;
     if (mHits <= cut_mHits[idx])                    mask |= MHITS;
     if (iso < cut_iso[idx])                         mask |= ISO;
 
     // return the mask
     return mask;
 
+}
+
+void EgammaCutBasedEleId::PrintDebug(unsigned int mask)
+{
+    printf("detain(%i), ",  bool(mask & DETAIN));
+    printf("dphiin(%i), ",  bool(mask & DPHIIN));
+    printf("sieie(%i), ",   bool(mask & SIGMAIETAIETA));
+    printf("hoe(%i), ",     bool(mask & HOE));
+    printf("ooemoop(%i), ", bool(mask & OOEMOOP));
+    printf("d0vtx(%i), ",   bool(mask & D0VTX));
+    printf("dzvtx(%i), ",   bool(mask & DZVTX));
+    printf("iso(%i), ",     bool(mask & ISO));
+    printf("vtxfit(%i), ",  bool(mask & VTXFIT));
+    printf("mhits(%i)\n",   bool(mask & MHITS));
+}
+
+float EgammaCutBasedEleId::GetEffectiveArea(const float eta)
+{
+
+    float etaAbs = fabs(eta);
+    float AEff = 0.18;
+    if (etaAbs > 1.0 && etaAbs <= 1.479) AEff = 0.19;
+    if (etaAbs > 1.479 && etaAbs <= 2.0) AEff = 0.21;
+    if (etaAbs > 2.0 && etaAbs <= 2.2) AEff = 0.38;
+    if (etaAbs > 2.2 && etaAbs <= 2.3) AEff = 0.61;
+    if (etaAbs > 2.3 && etaAbs <= 2.4) AEff = 0.73;
+    if (etaAbs > 2.4) AEff = 0.78;
+    return AEff;
 }
 

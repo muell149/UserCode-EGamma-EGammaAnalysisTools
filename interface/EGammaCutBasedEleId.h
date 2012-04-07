@@ -5,12 +5,15 @@
 //
 
 //#define STANDALONEID
-
+#ifndef STANDALONEID
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/ConversionFwd.h"
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/RecoCandidate/interface/IsoDeposit.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#endif
 
 #include <vector>
 
@@ -48,15 +51,14 @@ enum CutType {
     DZVTX           = (1<<6),
     ISO             = (1<<7),
     VTXFIT          = (1<<8),
-    MHITS           = (1<<9),
-    EOPFBREM        = (1<<10)
+    MHITS           = (1<<9)
 };
 
 //
 // all possible cuts pass
 //
 
-static const unsigned int PassAll = DETAIN | DPHIIN | SIGMAIETAIETA | HOE | OOEMOOP | D0VTX | DZVTX | ISO | VTXFIT | MHITS;
+static const unsigned int PassAll         = DETAIN | DPHIIN | SIGMAIETAIETA | HOE | OOEMOOP | D0VTX | DZVTX | ISO | VTXFIT | MHITS;
 
 //
 // CMSSW interface
@@ -67,17 +69,25 @@ static const unsigned int PassAll = DETAIN | DPHIIN | SIGMAIETAIETA | HOE | OOEM
 bool PassWP(const WorkingPoint workingPoint,
     const reco::GsfElectronRef &ele,
     const edm::Handle<reco::ConversionCollection> &conversions,
-    const math::XYZPoint &beamspot,
-    const reco::Vertex & vertex,
-    const IsoDepositVals &isoVals,
+    const reco::BeamSpot &beamspot,
+    const edm::Handle<reco::VertexCollection> &vtxs,
+    const double &iso_ch,
+    const double &iso_em,
+    const double &iso_nh,
     const double &rho);
+
+bool PassTriggerCuts(const reco::GsfElectronRef &ele);
+
+bool PassEoverPCuts(const reco::GsfElectronRef &ele);
 
 unsigned int TestWP(const WorkingPoint workingPoint,
     const reco::GsfElectronRef &ele,
     const edm::Handle<reco::ConversionCollection> &conversions,
-    const math::XYZPoint &beamspot,
-    const reco::Vertex & vertex,
-    const IsoDepositVals &isoVals,
+    const reco::BeamSpot &beamspot,
+    const edm::Handle<reco::VertexCollection> &vtxs,
+    const double &iso_ch,
+    const double &iso_em,
+    const double &iso_nh,
     const double &rho);
 
 #endif
@@ -90,13 +100,24 @@ unsigned int TestWP(const WorkingPoint workingPoint,
 
 unsigned int PassWP(WorkingPoint workingPoint, const bool isEB, const float pt, const float eta,
     const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
-    const float ooemoop, const float d0vtx, const float dzvtx, const float iso_nh, const float iso_ch, const float iso_em, 
-    const bool vtxFit, const unsigned int mHits, const double rho);
+    const float ooemoop, const float d0vtx, const float dzvtx, const float iso_ch, const float iso_em, const float iso_nh, 
+    const bool vtxFitConversion, const unsigned int mHits, const double rho);
+
+bool PassTriggerCuts(const bool isEB, const float pt, const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
+    const float trackIso, const float ecalIso, const float hcalIso);
+
+bool PassEoverPCuts(const float eta, const float eopin, const float fbrem);
 
 unsigned int TestWP(WorkingPoint workingPoint, const bool isEB, const float pt, const float eta,
     const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
-    const float ooemoop, const float d0vtx, const float dzvtx, const float iso_nh, const float iso_ch, const float iso_em, 
-    const bool vtxFit, const unsigned int mHits, const double rho);
+    const float ooemoop, const float d0vtx, const float dzvtx, const float iso_ch, const float iso_em, const float iso_nh, 
+    const bool vtxFitConversion, const unsigned int mHits, const double rho);
+
+// print the bit mask
+void PrintDebug(unsigned int mask);
+
+// get the effective area values
+float GetEffectiveArea(const float eta);
 
 }
 
