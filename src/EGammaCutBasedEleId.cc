@@ -109,7 +109,7 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
 
 #endif
 
-unsigned int EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint, const bool isEB, const float pt, const float eta,
+bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint, const bool isEB, const float pt, const float eta,
     const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
     const float ooemoop, const float d0vtx, const float dzvtx, const float iso_ch, const float iso_em, const float iso_nh, 
     const bool vtxFitConversion, const unsigned int mHits, const double rho)
