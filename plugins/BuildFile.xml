@@ -5,4 +5,5 @@
 <use name="DataFormats/EgammaCandidates"/>
 <use name="CommonTools/Utils"/>
 <use name="HLTrigger/HLTcore"/>
+<use name="EGamma/EGammaAnalysisTools"/>
 </library>
