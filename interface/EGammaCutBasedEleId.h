@@ -103,7 +103,8 @@ bool PassWP(WorkingPoint workingPoint, const bool isEB, const float pt, const fl
     const float ooemoop, const float d0vtx, const float dzvtx, const float iso_ch, const float iso_em, const float iso_nh, 
     const bool vtxFitConversion, const unsigned int mHits, const double rho);
 
-bool PassTriggerCuts(const bool isEB, const float pt, const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
+bool PassTriggerCuts(const bool isEB, const float pt, 
+    const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
     const float trackIso, const float ecalIso, const float hcalIso);
 
 bool PassEoverPCuts(const float eta, const float eopin, const float fbrem);

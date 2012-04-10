@@ -120,7 +120,8 @@ bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint, const bool isEB, con
     return false;
 }
 
-bool EgammaCutBasedEleId::PassTriggerCuts(const bool isEB, const float pt, const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
+bool EgammaCutBasedEleId::PassTriggerCuts(const bool isEB, const float pt, 
+    const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
     const float trackIso, const float ecalIso, const float hcalIso)
 {
 
@@ -135,10 +136,10 @@ bool EgammaCutBasedEleId::PassTriggerCuts(const bool isEB, const float pt, const
 
     // choose cut if barrel or endcap
     unsigned int idx = isEB ? 0 : 1;
-    if (fabs(dEtaIn) < cut_dEtaIn[idx])             return false;
-    if (fabs(dPhiIn) < cut_dPhiIn[idx])             return false;
-    if (sigmaIEtaIEta < cut_sigmaIEtaIEta[idx])     return false;
-    if (hoe < cut_hoe[idx])                         return false;
+    if (fabs(dEtaIn) > cut_dEtaIn[idx])             return false;
+    if (fabs(dPhiIn) > cut_dPhiIn[idx])             return false;
+    if (sigmaIEtaIEta > cut_sigmaIEtaIEta[idx])     return false;
+    if (hoe > cut_hoe[idx])                         return false;
 
     return true; 
 }
