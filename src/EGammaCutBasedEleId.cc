@@ -80,7 +80,7 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
     float dPhiIn        = ele->deltaPhiSuperClusterTrackAtVtx();
     float sigmaIEtaIEta = ele->sigmaIetaIeta();
     float hoe           = ele->hadronicOverEm();
-    float ooemoop       = (1.0/ele->energy() - 1.0/ele->p());
+    float ooemoop       = (1.0/ele->ecalEnergy() - ele->eSuperClusterOverP()/ele->ecalEnergy());
 
     // impact parameter variables
     float d0vtx         = 0.0;
