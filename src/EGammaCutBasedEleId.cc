@@ -25,7 +25,7 @@ bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint,
     return false;
 }
 
-bool EgammaCutBasedEleId::PassTriggerCuts(const reco::GsfElectronRef &ele)
+bool EgammaCutBasedEleId::PassTriggerCuts(TriggerWorkingPoint triggerWorkingPoint, const reco::GsfElectronRef &ele)
 {
 
     // get the variables
@@ -40,7 +40,7 @@ bool EgammaCutBasedEleId::PassTriggerCuts(const reco::GsfElectronRef &ele)
     float hcalIso       = ele->dr03HcalTowerSumEt();
 
     // test the trigger cuts
-    return EgammaCutBasedEleId::PassTriggerCuts(isEB, pt, dEtaIn, dPhiIn, sigmaIEtaIEta, hoe, trackIso, ecalIso, hcalIso);
+    return EgammaCutBasedEleId::PassTriggerCuts(triggerWorkingPoint, isEB, pt, dEtaIn, dPhiIn, sigmaIEtaIEta, hoe, trackIso, ecalIso, hcalIso);
 
 }
 
@@ -80,7 +80,7 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
     float dPhiIn        = ele->deltaPhiSuperClusterTrackAtVtx();
     float sigmaIEtaIEta = ele->sigmaIetaIeta();
     float hoe           = ele->hadronicOverEm();
-    float ooemoop       = (1.0/ele->superCluster()->energy() - 1.0/ele->p());
+    float ooemoop       = (1.0/ele->energy() - 1.0/ele->p());
 
     // impact parameter variables
     float d0vtx         = 0.0;
@@ -120,26 +120,51 @@ bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint, const bool isEB, con
     return false;
 }
 
-bool EgammaCutBasedEleId::PassTriggerCuts(const bool isEB, const float pt, 
+bool EgammaCutBasedEleId::PassTriggerCuts(const TriggerWorkingPoint triggerWorkingPoint, 
+    const bool isEB, const float pt, 
     const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
     const float trackIso, const float ecalIso, const float hcalIso)
 {
 
-    if (trackIso / pt > 0.2) return false;
-    if (ecalIso / pt > 0.2 ) return false;
-    if (hcalIso / pt > 0.2 ) return false;
    
-    float cut_dEtaIn[2]         = {0.007, 0.009};
-    float cut_dPhiIn[2]         = {0.15, 0.10};
-    float cut_sigmaIEtaIEta[2]  = {0.01, 0.03};
-    float cut_hoe[2]            = {0.12, 0.10};
-
     // choose cut if barrel or endcap
     unsigned int idx = isEB ? 0 : 1;
-    if (fabs(dEtaIn) > cut_dEtaIn[idx])             return false;
-    if (fabs(dPhiIn) > cut_dPhiIn[idx])             return false;
-    if (sigmaIEtaIEta > cut_sigmaIEtaIEta[idx])     return false;
-    if (hoe > cut_hoe[idx])                         return false;
+
+    if (triggerWorkingPoint == EgammaCutBasedEleId::TRIGGERTIGHT) {
+        float cut_dEtaIn[2]         = {0.007, 0.009};
+        float cut_dPhiIn[2]         = {0.15, 0.10};
+        float cut_sigmaIEtaIEta[2]  = {0.01, 0.03};
+        float cut_hoe[2]            = {0.12, 0.10};
+        float cut_trackIso[2]       = {0.20, 0.20};
+        float cut_ecalIso[2]        = {0.20, 0.20};
+        float cut_hcalIso[2]        = {0.20, 0.20};
+        if (fabs(dEtaIn) > cut_dEtaIn[idx])             return false;
+        if (fabs(dPhiIn) > cut_dPhiIn[idx])             return false;
+        if (sigmaIEtaIEta > cut_sigmaIEtaIEta[idx])     return false;
+        if (hoe > cut_hoe[idx])                         return false;
+        if (trackIso / pt > cut_trackIso[idx])          return false;
+        if (ecalIso / pt > cut_ecalIso[idx])            return false;
+        if (hcalIso / pt > cut_hcalIso[idx])            return false;
+    }
+    else if (triggerWorkingPoint == EgammaCutBasedEleId::TRIGGERWP70) {
+        float cut_dEtaIn[2]         = {0.004, 0.005};
+        float cut_dPhiIn[2]         = {0.03, 0.02};
+        float cut_sigmaIEtaIEta[2]  = {0.01, 0.03};
+        float cut_hoe[2]            = {0.025, 0.025};
+        float cut_trackIso[2]       = {0.10, 0.10};
+        float cut_ecalIso[2]        = {0.10, 0.05};
+        float cut_hcalIso[2]        = {0.05, 0.05};
+        if (fabs(dEtaIn) > cut_dEtaIn[idx])             return false;
+        if (fabs(dPhiIn) > cut_dPhiIn[idx])             return false;
+        if (sigmaIEtaIEta > cut_sigmaIEtaIEta[idx])     return false;
+        if (hoe > cut_hoe[idx])                         return false;
+        if (trackIso / pt > cut_trackIso[idx])          return false;
+        if (ecalIso / pt > cut_ecalIso[idx])            return false;
+        if (hcalIso / pt > cut_hcalIso[idx])            return false;
+    }
+    else {
+        std::cout << "[EgammaCutBasedEleId::PassTriggerCuts] Undefined working point" << std::endl;
+    }   
 
     return true; 
 }

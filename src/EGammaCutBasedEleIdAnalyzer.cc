@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Dave Evans,510 1-015,+41227679496,
 //         Created:  Tue Apr 10 11:17:29 CEST 2012
-// $Id$
+// $Id: EGammaCutBasedEleIdAnalyzer.cc,v 1.1 2012/04/10 11:35:02 dlevans Exp $
 //
 //
 
@@ -203,7 +203,10 @@ EGammaCutBasedEleIdAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
         bool fbremeopin = EgammaCutBasedEleId::PassEoverPCuts(ele);
 
         // cuts to match tight trigger requirements
-        bool trig = EgammaCutBasedEleId::PassTriggerCuts(ele);
+        bool trigtight = EgammaCutBasedEleId::PassTriggerCuts(EgammaCutBasedEleId::TRIGGERTIGHT, ele);
+
+        // for 2011 WP70 trigger
+        bool trigwp70 = EgammaCutBasedEleId::PassTriggerCuts(EgammaCutBasedEleId::TRIGGERWP70, ele);
 
         //
         // fill histograms
@@ -214,7 +217,7 @@ EGammaCutBasedEleIdAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
         if (loose)      h1_pt_loose_        ->Fill(ele->pt());
         if (medium)     h1_pt_medium_       ->Fill(ele->pt());
         if (tight)      h1_pt_tight_        ->Fill(ele->pt());
-        if (trig)       h1_pt_trig_         ->Fill(ele->pt());
+        if (trigtight)  h1_pt_trig_         ->Fill(ele->pt());
         if (fbremeopin) h1_pt_fbremeopin_   ->Fill(ele->pt());
 
         //
@@ -227,7 +230,8 @@ EGammaCutBasedEleIdAnalyzer::analyze(const edm::Event& iEvent, const edm::EventS
             printf("loose(%i), ",       loose);
             printf("medium(%i), ",      medium);
             printf("tight(%i), ",       tight);
-            printf("trig(%i), ",        trig);
+            printf("trigtight(%i), ",   trigtight);
+            printf("trigwp70(%i), ",    trigwp70);
             printf("fbremeopin(%i)\n",  fbremeopin);
         }
 

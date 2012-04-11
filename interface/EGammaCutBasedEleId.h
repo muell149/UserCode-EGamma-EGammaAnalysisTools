@@ -37,6 +37,11 @@ enum WorkingPoint {
     TIGHT
 };
 
+enum TriggerWorkingPoint {
+    TRIGGERTIGHT,
+    TRIGGERWP70
+};
+
 //
 // cuts used within working points
 //
@@ -76,7 +81,7 @@ bool PassWP(const WorkingPoint workingPoint,
     const double &iso_nh,
     const double &rho);
 
-bool PassTriggerCuts(const reco::GsfElectronRef &ele);
+bool PassTriggerCuts(const TriggerWorkingPoint triggerWorkingPoint, const reco::GsfElectronRef &ele);
 
 bool PassEoverPCuts(const reco::GsfElectronRef &ele);
 
@@ -103,7 +108,7 @@ bool PassWP(WorkingPoint workingPoint, const bool isEB, const float pt, const fl
     const float ooemoop, const float d0vtx, const float dzvtx, const float iso_ch, const float iso_em, const float iso_nh, 
     const bool vtxFitConversion, const unsigned int mHits, const double rho);
 
-bool PassTriggerCuts(const bool isEB, const float pt, 
+bool PassTriggerCuts(const TriggerWorkingPoint triggerWorkingPoint, const bool isEB, const float pt, 
     const float dEtaIn, const float dPhiIn, const float sigmaIEtaIEta, const float hoe,
     const float trackIso, const float ecalIso, const float hcalIso);
 
