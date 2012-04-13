@@ -40,7 +40,13 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PileUpPFCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PileUpPFCandidateFwd.h"
 
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+
 using namespace std;
+using namespace edm;
+using namespace reco;
+
 
 class PFIsolationEstimator{
  public:
@@ -53,7 +59,7 @@ class PFIsolationEstimator{
   };
   
 
-  void     initializeElectronIsolation( Bool_t  bApplyVeto, float  fConeSize = 0.4 );
+  void     initializeElectronIsolation( Bool_t  bApplyVeto, float  fConeSize = 0.3 );
   void     initializePhotonIsolation( Bool_t  bApplyVeto, float  fConeSize = 0.4  );
   void     initializeElectronIsolationInRings( Bool_t  bApplyVeto, int iNumberOfRings, float fRingSize );
   void     initializePhotonIsolationInRings( Bool_t  bApplyVeto, int iNumberOfRings, float fRingSize  );
@@ -61,11 +67,12 @@ class PFIsolationEstimator{
   Bool_t   isInitialized() const { return fisInitialized; }
   
 
-  float fGetIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl,const reco::VertexCollection& vertices );
-  vector<float >  fGetIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, const reco::VertexCollection& vertices );
+  float fGetIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >  vertices );
   
- 
-  int chargedHadronVertex( const reco::VertexCollection& vertices, const reco::PFCandidate& pfcand ) const;
+
+  vector<float >  fGetIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl,edm::Handle< reco::VertexCollection > vertices );
+  
+  VertexRef chargedHadronVertex(edm::Handle< reco::VertexCollection > verticies, const reco::PFCandidate& pfcand );
 
   void setConeSize(float fValue = 0.4){ fConeSize = fValue;};
 
@@ -79,36 +86,37 @@ class PFIsolationEstimator{
   void setRectangleVetoEndcap(Bool_t bValue = kTRUE){  bRectangleVetoEndcap = bValue;};
 
   //Veto Values
-  void setDeltaRVetoBarrelPhotons(float fValue = -1.){fDeltaRVetoBarrelPhotons=fValue;};
-  void setDeltaRVetoBarrelNeutrals(float fValue = -1.){fDeltaRVetoBarrelNeutrals=fValue;};
-  void setDeltaRVetoBarrelCharged(float fValue = -1.){fDeltaRVetoBarrelPhotons=fValue;};
-  void setDeltaRVetoEndcapPhotons(float fValue = -1.){fDeltaRVetoEndcapPhotons=fValue;};
-  void setDeltaRVetoEndcapNeutrals(float fValue = -1.){fDeltaRVetoEndcapNeutrals=fValue;};
-  void setDeltaRVetoEndcapCharged(float fValue = -1.){fDeltaRVetoEndcapPhotons=fValue;};
+  void setDeltaRVetoBarrelPhotons(float fValue = -1.0){fDeltaRVetoBarrelPhotons=fValue;};
+  void setDeltaRVetoBarrelNeutrals(float fValue = -1.0){fDeltaRVetoBarrelNeutrals=fValue;};
+  void setDeltaRVetoBarrelCharged(float fValue = -1.0){fDeltaRVetoBarrelPhotons=fValue;};
+  void setDeltaRVetoEndcapPhotons(float fValue = -1.0){fDeltaRVetoEndcapPhotons=fValue;};
+  void setDeltaRVetoEndcapNeutrals(float fValue = -1.0){fDeltaRVetoEndcapNeutrals=fValue;};
+  void setDeltaRVetoEndcapCharged(float fValue = -1.0){fDeltaRVetoEndcapPhotons=fValue;};
 
   
-  void setRectangleDeltaPhiVetoBarrelPhotons(float fValue = -1.){fRectangleDeltaPhiVetoBarrelPhotons=fValue;};
-  void setRectangleDeltaPhiVetoBarrelNeutrals(float fValue = -1.){fRectangleDeltaPhiVetoBarrelNeutrals=fValue;};
-  void setRectangleDeltaPhiVetoBarrelCharged(float fValue = -1.){fRectangleDeltaPhiVetoBarrelPhotons=fValue;};
-  void setRectangleDeltaPhiVetoEndcapPhotons(float fValue = -1.){fRectangleDeltaPhiVetoEndcapPhotons=fValue;};
-  void setRectangleDeltaPhiVetoEndcapNeutrals(float fValue = -1.){fRectangleDeltaPhiVetoEndcapNeutrals=fValue;};
-  void setRectangleDeltaPhiVetoEndcapCharged(float fValue = -1.){fRectangleDeltaPhiVetoEndcapPhotons=fValue;};
+  void setRectangleDeltaPhiVetoBarrelPhotons(float fValue = -1.0){fRectangleDeltaPhiVetoBarrelPhotons=fValue;};
+  void setRectangleDeltaPhiVetoBarrelNeutrals(float fValue = -1.0){fRectangleDeltaPhiVetoBarrelNeutrals=fValue;};
+  void setRectangleDeltaPhiVetoBarrelCharged(float fValue = -1.0){fRectangleDeltaPhiVetoBarrelPhotons=fValue;};
+  void setRectangleDeltaPhiVetoEndcapPhotons(float fValue = -1.0){fRectangleDeltaPhiVetoEndcapPhotons=fValue;};
+  void setRectangleDeltaPhiVetoEndcapNeutrals(float fValue = -1.0){fRectangleDeltaPhiVetoEndcapNeutrals=fValue;};
+  void setRectangleDeltaPhiVetoEndcapCharged(float fValue = -1.0){fRectangleDeltaPhiVetoEndcapPhotons=fValue;};
   
 
-  void setRectangleDeltaEtaVetoBarrelPhotons(float fValue = -1.){fRectangleDeltaEtaVetoBarrelPhotons=fValue;};
-  void setRectangleDeltaEtaVetoBarrelNeutrals(float fValue = -1.){fRectangleDeltaEtaVetoBarrelNeutrals=fValue;};
-  void setRectangleDeltaEtaVetoBarrelCharged(float fValue = -1.){fRectangleDeltaEtaVetoBarrelPhotons=fValue;};
-  void setRectangleDeltaEtaVetoEndcapPhotons(float fValue = -1.){fRectangleDeltaEtaVetoEndcapPhotons=fValue;};
-  void setRectangleDeltaEtaVetoEndcapNeutrals(float fValue = -1.){fRectangleDeltaEtaVetoEndcapNeutrals=fValue;};
-  void setRectangleDeltaEtaVetoEndcapCharged(float fValue = -1.){fRectangleDeltaEtaVetoEndcapPhotons=fValue;};
+  void setRectangleDeltaEtaVetoBarrelPhotons(float fValue = -1.0){fRectangleDeltaEtaVetoBarrelPhotons=fValue;};
+  void setRectangleDeltaEtaVetoBarrelNeutrals(float fValue = -1.0){fRectangleDeltaEtaVetoBarrelNeutrals=fValue;};
+  void setRectangleDeltaEtaVetoBarrelCharged(float fValue = -1.0){fRectangleDeltaEtaVetoBarrelPhotons=fValue;};
+  void setRectangleDeltaEtaVetoEndcapPhotons(float fValue = -1.0){fRectangleDeltaEtaVetoEndcapPhotons=fValue;};
+  void setRectangleDeltaEtaVetoEndcapNeutrals(float fValue = -1.0){fRectangleDeltaEtaVetoEndcapNeutrals=fValue;};
+  void setRectangleDeltaEtaVetoEndcapCharged(float fValue = -1.0){fRectangleDeltaEtaVetoEndcapPhotons=fValue;};
 
   //Veto implementation
+  float  isPhotonParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand );
+  float  isNeutralParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand );
+  float  isChargedParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand, edm::Handle< reco::VertexCollection > vertices);  
   
-  
-  
-  float getIsolationPhoton(){ return fIsolationPhoton; };
-  float getIsolationNeutral(){ return fIsolationNeutral; };
-  float getIsolationCharged(){ return fIsolationCharged; };
+  float getIsolationPhoton(){   fIsolationPhoton = 	fIsolationInRingsPhoton[0]; return fIsolationPhoton; };
+  float getIsolationNeutral(){ fIsolationNeutral = 	fIsolationInRingsNeutral[0]; return fIsolationNeutral; };
+  float getIsolationCharged(){  fIsolationCharged =   fIsolationInRingsCharged[0]; return fIsolationCharged; };
   float getIsolationChargedAll(){ return fIsolationChargedAll; };
 
   vector<float >  getIsolationInRingsPhoton(){ return fIsolationInRingsPhoton; };
@@ -117,8 +125,11 @@ class PFIsolationEstimator{
   vector<float >  getIsolationInRingsChargedAll(){ return fIsolationInRingsChargedAll; };
 
 
-  void SetNumbersOfRings(int iValue = 1){iNumberOfRings = iValue;};
+  void setNumbersOfRings(int iValue = 1){iNumberOfRings = iValue;};
   void setRingSize(float fValue = 0.4){fRingSize = fValue;};
+
+  int getNumbersOfRings(){return iNumberOfRings;};
+  float getRingSize(){return fRingSize; };
 
 #ifndef STANDALONE
  
@@ -144,7 +155,7 @@ class PFIsolationEstimator{
   vector<float >          fIsolationInRingsChargedAll;
 
   Bool_t                    checkClosestZVertex;
-  float                   fConeSize;
+  float                     fConeSize;
   Bool_t                    bApplyVeto;
   
   Bool_t                    bDeltaRVetoBarrel; 
@@ -180,7 +191,12 @@ class PFIsolationEstimator{
   int                     iNumberOfRings;
   float                   fRingSize;
 
+  float                   fDeltaR;
+  float                   fDeltaEta;
+  float                   fDeltaPhi;
 
+  math::XYZVector         vtxWRTCandidate;
+   
   void     initialize( Bool_t  bApplyVeto, int iParticleType);
 };
 
