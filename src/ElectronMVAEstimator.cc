@@ -770,16 +770,13 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
 	   // Footprint Veto
 	   if (fabs(fMVAVar_eta) > 1.479 && dr < 0.08) passVeto = kFALSE;
 	   //************************************************************	
-//            cout << "pf gamma: " << dr << " ";
 	   if (passVeto) {
 	     if (dr < 0.1) tmpGammaIso_DR0p0To0p1 += iP->pt();
 	     if (dr >= 0.1 && dr < 0.2) tmpGammaIso_DR0p1To0p2 += iP->pt();
 	     if (dr >= 0.2 && dr < 0.3) tmpGammaIso_DR0p2To0p3 += iP->pt();
 	     if (dr >= 0.3 && dr < 0.4) tmpGammaIso_DR0p3To0p4 += iP->pt();
 	     if (dr >= 0.4 && dr < 0.5) tmpGammaIso_DR0p4To0p5 += iP->pt();
-//              cout << " pass: " << tmpGammaIso_DR0p4To0p5 << " " ;
 	   }
-//            cout << endl;
 	 }
 	 //NeutralHadron
 	 else {
@@ -808,10 +805,11 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
   fMVAVar_NeutralHadronIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p2To0p3 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p2To0p3, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
   fMVAVar_NeutralHadronIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p3To0p4 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p3To0p4, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
   fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p4To0p5, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
-  
-//   cout << "gg: " << tmpGammaIso_DR0p4To0p5 << " : " << ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIsoDR0p4To0p5, ele->SCluster()->Eta(), EffectiveAreaTarget) << " " << EffectiveAreaTarget << endl;
+ 
+  if (fPrintMVADebug) {
+    cout << "UseBinnedVersion=" << fUseBinnedVersion << " -> BIN: " << fMVAVar_eta << " " << fMVAVar_pt << " : " << GetMVABin(fMVAVar_eta,fMVAVar_pt) << endl;
+  }
 
-  cout << fUseBinnedVersion << " -> BIN: " << fMVAVar_eta << " " << fMVAVar_pt << " : " << GetMVABin(fMVAVar_eta,fMVAVar_pt) << endl;
   // evaluate
   bindVariables();
   Double_t mva = -9999; 
