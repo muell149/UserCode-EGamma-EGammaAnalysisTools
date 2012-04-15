@@ -1,6 +1,7 @@
 #include <TFile.h>
 #include "../interface/ElectronMVAEstimator.h"
 #include <cmath>
+#include <vector>
 using namespace std;
 
 #ifndef STANDALONE
@@ -9,6 +10,7 @@ using namespace std;
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
@@ -16,122 +18,216 @@ using namespace std;
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
+#include "EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h"
+#include "DataFormats/Common/interface/RefToPtr.h"
 using namespace reco;
 #endif
-
-
-
-
 
 //--------------------------------------------------------------------------------------------------
 ElectronMVAEstimator::ElectronMVAEstimator() :
 fMethodname("BDTG method"),
-fisInitialized(kFALSE)
+fisInitialized(kFALSE),
+fPrintMVADebug(kFALSE),
+fMVAType(kTrig),
+fUseBinnedVersion(kTRUE),
+fNMVABins(0)
 {
-  // Constructor.
-  fTMVAReader = 0;
+  // Constructor.  
 }
-
-
 
 //--------------------------------------------------------------------------------------------------
 ElectronMVAEstimator::~ElectronMVAEstimator()
 {
-    if (fTMVAReader) delete fTMVAReader;
+  for (uint i=0;i<fTMVAReader.size(); ++i) {
+    if (fTMVAReader[i]) delete fTMVAReader[i];
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
 void ElectronMVAEstimator::initialize( std::string methodName,
-				       std::string weightsfile,
-				       ElectronMVAEstimator::MVAType type) {
+                                       std::string weightsfile,
+                                       ElectronMVAEstimator::MVAType type)
+{
   
+  std::vector<std::string> tempWeightFileVector;
+  tempWeightFileVector.push_back(weightsfile);
+  initialize(methodName,type,kFALSE,tempWeightFileVector);
+}
+
+
+//--------------------------------------------------------------------------------------------------
+void ElectronMVAEstimator::initialize( std::string methodName,
+                                       ElectronMVAEstimator::MVAType type,
+                                       Bool_t useBinnedVersion,
+				       std::vector<std::string> weightsfiles
+  ) {
+
+  //clean up first
+  for (uint i=0;i<fTMVAReader.size(); ++i) {
+    if (fTMVAReader[i]) delete fTMVAReader[i];
+  }
+  fTMVAReader.clear();
+
+  //initialize
   fisInitialized = kTRUE;
   fMVAType = type;
-
   fMethodname = methodName;
-    
-  if (fTMVAReader) delete fTMVAReader;
-  
-  fTMVAReader = new TMVA::Reader( "!Color:!Silent:Error" );  
-  fTMVAReader->SetVerbose(kTRUE);
-  
-  if (type == kTrig) {
-    // Pure tracking variables
-    fTMVAReader->AddVariable("fbrem",           &fMVAVar_fbrem);
-    fTMVAReader->AddVariable("kfchi2",          &fMVAVar_kfchi2);
-    fTMVAReader->AddVariable("kfhits",          &fMVAVar_kfhits);
-    fTMVAReader->AddVariable("gsfchi2",         &fMVAVar_gsfchi2);
+  fUseBinnedVersion = useBinnedVersion;
 
-    // Geometrical matchings
-    fTMVAReader->AddVariable("deta",            &fMVAVar_deta);
-    fTMVAReader->AddVariable("dphi",            &fMVAVar_dphi);
-    fTMVAReader->AddVariable("detacalo",        &fMVAVar_detacalo);
-    // fTMVAReader->AddVariable("dphicalo",        &fMVAVar_dphicalo);   // Pruned but save in your ntuple. 
-    
-    // Pure ECAL -> shower shapes
-    fTMVAReader->AddVariable("see",             &fMVAVar_see);
-    fTMVAReader->AddVariable("spp",             &fMVAVar_spp);
-    fTMVAReader->AddVariable("etawidth",        &fMVAVar_etawidth);
-    fTMVAReader->AddVariable("phiwidth",        &fMVAVar_phiwidth);
-    fTMVAReader->AddVariable("e1x5e5x5",        &fMVAVar_e1x5e5x5);
-    fTMVAReader->AddVariable("R9",              &fMVAVar_R9);
-    // fTMVAReader->AddVariable("nbrems",          &fMVAVar_nbrems); // Pruned but save in your ntuple. 
-
-    // Energy matching
-    fTMVAReader->AddVariable("HoE",             &fMVAVar_HoE);
-    fTMVAReader->AddVariable("EoP",             &fMVAVar_EoP); 
-    fTMVAReader->AddVariable("IoEmIoP",         &fMVAVar_IoEmIoP);
-    fTMVAReader->AddVariable("eleEoPout",       &fMVAVar_eleEoPout);
-    //  fTMVAReader->AddVariable("EoPout",          &fMVAVar_EoPout); // Pruned but save in your ntuple.    
-    fTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
-
-    // IP
-    fTMVAReader->AddVariable("d0",              &fMVAVar_d0);
-    fTMVAReader->AddVariable("ip3d",            &fMVAVar_ip3d);
-    
-    fTMVAReader->AddSpectator("eta",            &fMVAVar_eta);
-    fTMVAReader->AddSpectator("pt",             &fMVAVar_pt);
+  //Define expected number of bins
+  UInt_t ExpectedNBins = 0;
+  if (!fUseBinnedVersion) {
+    ExpectedNBins = 1;
+  } else if (type == kTrig) {
+    ExpectedNBins = 6;
+  } else if (type == kNonTrig) {
+    ExpectedNBins = 6;
+  } else if (type == kIsoRings) {
+    ExpectedNBins = 4;
   }
+  fNMVABins = ExpectedNBins;
   
-  if (type == kNonTrig) {
-    // Pure tracking variables
-    fTMVAReader->AddVariable("fbrem",           &fMVAVar_fbrem);
-    fTMVAReader->AddVariable("kfchi2",          &fMVAVar_kfchi2);
-    fTMVAReader->AddVariable("kfhits",          &fMVAVar_kfhits);
-    fTMVAReader->AddVariable("gsfchi2",         &fMVAVar_gsfchi2);
-
-    // Geometrical matchings
-    fTMVAReader->AddVariable("deta",            &fMVAVar_deta);
-    fTMVAReader->AddVariable("dphi",            &fMVAVar_dphi);
-    fTMVAReader->AddVariable("detacalo",        &fMVAVar_detacalo);
-    // fTMVAReader->AddVariable("dphicalo",        &fMVAVar_dphicalo);   // Pruned but save in your ntuple. 
-    
-    // Pure ECAL -> shower shapes
-    fTMVAReader->AddVariable("see",             &fMVAVar_see);
-    fTMVAReader->AddVariable("spp",             &fMVAVar_spp);
-    fTMVAReader->AddVariable("etawidth",        &fMVAVar_etawidth);
-    fTMVAReader->AddVariable("phiwidth",        &fMVAVar_phiwidth);
-    fTMVAReader->AddVariable("e1x5e5x5",        &fMVAVar_e1x5e5x5);
-    fTMVAReader->AddVariable("R9",              &fMVAVar_R9);
-    // fTMVAReader->AddVariable("nbrems",          &fMVAVar_nbrems); // Pruned but save in your ntuple. 
-
-    // Energy matching
-    fTMVAReader->AddVariable("HoE",             &fMVAVar_HoE);
-    fTMVAReader->AddVariable("EoP",             &fMVAVar_EoP); 
-    fTMVAReader->AddVariable("IoEmIoP",         &fMVAVar_IoEmIoP);
-    fTMVAReader->AddVariable("eleEoPout",       &fMVAVar_eleEoPout);
-    //  fTMVAReader->AddVariable("EoPout",          &fMVAVar_EoPout); // Pruned but save in your ntuple. 
-    fTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
-    
-    fTMVAReader->AddSpectator("eta",            &fMVAVar_eta);
-    fTMVAReader->AddSpectator("pt",             &fMVAVar_pt);
+  //Check number of weight files given
+  if (fNMVABins != weightsfiles.size() ) {
+    std::cout << "Error: Expected Number of bins = " << fNMVABins << " does not equal to weightsfiles.size() = " 
+              << weightsfiles.size() << std::endl;
+    assert(fNMVABins == weightsfiles.size());
   }
-  
-  fTMVAReader->BookMVA(fMethodname , weightsfile);
-  std::cout << "Electron ID MVA Initialization\n";
-  std::cout << "MethodName : " << fMethodname << " , type == " << type << std::endl;
-  std::cout << "Load weights file : " << weightsfile << std::endl;
 
+  //Loop over all bins
+  for (uint i=0;i<fNMVABins; ++i) {
+  
+    TMVA::Reader *tmpTMVAReader = new TMVA::Reader( "!Color:!Silent:Error" );  
+    tmpTMVAReader->SetVerbose(kTRUE);
+  
+    if (type == kTrig) {
+      // Pure tracking variables
+      tmpTMVAReader->AddVariable("fbrem",           &fMVAVar_fbrem);
+      tmpTMVAReader->AddVariable("kfchi2",          &fMVAVar_kfchi2);
+      tmpTMVAReader->AddVariable("kfhits",          &fMVAVar_kfhits);
+      tmpTMVAReader->AddVariable("gsfchi2",         &fMVAVar_gsfchi2);
+
+      // Geometrical matchings
+      tmpTMVAReader->AddVariable("deta",            &fMVAVar_deta);
+      tmpTMVAReader->AddVariable("dphi",            &fMVAVar_dphi);
+      tmpTMVAReader->AddVariable("detacalo",        &fMVAVar_detacalo);
+      // tmpTMVAReader->AddVariable("dphicalo",        &fMVAVar_dphicalo);   // Pruned but save in your ntuple. 
+    
+      // Pure ECAL -> shower shapes
+      tmpTMVAReader->AddVariable("see",             &fMVAVar_see);
+      tmpTMVAReader->AddVariable("spp",             &fMVAVar_spp);
+      tmpTMVAReader->AddVariable("etawidth",        &fMVAVar_etawidth);
+      tmpTMVAReader->AddVariable("phiwidth",        &fMVAVar_phiwidth);
+      tmpTMVAReader->AddVariable("e1x5e5x5",        &fMVAVar_e1x5e5x5);
+      tmpTMVAReader->AddVariable("R9",              &fMVAVar_R9);
+      // tmpTMVAReader->AddVariable("nbrems",          &fMVAVar_nbrems); // Pruned but save in your ntuple. 
+
+      // Energy matching
+      tmpTMVAReader->AddVariable("HoE",             &fMVAVar_HoE);
+      tmpTMVAReader->AddVariable("EoP",             &fMVAVar_EoP); 
+      tmpTMVAReader->AddVariable("IoEmIoP",         &fMVAVar_IoEmIoP);
+      tmpTMVAReader->AddVariable("eleEoPout",       &fMVAVar_eleEoPout);
+      //  tmpTMVAReader->AddVariable("EoPout",          &fMVAVar_EoPout); // Pruned but save in your ntuple.    
+      tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
+
+      // IP
+      tmpTMVAReader->AddVariable("d0",              &fMVAVar_d0);
+      tmpTMVAReader->AddVariable("ip3d",            &fMVAVar_ip3d);
+    
+      tmpTMVAReader->AddSpectator("eta",            &fMVAVar_eta);
+      tmpTMVAReader->AddSpectator("pt",             &fMVAVar_pt);
+    }
+  
+    if (type == kNonTrig) {
+      // Pure tracking variables
+      tmpTMVAReader->AddVariable("fbrem",           &fMVAVar_fbrem);
+      tmpTMVAReader->AddVariable("kfchi2",          &fMVAVar_kfchi2);
+      tmpTMVAReader->AddVariable("kfhits",          &fMVAVar_kfhits);
+      tmpTMVAReader->AddVariable("gsfchi2",         &fMVAVar_gsfchi2);
+
+      // Geometrical matchings
+      tmpTMVAReader->AddVariable("deta",            &fMVAVar_deta);
+      tmpTMVAReader->AddVariable("dphi",            &fMVAVar_dphi);
+      tmpTMVAReader->AddVariable("detacalo",        &fMVAVar_detacalo);
+      // tmpTMVAReader->AddVariable("dphicalo",        &fMVAVar_dphicalo);   // Pruned but save in your ntuple. 
+    
+      // Pure ECAL -> shower shapes
+      tmpTMVAReader->AddVariable("see",             &fMVAVar_see);
+      tmpTMVAReader->AddVariable("spp",             &fMVAVar_spp);
+      tmpTMVAReader->AddVariable("etawidth",        &fMVAVar_etawidth);
+      tmpTMVAReader->AddVariable("phiwidth",        &fMVAVar_phiwidth);
+      tmpTMVAReader->AddVariable("e1x5e5x5",        &fMVAVar_e1x5e5x5);
+      tmpTMVAReader->AddVariable("R9",              &fMVAVar_R9);
+      // tmpTMVAReader->AddVariable("nbrems",          &fMVAVar_nbrems); // Pruned but save in your ntuple. 
+
+      // Energy matching
+      tmpTMVAReader->AddVariable("HoE",             &fMVAVar_HoE);
+      tmpTMVAReader->AddVariable("EoP",             &fMVAVar_EoP); 
+      tmpTMVAReader->AddVariable("IoEmIoP",         &fMVAVar_IoEmIoP);
+      tmpTMVAReader->AddVariable("eleEoPout",       &fMVAVar_eleEoPout);
+      //  tmpTMVAReader->AddVariable("EoPout",          &fMVAVar_EoPout); // Pruned but save in your ntuple. 
+      tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
+    
+      tmpTMVAReader->AddSpectator("eta",            &fMVAVar_eta);
+      tmpTMVAReader->AddSpectator("pt",             &fMVAVar_pt);
+    }
+
+    if (type == kIsoRings) {
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p0To0p1",         &fMVAVar_ChargedIso_DR0p0To0p1        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p1To0p2",         &fMVAVar_ChargedIso_DR0p1To0p2        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p2To0p3",         &fMVAVar_ChargedIso_DR0p2To0p3        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p3To0p4",         &fMVAVar_ChargedIso_DR0p3To0p4        );
+      tmpTMVAReader->AddVariable( "ChargedIso_DR0p4To0p5",         &fMVAVar_ChargedIso_DR0p4To0p5        );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p0To0p1",           &fMVAVar_GammaIso_DR0p0To0p1          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p1To0p2",           &fMVAVar_GammaIso_DR0p1To0p2          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p2To0p3",           &fMVAVar_GammaIso_DR0p2To0p3          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p3To0p4",           &fMVAVar_GammaIso_DR0p3To0p4          );
+      tmpTMVAReader->AddVariable( "GammaIso_DR0p4To0p5",           &fMVAVar_GammaIso_DR0p4To0p5          );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p0To0p1",   &fMVAVar_NeutralHadronIso_DR0p0To0p1  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p1To0p2",   &fMVAVar_NeutralHadronIso_DR0p1To0p2  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p2To0p3",   &fMVAVar_NeutralHadronIso_DR0p2To0p3  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p3To0p4",   &fMVAVar_NeutralHadronIso_DR0p3To0p4  );
+      tmpTMVAReader->AddVariable( "NeutralHadronIso_DR0p4To0p5",   &fMVAVar_NeutralHadronIso_DR0p4To0p5  );
+      tmpTMVAReader->AddSpectator("eta",            &fMVAVar_eta);
+      tmpTMVAReader->AddSpectator("pt",             &fMVAVar_pt);
+    }
+  
+    tmpTMVAReader->BookMVA(fMethodname , weightsfiles[i]);
+    std::cout << "MVABin " << i << " : MethodName = " << fMethodname 
+              << " , type == " << type << " , "
+              << "Load weights file : " << weightsfiles[i] 
+              << std::endl;
+    fTMVAReader.push_back(tmpTMVAReader);
+  }
+  std::cout << "Electron ID MVA Completed\n";
+
+}
+
+
+//--------------------------------------------------------------------------------------------------
+UInt_t ElectronMVAEstimator::GetMVABin( double eta, double pt) const {
+  
+    //Default is to return the first bin
+    uint bin = 0;
+
+    if (fMVAType == ElectronMVAEstimator::kIsoRings) {
+      if (pt < 10 && fabs(eta) < 1.479) bin = 0;
+      if (pt < 10 && fabs(eta) >= 1.479) bin = 1;
+      if (pt >= 10 && fabs(eta) < 1.479) bin = 2;
+      if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
+    }
+
+    if (fMVAType == ElectronMVAEstimator::kTrig || fMVAType == ElectronMVAEstimator::kNonTrig ) {
+      bin = 0;
+      if (pt < 10 && fabs(eta) < 0.8) bin = 0;
+      if (pt < 10 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
+      if (pt < 10 && fabs(eta) >= 1.479) bin = 2;
+      if (pt >= 10 && fabs(eta) < 0.8) bin = 3;
+      if (pt >= 10 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 4;
+      if (pt >= 10 && fabs(eta) >= 1.479) bin = 5;
+    }
+
+    return bin;
 }
 
 
@@ -203,9 +299,11 @@ Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem,
 
   bindVariables();
   Double_t mva = -9999;  
-  mva = fTMVAReader->EvaluateMVA(fMethodname);
-
-
+  if (fUseBinnedVersion) {
+    mva = fTMVAReader[GetMVABin(fMVAVar_eta,fMVAVar_pt)]->EvaluateMVA(fMethodname);
+  } else {
+    mva = fTMVAReader[0]->EvaluateMVA(fMethodname);
+  }
 
   if(printDebug) {
     cout << " *** Inside the class fMethodname " << fMethodname << endl;
@@ -304,7 +402,11 @@ Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem,
 
   bindVariables();
   Double_t mva = -9999;  
-  mva = fTMVAReader->EvaluateMVA(fMethodname);
+  if (fUseBinnedVersion) {
+    mva = fTMVAReader[GetMVABin(fMVAVar_eta,fMVAVar_pt)]->EvaluateMVA(fMethodname);
+  } else {
+    mva = fTMVAReader[0]->EvaluateMVA(fMethodname);
+  }
 
 
 
@@ -434,7 +536,11 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
   // evaluate
   bindVariables();
   Double_t mva = -9999;  
-  mva = fTMVAReader->EvaluateMVA(fMethodname);
+  if (fUseBinnedVersion) {
+    mva = fTMVAReader[GetMVABin(fMVAVar_eta,fMVAVar_pt)]->EvaluateMVA(fMethodname);
+  } else {
+    mva = fTMVAReader[0]->EvaluateMVA(fMethodname);
+  }
 
 
 
@@ -471,6 +577,307 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
 
   return mva;
 }
+
+
+Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele, 
+                                        const reco::Vertex& vertex, 
+                                        const TransientTrackBuilder& transientTrackBuilder,
+                                        EcalClusterLazyTools myEcalCluster,
+                                        const reco::PFCandidateCollection &PFCandidates,
+                                        double Rho,
+                                        ElectronEffectiveArea::ElectronEffectiveAreaTarget EATarget,
+                                        const reco::GsfElectronCollection &IdentifiedElectrons,
+                                        const reco::MuonCollection &IdentifiedMuons) {
+  
+  if (!fisInitialized) { 
+    std::cout << "Error: ElectronMVAEstimator not properly initialized.\n"; 
+    return -9999;
+  }
+  
+
+  bool validKF= false; 
+  reco::TrackRef myTrackRef = ele.closestCtfTrackRef();
+  validKF = (myTrackRef.isAvailable());
+  validKF = (myTrackRef.isNonnull());  
+
+  // Pure tracking variables
+  fMVAVar_fbrem           =  ele.fbrem();
+  fMVAVar_kfchi2          =  (validKF) ? myTrackRef->normalizedChi2() : 0 ;
+  fMVAVar_kfhits          =  (validKF) ? myTrackRef->hitPattern().trackerLayersWithMeasurement() : -1. ; 
+  fMVAVar_kfhitsall       =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ;   //  save also this in your ntuple as possible alternative
+  fMVAVar_gsfchi2         =  ele.gsfTrack()->normalizedChi2();  
+
+  
+  // Geometrical matchings
+  fMVAVar_deta            =  ele.deltaEtaSuperClusterTrackAtVtx();
+  fMVAVar_dphi            =  ele.deltaPhiSuperClusterTrackAtVtx();
+  fMVAVar_detacalo        =  ele.deltaEtaSeedClusterTrackAtCalo();
+  // fMVAVar_dphicalo        =  ele.deltaPhiSeedClusterTrackAtCalo();   //  save also this in your ntuple 
+
+
+  // Pure ECAL -> shower shapes
+  fMVAVar_see             =  ele.sigmaIetaIeta();    //EleSigmaIEtaIEta
+  std::vector<float> vCov = myEcalCluster.localCovariances(*(ele.superCluster()->seed())) ;
+  if (!isnan(vCov[2])) fMVAVar_spp = sqrt (vCov[2]);   //EleSigmaIPhiIPhi
+  else fMVAVar_spp = 0.;    
+  // fMVAVar_sigmaIEtaIPhi = vCov[1];  //  save also this in your ntuple 
+
+  fMVAVar_etawidth        =  ele.superCluster()->etaWidth();
+  fMVAVar_phiwidth        =  ele.superCluster()->phiWidth();
+  fMVAVar_e1x5e5x5        =  (ele.e5x5()) !=0. ? 1.-(ele.e1x5()/ele.e5x5()) : -1. ;
+  fMVAVar_R9              =  myEcalCluster.e3x3(*(ele.superCluster()->seed())) / ele.superCluster()->rawEnergy();
+  //fMVAVar_nbrems          =  fabs(ele.numberOfBrems());    //  save also this in your ntuple 
+
+  // Energy matching
+  fMVAVar_HoE             =  ele.hadronicOverEm();
+  fMVAVar_EoP             =  ele.eSuperClusterOverP();
+  fMVAVar_IoEmIoP         =  (1.0/(ele.superCluster()->energy())) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
+  fMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
+  fMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
+  fMVAVar_EoPout          =  ele.eSeedClusterOverPout();     //  save also this in your ntuple 
+
+
+  // Spectators
+  fMVAVar_eta             =  ele.superCluster()->eta();         
+  fMVAVar_pt              =  ele.pt();                          
+
+ 
+  // for triggering electrons get the impact parameteres
+  if(fMVAType == kTrig || fMVAType == kIsoRings) {
+    //d0
+    if (ele.gsfTrack().isNonnull()) {
+      fMVAVar_d0 = (-1.0)*ele.gsfTrack()->dxy(vertex.position()); 
+    } else if (ele.closestCtfTrackRef().isNonnull()) {
+      fMVAVar_d0 = (-1.0)*ele.closestCtfTrackRef()->dxy(vertex.position()); 
+    } else {
+      fMVAVar_d0 = -9999.0;
+    }
+    
+    //default values for IP3D
+    fMVAVar_ip3d = -999.0; 
+    // fMVAVar_ip3dSig = 0.0;
+    if (ele.gsfTrack().isNonnull()) {
+      const double gsfsign   = ( (-ele.gsfTrack()->dxy(vertex.position()))   >=0 ) ? 1. : -1.;
+      
+      const reco::TransientTrack &tt = transientTrackBuilder.build(ele.gsfTrack()); 
+      const std::pair<bool,Measurement1D> &ip3dpv =  IPTools::absoluteImpactParameter3D(tt,vertex);
+      if (ip3dpv.first) {
+	double ip3d = gsfsign*ip3dpv.second.value();
+	//double ip3derr = ip3dpv.second.error();  
+	fMVAVar_ip3d = ip3d; 
+	// fMVAVar_ip3dSig = ip3d/ip3derr;
+      }
+    }
+  }
+  
+  
+  //**********************************************************
+  //Isolation variables
+  //**********************************************************
+  Double_t tmpChargedIso_DR0p0To0p1  = 0;
+  Double_t tmpChargedIso_DR0p1To0p2  = 0;
+  Double_t tmpChargedIso_DR0p2To0p3  = 0;
+  Double_t tmpChargedIso_DR0p3To0p4  = 0;
+  Double_t tmpChargedIso_DR0p4To0p5  = 0;
+  Double_t tmpGammaIso_DR0p0To0p1  = 0;
+  Double_t tmpGammaIso_DR0p1To0p2  = 0;
+  Double_t tmpGammaIso_DR0p2To0p3  = 0;
+  Double_t tmpGammaIso_DR0p3To0p4  = 0;
+  Double_t tmpGammaIso_DR0p4To0p5  = 0;
+  Double_t tmpNeutralHadronIso_DR0p0To0p1  = 0;
+  Double_t tmpNeutralHadronIso_DR0p1To0p2  = 0;
+  Double_t tmpNeutralHadronIso_DR0p2To0p3  = 0;
+  Double_t tmpNeutralHadronIso_DR0p3To0p4  = 0;
+  Double_t tmpNeutralHadronIso_DR0p4To0p5  = 0;
+
+  double electronTrackZ = 0;
+  if (ele.gsfTrack().isNonnull()) {
+    electronTrackZ = ele.gsfTrack()->dz(vertex.position());
+  } else if (ele.closestCtfTrackRef().isNonnull()) {
+    electronTrackZ = ele.closestCtfTrackRef()->dz(vertex.position());
+  }
+
+  for (reco::PFCandidateCollection::const_iterator iP = PFCandidates.begin(); 
+       iP != PFCandidates.end(); ++iP) {
+      
+    //exclude the electron itself
+    if(iP->gsfTrackRef().isNonnull() && ele.gsfTrack().isNonnull() &&
+       refToPtr(iP->gsfTrackRef()) == refToPtr(ele.gsfTrack())) continue;
+    if(iP->trackRef().isNonnull() && ele.closestCtfTrackRef().isNonnull() &&
+       refToPtr(iP->trackRef()) == refToPtr(ele.closestCtfTrackRef())) continue;      
+
+    //************************************************************
+    // New Isolation Calculations
+    //************************************************************
+    double dr = sqrt(pow(iP->eta() - ele.eta(),2) + pow(acos(cos(iP->phi() - ele.phi())),2));
+    Double_t deta = (iP->eta() - ele.eta());
+
+    if (dr < 1.0) {
+      Bool_t IsLeptonFootprint = kFALSE;
+      //************************************************************
+      // Lepton Footprint Removal
+      //************************************************************   
+      for (reco::GsfElectronCollection::const_iterator iE = IdentifiedElectrons.begin(); 
+           iE != IdentifiedElectrons.end(); ++iE) {
+	//if pf candidate matches an electron passing ID cuts, then veto it
+	if(iP->gsfTrackRef().isNonnull() && iE->gsfTrack().isNonnull() &&
+	   refToPtr(iP->gsfTrackRef()) == refToPtr(iE->gsfTrack())) IsLeptonFootprint = kTRUE;
+        if(iP->trackRef().isNonnull() && iE->closestCtfTrackRef().isNonnull() &&
+           refToPtr(iP->trackRef()) == refToPtr(iE->closestCtfTrackRef())) IsLeptonFootprint = kTRUE;
+
+	//if pf candidate lies in veto regions of electron passing ID cuts, then veto it
+        double tmpDR = sqrt(pow(iP->eta() - iE->eta(),2) + pow(acos(cos(iP->phi() - iE->phi())),2));
+	if(iP->trackRef().isNonnull() && fabs(iE->superCluster()->eta()) >= 1.479 
+           && tmpDR < 0.015) IsLeptonFootprint = kTRUE;
+	if(iP->particleId() == reco::PFCandidate::gamma && fabs(iE->superCluster()->eta()) >= 1.479 
+           && tmpDR < 0.08) IsLeptonFootprint = kTRUE;
+      }
+      for (reco::MuonCollection::const_iterator iM = IdentifiedMuons.begin(); 
+           iM != IdentifiedMuons.end(); ++iM) {
+	//if pf candidate matches an muon passing ID cuts, then veto it
+	if(iP->trackRef().isNonnull() && iM->innerTrack().isNonnull() &&
+	   refToPtr(iP->trackRef()) == refToPtr(iM->innerTrack())) IsLeptonFootprint = kTRUE;
+
+	//if pf candidate lies in veto regions of muon passing ID cuts, then veto it
+        double tmpDR = sqrt(pow(iP->eta() - iM->eta(),2) + pow(acos(cos(iP->phi() - iM->phi())),2));
+	if(iP->trackRef().isNonnull() && tmpDR < 0.01) IsLeptonFootprint = kTRUE;
+      }
+
+     if (!IsLeptonFootprint) {
+	Bool_t passVeto = kTRUE;
+	//Charged
+	 if(iP->trackRef().isNonnull()) {	  	   
+	   if (!(fabs(iP->trackRef()->dz(vertex.position()) - electronTrackZ) < 0.2)) passVeto = kFALSE;
+	   //************************************************************
+	   // Veto any PFmuon, or PFEle
+	   if (iP->particleId() == reco::PFCandidate::e || iP->particleId() == reco::PFCandidate::mu) passVeto = kFALSE;
+	   //************************************************************
+	   //************************************************************
+	   // Footprint Veto
+	   if (fabs(fMVAVar_eta) > 1.479 && dr < 0.015) passVeto = kFALSE;
+	   //************************************************************
+	   if (passVeto) {
+	     if (dr < 0.1) tmpChargedIso_DR0p0To0p1 += iP->pt();
+	     if (dr >= 0.1 && dr < 0.2) tmpChargedIso_DR0p1To0p2 += iP->pt();
+	     if (dr >= 0.2 && dr < 0.3) tmpChargedIso_DR0p2To0p3 += iP->pt();
+	     if (dr >= 0.3 && dr < 0.4) tmpChargedIso_DR0p3To0p4 += iP->pt();
+	     if (dr >= 0.4 && dr < 0.5) tmpChargedIso_DR0p4To0p5 += iP->pt();
+	   } //pass veto	   
+	 }
+	 //Gamma
+	 else if (iP->particleId() == reco::PFCandidate::gamma) {
+	   //************************************************************
+	   // Footprint Veto
+	   if (fabs(fMVAVar_eta) > 1.479 && dr < 0.08) passVeto = kFALSE;
+	   //************************************************************	
+//            cout << "pf gamma: " << dr << " ";
+	   if (passVeto) {
+	     if (dr < 0.1) tmpGammaIso_DR0p0To0p1 += iP->pt();
+	     if (dr >= 0.1 && dr < 0.2) tmpGammaIso_DR0p1To0p2 += iP->pt();
+	     if (dr >= 0.2 && dr < 0.3) tmpGammaIso_DR0p2To0p3 += iP->pt();
+	     if (dr >= 0.3 && dr < 0.4) tmpGammaIso_DR0p3To0p4 += iP->pt();
+	     if (dr >= 0.4 && dr < 0.5) tmpGammaIso_DR0p4To0p5 += iP->pt();
+//              cout << " pass: " << tmpGammaIso_DR0p4To0p5 << " " ;
+	   }
+//            cout << endl;
+	 }
+	 //NeutralHadron
+	 else {
+           if (dr < 0.1) tmpNeutralHadronIso_DR0p0To0p1 += iP->pt();
+           if (dr >= 0.1 && dr < 0.2) tmpNeutralHadronIso_DR0p1To0p2 += iP->pt();
+           if (dr >= 0.2 && dr < 0.3) tmpNeutralHadronIso_DR0p2To0p3 += iP->pt();
+           if (dr >= 0.3 && dr < 0.4) tmpNeutralHadronIso_DR0p3To0p4 += iP->pt();
+           if (dr >= 0.4 && dr < 0.5) tmpNeutralHadronIso_DR0p4To0p5 += iP->pt();
+	 }
+      } //not lepton footprint
+    } //in 1.0 dr cone
+  } //loop over PF candidates
+
+  fMVAVar_ChargedIso_DR0p0To0p1   = TMath::Min((tmpChargedIso_DR0p0To0p1)/ele.pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p1To0p2   = TMath::Min((tmpChargedIso_DR0p1To0p2)/ele.pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p2To0p3 = TMath::Min((tmpChargedIso_DR0p2To0p3)/ele.pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p3To0p4 = TMath::Min((tmpChargedIso_DR0p3To0p4)/ele.pt(), 2.5);
+  fMVAVar_ChargedIso_DR0p4To0p5 = TMath::Min((tmpChargedIso_DR0p4To0p5)/ele.pt(), 2.5); 
+  fMVAVar_GammaIso_DR0p0To0p1 = TMath::Max(TMath::Min((tmpGammaIso_DR0p0To0p1 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p0To0p1, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpGammaIso_DR0p1To0p2 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p1To0p2, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpGammaIso_DR0p2To0p3 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p2To0p3, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpGammaIso_DR0p3To0p4 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p3To0p4, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpGammaIso_DR0p4To0p5 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p4To0p5, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p0To0p1 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p0To0p1 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p0To0p1, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p1To0p2 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p1To0p2, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p2To0p3 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p2To0p3, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p3To0p4 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p3To0p4, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p4To0p5, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
+  
+//   cout << "gg: " << tmpGammaIso_DR0p4To0p5 << " : " << ElectronTools::ElectronEffectiveArea(ElectronTools::kEleGammaIsoDR0p4To0p5, ele->SCluster()->Eta(), EffectiveAreaTarget) << " " << EffectiveAreaTarget << endl;
+
+  cout << fUseBinnedVersion << " -> BIN: " << fMVAVar_eta << " " << fMVAVar_pt << " : " << GetMVABin(fMVAVar_eta,fMVAVar_pt) << endl;
+  // evaluate
+  bindVariables();
+  Double_t mva = -9999; 
+   
+//   mva = fTMVAReader[0]->EvaluateMVA(fMethodname);
+  if (fUseBinnedVersion) {
+    mva = fTMVAReader[GetMVABin(fMVAVar_eta,fMVAVar_pt)]->EvaluateMVA(fMethodname);
+  } else {
+    mva = fTMVAReader[0]->EvaluateMVA(fMethodname);
+  }
+
+
+  if(fPrintMVADebug) {
+    cout << " *** Inside the class fMethodname " << fMethodname << " fMVAType " << fMVAType << endl;
+    cout << " fbrem " <<  fMVAVar_fbrem  
+      	 << " kfchi2 " << fMVAVar_kfchi2  
+	 << " kfhits " << fMVAVar_kfhits  
+	 << " kfhitsall " << fMVAVar_kfhitsall  
+	 << " gsfchi2 " << fMVAVar_gsfchi2  
+	 << " deta " <<  fMVAVar_deta  
+	 << " dphi " << fMVAVar_dphi  
+      	 << " detacalo " << fMVAVar_detacalo  
+      // << " dphicalo " << fMVAVar_dphicalo  
+	 << " see " << fMVAVar_see  
+	 << " spp " << fMVAVar_spp  
+	 << " etawidth " << fMVAVar_etawidth  
+	 << " phiwidth " << fMVAVar_phiwidth  
+	 << " e1x5e5x5 " << fMVAVar_e1x5e5x5  
+	 << " R9 " << fMVAVar_R9  
+      // << " mynbrems " << fMVAVar_nbrems  
+	 << " HoE " << fMVAVar_HoE  
+	 << " EoP " << fMVAVar_EoP  
+	 << " IoEmIoP " << fMVAVar_IoEmIoP  
+	 << " eleEoPout " << fMVAVar_eleEoPout  
+         << " EoPout " << fMVAVar_EoPout  
+	 << " d0 " << fMVAVar_d0  
+	 << " ip3d " << fMVAVar_ip3d  
+	 << " eta " << fMVAVar_eta  
+	 << " pt " << fMVAVar_pt << endl;
+    cout  << "ChargedIso ( 0.0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 ): " 
+          << fMVAVar_ChargedIso_DR0p0To0p1   << " "
+          << fMVAVar_ChargedIso_DR0p1To0p2   << " "
+          << fMVAVar_ChargedIso_DR0p2To0p3 << " "
+          << fMVAVar_ChargedIso_DR0p3To0p4 << " "
+          << fMVAVar_ChargedIso_DR0p4To0p5 << endl;
+    cout  << "PF Gamma Iso ( 0.0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 ): " 
+          << fMVAVar_GammaIso_DR0p0To0p1 << " "
+          << fMVAVar_GammaIso_DR0p1To0p2 << " "
+          << fMVAVar_GammaIso_DR0p2To0p3 << " "
+          << fMVAVar_GammaIso_DR0p3To0p4 << " "
+          << fMVAVar_GammaIso_DR0p4To0p5 << endl;
+    cout  << "PF Neutral Hadron Iso ( 0.0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 ): " 
+          << fMVAVar_NeutralHadronIso_DR0p0To0p1 << " "
+          << fMVAVar_NeutralHadronIso_DR0p1To0p2 << " "
+          << fMVAVar_NeutralHadronIso_DR0p2To0p3 << " "
+          << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
+          << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "
+          << endl;
+    cout << " ### MVA " << mva << endl;
+  }
+  
+
+  return mva;
+}
+
+
 #endif
 void ElectronMVAEstimator::bindVariables() {
 
