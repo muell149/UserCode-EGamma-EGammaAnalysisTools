@@ -185,10 +185,20 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
 			   myManualCatWeigths);
   
   // NOTE: it is better if you copy the MVA weight files locally
+
+  std::vector<std::string> myManualCatWeigthsTrig;
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat1.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat2.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat3.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat4.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat5.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat6.weights.xml");
+
   myMVATrig = new ElectronMVAEstimator();
-  myMVATrig->initialize("BDTCat_BDTG_TrigV0",
-			"/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTGCat_TrigV0.weights.xml",
-			ElectronMVAEstimator::kTrig);
+  myMVATrig->initialize("BDT",
+			ElectronMVAEstimator::kTrig,
+			manualCat,
+			myManualCatWeigthsTrig);
   
 
   

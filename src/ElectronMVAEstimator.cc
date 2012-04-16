@@ -38,7 +38,7 @@ fNMVABins(0)
 //--------------------------------------------------------------------------------------------------
 ElectronMVAEstimator::~ElectronMVAEstimator()
 {
-  for (uint i=0;i<fTMVAReader.size(); ++i) {
+  for (unsigned int i=0;i<fTMVAReader.size(); ++i) {
     if (fTMVAReader[i]) delete fTMVAReader[i];
   }
 }
@@ -63,7 +63,7 @@ void ElectronMVAEstimator::initialize( std::string methodName,
   ) {
 
   //clean up first
-  for (uint i=0;i<fTMVAReader.size(); ++i) {
+  for (unsigned int i=0;i<fTMVAReader.size(); ++i) {
     if (fTMVAReader[i]) delete fTMVAReader[i];
   }
   fTMVAReader.clear();
@@ -90,12 +90,15 @@ void ElectronMVAEstimator::initialize( std::string methodName,
   //Check number of weight files given
   if (fNMVABins != weightsfiles.size() ) {
     std::cout << "Error: Expected Number of bins = " << fNMVABins << " does not equal to weightsfiles.size() = " 
-              << weightsfiles.size() << std::endl;
+              << weightsfiles.size() << std::endl; 
+ 
+   #ifndef STANDALONE
     assert(fNMVABins == weightsfiles.size());
+   #endif 
   }
 
   //Loop over all bins
-  for (uint i=0;i<fNMVABins; ++i) {
+  for (unsigned int i=0;i<fNMVABins; ++i) {
   
     TMVA::Reader *tmpTMVAReader = new TMVA::Reader( "!Color:!Silent:Error" );  
     tmpTMVAReader->SetVerbose(kTRUE);
@@ -216,7 +219,7 @@ void ElectronMVAEstimator::initialize( std::string methodName,
 UInt_t ElectronMVAEstimator::GetMVABin( double eta, double pt) const {
   
     //Default is to return the first bin
-    uint bin = 0;
+    unsigned int bin = 0;
 
     if (fMVAType == ElectronMVAEstimator::kIsoRings) {
       if (pt < 10 && fabs(eta) < 1.479) bin = 0;
@@ -895,9 +898,8 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
 
   return mva;
 }
-
-
 #endif
+
 void ElectronMVAEstimator::bindVariables() {
 
   // this binding is needed for variables that sometime diverge. 

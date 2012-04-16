@@ -92,11 +92,38 @@ void MakeTestMVAMacro_000::Loop()
 
 
   ElectronMVAEstimator *myMVANonTrigV0 = new ElectronMVAEstimator();
-  myMVANonTrigV0->initialize("BDTCat_BDTG_NonTrigV0",
-			   "/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTGCat_NonTrigV0.weights.xml", 
-			   ElectronMVAEstimator::kNonTrig);
+  std::vector<std::string> myManualCatWeigths;
+  myManualCatWeigths.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_NonTrigV0_Cat1.weights.xml");
+  myManualCatWeigths.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_NonTrigV0_Cat2.weights.xml");
+  myManualCatWeigths.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_NonTrigV0_Cat3.weights.xml");
+  myManualCatWeigths.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_NonTrigV0_Cat4.weights.xml");
+  myManualCatWeigths.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_NonTrigV0_Cat5.weights.xml");
+  myManualCatWeigths.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_NonTrigV0_Cat6.weights.xml");
+
+  Bool_t manualCat = true;
+  
+  myMVANonTrigV0->initialize("BDT",
+			     ElectronMVAEstimator::kNonTrig,
+			     manualCat, 
+			     myManualCatWeigths);
+
  
-   if (fChain == 0) return;
+  ElectronMVAEstimator *myMVATrigV0 = new ElectronMVAEstimator();
+  std::vector<std::string> myManualCatWeigthsTrig;
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat1.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat2.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat3.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat4.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat5.weights.xml");
+  myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat6.weights.xml");
+
+
+  myMVATrigV0->initialize("BDT",
+			  ElectronMVAEstimator::kTrig,
+			  manualCat, 
+			  myManualCatWeigthsTrig);
+  
+  if (fChain == 0) return;
 
    Long64_t nentries = fChain->GetEntriesFast();
 
@@ -120,7 +147,7 @@ void MakeTestMVAMacro_000::Loop()
       if(myMVANonTrigV0 == 0)
 	cout << " MVA not init!!! " <<endl;
       
-      bool print = false;
+      bool print = true;
       
       double myMVAOut = myMVANonTrigV0->mvaValue(fbrem, 
 						 kfchi2,
@@ -147,8 +174,59 @@ void MakeTestMVAMacro_000::Loop()
 						 pt,
 						 print);
       
+      bool LooseTrigPresel = false;
+      if(fabs(eta) < 1.485) {
+	if(see < 0.014 &&
+	   HoE < 0.15 &&
+	   trkIso/pt < 0.2 &&
+	   ecalIso/pt < 0.2 &&
+	   hcalIso/pt < 0.2 &&
+	   matchConv == 0)
+	  LooseTrigPresel = true;
+      }
+      else {
+	if(see < 0.035 &&
+	   HoE < 0.10 &&
+	   trkIso/pt < 0.2 &&
+	   ecalIso/pt < 0.2 &&
+	   hcalIso/pt < 0.2 &&
+	   matchConv == 0)
+	  LooseTrigPresel = true;
+      }
+      
+      double myMVAOutTrig = -2.;
+      if(LooseTrigPresel) 
+	myMVAOutTrig = myMVATrigV0->mvaValue(fbrem, 
+					     kfchi2,
+					     kfhits,
+					     gsfchi2,
+					     deta,
+					     dphi,
+					     detacalo,
+					     // dphicalo,
+					     see,
+					     spp,
+					     etawidth,
+					     phiwidth,
+					     e1x5e5x5,
+					     R9,
+					     //nbrems,
+					     HoE,
+					     EoP,
+					     IoEmIoP,
+					     eleEoPout,
+					     PreShowerOverRaw,
+					     d0,
+					     ip3d,
+					     // EoPout,
+					     eta,
+					     pt,
+					     print);
+      
+      
       if(print) 
-	cout << " MVA Standalone Class " << myMVAOut << endl;
+	cout << " MVA Standalone Class: NonTrig Output " << myMVAOut
+	     << " Trig Ouput "  << myMVAOutTrig << endl;
 
 
 
