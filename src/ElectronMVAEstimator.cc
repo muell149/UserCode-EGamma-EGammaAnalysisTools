@@ -128,7 +128,11 @@ void ElectronMVAEstimator::initialize( std::string methodName,
       tmpTMVAReader->AddVariable("IoEmIoP",         &fMVAVar_IoEmIoP);
       tmpTMVAReader->AddVariable("eleEoPout",       &fMVAVar_eleEoPout);
       //  tmpTMVAReader->AddVariable("EoPout",          &fMVAVar_EoPout); // Pruned but save in your ntuple.    
-      tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
+      if(i == 2 || i == 5) 
+	tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
+      
+      if(!fUseBinnedVersion)
+	tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
 
       // IP
       tmpTMVAReader->AddVariable("d0",              &fMVAVar_d0);
@@ -166,8 +170,12 @@ void ElectronMVAEstimator::initialize( std::string methodName,
       tmpTMVAReader->AddVariable("IoEmIoP",         &fMVAVar_IoEmIoP);
       tmpTMVAReader->AddVariable("eleEoPout",       &fMVAVar_eleEoPout);
       //  tmpTMVAReader->AddVariable("EoPout",          &fMVAVar_EoPout); // Pruned but save in your ntuple. 
-      tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
+      if(i == 2 || i == 5) 
+	tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
     
+      if(!fUseBinnedVersion)
+	tmpTMVAReader->AddVariable("PreShowerOverRaw",&fMVAVar_PreShowerOverRaw);
+
       tmpTMVAReader->AddSpectator("eta",            &fMVAVar_eta);
       tmpTMVAReader->AddSpectator("pt",             &fMVAVar_pt);
     }
@@ -217,7 +225,7 @@ UInt_t ElectronMVAEstimator::GetMVABin( double eta, double pt) const {
       if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
     }
 
-    if (fMVAType == ElectronMVAEstimator::kTrig || fMVAType == ElectronMVAEstimator::kNonTrig ) {
+    if (fMVAType == ElectronMVAEstimator::kNonTrig ) {
       bin = 0;
       if (pt < 10 && fabs(eta) < 0.8) bin = 0;
       if (pt < 10 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
@@ -226,6 +234,19 @@ UInt_t ElectronMVAEstimator::GetMVABin( double eta, double pt) const {
       if (pt >= 10 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 4;
       if (pt >= 10 && fabs(eta) >= 1.479) bin = 5;
     }
+
+
+    if (fMVAType == ElectronMVAEstimator::kTrig) {
+      bin = 0;
+      if (pt < 20 && fabs(eta) < 0.8) bin = 0;
+      if (pt < 20 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
+      if (pt < 20 && fabs(eta) >= 1.479) bin = 2;
+      if (pt >= 20 && fabs(eta) < 0.8) bin = 3;
+      if (pt >= 20 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 4;
+      if (pt >= 20 && fabs(eta) >= 1.479) bin = 5;
+    }
+
+ 
 
     return bin;
 }
