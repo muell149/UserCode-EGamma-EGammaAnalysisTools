@@ -1,5 +1,5 @@
 #include <TFile.h>
-#include "../interface/ElectronMVAEstimator.h"
+#include "../interface/EGammaMvaEleEstimator.h"
 #include <cmath>
 #include <vector>
 using namespace std;
@@ -24,7 +24,7 @@ using namespace reco;
 #endif
 
 //--------------------------------------------------------------------------------------------------
-ElectronMVAEstimator::ElectronMVAEstimator() :
+EGammaMvaEleEstimator::EGammaMvaEleEstimator() :
 fMethodname("BDTG method"),
 fisInitialized(kFALSE),
 fPrintMVADebug(kFALSE),
@@ -36,7 +36,7 @@ fNMVABins(0)
 }
 
 //--------------------------------------------------------------------------------------------------
-ElectronMVAEstimator::~ElectronMVAEstimator()
+EGammaMvaEleEstimator::~EGammaMvaEleEstimator()
 {
   for (unsigned int i=0;i<fTMVAReader.size(); ++i) {
     if (fTMVAReader[i]) delete fTMVAReader[i];
@@ -44,9 +44,9 @@ ElectronMVAEstimator::~ElectronMVAEstimator()
 }
 
 //--------------------------------------------------------------------------------------------------
-void ElectronMVAEstimator::initialize( std::string methodName,
+void EGammaMvaEleEstimator::initialize( std::string methodName,
                                        std::string weightsfile,
-                                       ElectronMVAEstimator::MVAType type)
+                                       EGammaMvaEleEstimator::MVAType type)
 {
   
   std::vector<std::string> tempWeightFileVector;
@@ -56,8 +56,8 @@ void ElectronMVAEstimator::initialize( std::string methodName,
 
 
 //--------------------------------------------------------------------------------------------------
-void ElectronMVAEstimator::initialize( std::string methodName,
-                                       ElectronMVAEstimator::MVAType type,
+void EGammaMvaEleEstimator::initialize( std::string methodName,
+                                       EGammaMvaEleEstimator::MVAType type,
                                        Bool_t useBinnedVersion,
 				       std::vector<std::string> weightsfiles
   ) {
@@ -216,19 +216,19 @@ void ElectronMVAEstimator::initialize( std::string methodName,
 
 
 //--------------------------------------------------------------------------------------------------
-UInt_t ElectronMVAEstimator::GetMVABin( double eta, double pt) const {
+UInt_t EGammaMvaEleEstimator::GetMVABin( double eta, double pt) const {
   
     //Default is to return the first bin
     unsigned int bin = 0;
 
-    if (fMVAType == ElectronMVAEstimator::kIsoRings) {
+    if (fMVAType == EGammaMvaEleEstimator::kIsoRings) {
       if (pt < 10 && fabs(eta) < 1.479) bin = 0;
       if (pt < 10 && fabs(eta) >= 1.479) bin = 1;
       if (pt >= 10 && fabs(eta) < 1.479) bin = 2;
       if (pt >= 10 && fabs(eta) >= 1.479) bin = 3;
     }
 
-    if (fMVAType == ElectronMVAEstimator::kNonTrig ) {
+    if (fMVAType == EGammaMvaEleEstimator::kNonTrig ) {
       bin = 0;
       if (pt < 10 && fabs(eta) < 0.8) bin = 0;
       if (pt < 10 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
@@ -239,7 +239,7 @@ UInt_t ElectronMVAEstimator::GetMVABin( double eta, double pt) const {
     }
 
 
-    if (fMVAType == ElectronMVAEstimator::kTrig) {
+    if (fMVAType == EGammaMvaEleEstimator::kTrig) {
       bin = 0;
       if (pt < 20 && fabs(eta) < 0.8) bin = 0;
       if (pt < 20 && fabs(eta) >= 0.8 && fabs(eta) < 1.479 ) bin = 1;
@@ -256,7 +256,7 @@ UInt_t ElectronMVAEstimator::GetMVABin( double eta, double pt) const {
 
 
 //--------------------------------------------------------------------------------------------------
-Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem, 
+Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem, 
 					Double_t kfchi2,
 					Int_t    kfhits,
 					Double_t gsfchi2,
@@ -284,7 +284,7 @@ Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem,
 					Bool_t printDebug) {
   
   if (!fisInitialized) { 
-    std::cout << "Error: ElectronMVAEstimator not properly initialized.\n"; 
+    std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
   }
 
@@ -363,7 +363,7 @@ Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem,
   return mva;
 }
 //--------------------------------------------------------------------------------------------------
-Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem, 
+Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem, 
 					Double_t kfchi2,
 					Int_t    kfhits,
 					Double_t gsfchi2,
@@ -389,7 +389,7 @@ Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem,
 					Bool_t printDebug) {
   
   if (!fisInitialized) { 
-    std::cout << "Error: ElectronMVAEstimator not properly initialized.\n"; 
+    std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
   }
 
@@ -469,14 +469,14 @@ Double_t ElectronMVAEstimator::mvaValue(Double_t fbrem,
 
 //--------------------------------------------------------------------------------------------------
 #ifndef STANDALONE
-Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele, 
+Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele, 
 					const reco::Vertex& vertex, 
 					const TransientTrackBuilder& transientTrackBuilder,					
 					EcalClusterLazyTools myEcalCluster,
 					bool printDebug) {
   
   if (!fisInitialized) { 
-    std::cout << "Error: ElectronMVAEstimator not properly initialized.\n"; 
+    std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
   }
   
@@ -603,7 +603,7 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
 }
 
 
-Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele, 
+Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele, 
                                         const reco::Vertex& vertex, 
                                         const TransientTrackBuilder& transientTrackBuilder,
                                         EcalClusterLazyTools myEcalCluster,
@@ -614,7 +614,7 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
                                         const reco::MuonCollection &IdentifiedMuons) {
   
   if (!fisInitialized) { 
-    std::cout << "Error: ElectronMVAEstimator not properly initialized.\n"; 
+    std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
   }
   
@@ -900,7 +900,7 @@ Double_t ElectronMVAEstimator::mvaValue(const reco::GsfElectron& ele,
 }
 #endif
 
-void ElectronMVAEstimator::bindVariables() {
+void EGammaMvaEleEstimator::bindVariables() {
 
   // this binding is needed for variables that sometime diverge. 
 

@@ -3,7 +3,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
-#include "../../interface/ElectronMVAEstimator.h"
+#include "../../interface/EGammaMvaEleEstimator.h"
 
 
 void MakeTestMVAMacro_000::Loop()
@@ -91,7 +91,7 @@ void MakeTestMVAMacro_000::Loop()
 
 
 
-  ElectronMVAEstimator *myMVANonTrigV0 = new ElectronMVAEstimator();
+  EGammaMvaEleEstimator *myMVANonTrigV0 = new EGammaMvaEleEstimator();
   std::vector<std::string> myManualCatWeigths;
   myManualCatWeigths.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_NonTrigV0_Cat1.weights.xml");
   myManualCatWeigths.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_NonTrigV0_Cat2.weights.xml");
@@ -103,12 +103,12 @@ void MakeTestMVAMacro_000::Loop()
   Bool_t manualCat = true;
   
   myMVANonTrigV0->initialize("BDT",
-			     ElectronMVAEstimator::kNonTrig,
+			     EGammaMvaEleEstimator::kNonTrig,
 			     manualCat, 
 			     myManualCatWeigths);
 
  
-  ElectronMVAEstimator *myMVATrigV0 = new ElectronMVAEstimator();
+  EGammaMvaEleEstimator *myMVATrigV0 = new EGammaMvaEleEstimator();
   std::vector<std::string> myManualCatWeigthsTrig;
   myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat1.weights.xml");
   myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat2.weights.xml");
@@ -119,7 +119,7 @@ void MakeTestMVAMacro_000::Loop()
 
 
   myMVATrigV0->initialize("BDT",
-			  ElectronMVAEstimator::kTrig,
+			  EGammaMvaEleEstimator::kTrig,
 			  manualCat, 
 			  myManualCatWeigthsTrig);
   

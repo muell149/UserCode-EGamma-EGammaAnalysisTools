@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------------------
 // $Id $
 //
-// ElectronMVAEstimator
+// EGammaMvaEleEstimator
 //
 // Helper Class for applying MVA electron ID selection
 //
@@ -16,8 +16,8 @@
 
 //#define STANDALONE   // <---- this line
 
-#ifndef ElectronMVAEstimator_H
-#define ElectronMVAEstimator_H
+#ifndef EGammaMvaEleEstimator_H
+#define EGammaMvaEleEstimator_H
 
 #ifndef STANDALONE
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
@@ -34,10 +34,10 @@
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
 
-class ElectronMVAEstimator{
+class EGammaMvaEleEstimator{
   public:
-    ElectronMVAEstimator();
-    ~ElectronMVAEstimator(); 
+    EGammaMvaEleEstimator();
+    ~EGammaMvaEleEstimator(); 
   
     enum MVAType {
       kTrig = 0,      // MVA for non-triggering electrons          
@@ -47,9 +47,9 @@ class ElectronMVAEstimator{
   
     void     initialize( std::string methodName,
                          std::string weightsfile,
-                         ElectronMVAEstimator::MVAType type);
+                         EGammaMvaEleEstimator::MVAType type);
     void     initialize( std::string methodName,
-                         ElectronMVAEstimator::MVAType type,
+                         EGammaMvaEleEstimator::MVAType type,
                          Bool_t useBinnedVersion,
                          std::vector<std::string> weightsfiles );
     

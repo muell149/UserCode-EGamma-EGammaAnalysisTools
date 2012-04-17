@@ -40,7 +40,7 @@
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "EGamma/EGammaAnalysisTools/interface/ElectronMVAEstimator.h"
+#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
@@ -84,9 +84,9 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
   
   ParameterSet conf_;
 
-  //  ElectronMVAEstimator *fMVASiDanV2;
-  ElectronMVAEstimator* myMVANonTrig;
-  ElectronMVAEstimator* myMVATrig;
+  //  EGammaMvaEleEstimator *fMVASiDanV2;
+  EGammaMvaEleEstimator* myMVANonTrig;
+  EGammaMvaEleEstimator* myMVATrig;
   
   TMVA::Reader             *myTMVAReader;
   Float_t                   myMVAVar_fbrem;
@@ -166,7 +166,7 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
 {
 
   ev = 0;
-  myMVANonTrig = new ElectronMVAEstimator();
+  myMVANonTrig = new EGammaMvaEleEstimator();
 
   // NOTE: it is better if you copy the MVA weight files locally
   std::vector<std::string> myManualCatWeigths;
@@ -180,7 +180,7 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
   Bool_t manualCat = true;
   
   myMVANonTrig->initialize("BDT",
-			   ElectronMVAEstimator::kNonTrig,
+			   EGammaMvaEleEstimator::kNonTrig,
 			   manualCat, 
 			   myManualCatWeigths);
   
@@ -194,9 +194,9 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
   myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat5.weights.xml");
   myManualCatWeigthsTrig.push_back("/afs/cern.ch/cms/data/CMSSW/RecoEgamma/ElectronIdentification/data/Electrons_BDTG_TrigV0_Cat6.weights.xml");
 
-  myMVATrig = new ElectronMVAEstimator();
+  myMVATrig = new EGammaMvaEleEstimator();
   myMVATrig->initialize("BDT",
-			ElectronMVAEstimator::kTrig,
+			EGammaMvaEleEstimator::kTrig,
 			manualCat,
 			myManualCatWeigthsTrig);
   

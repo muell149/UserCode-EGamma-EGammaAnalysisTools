@@ -9,8 +9,8 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-//#include "RecoEgamma/ElectronIdentification/interface/ElectronMVAEstimator.h"
-#include "EGamma/EGammaAnalysisTools/interface/ElectronMVAEstimator.h"
+//#include "RecoEgamma/ElectronIdentification/interface/EGammaMvaEleEstimator.h"
+#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -44,7 +44,7 @@ class ElectronIdMVAProducer : public edm::EDFilter {
                 string mvaWeightFile_;
                 bool Trig_;
  
-                ElectronMVAEstimator* mvaID_;
+                EGammaMvaEleEstimator* mvaID_;
 
 };
 
@@ -83,13 +83,13 @@ ElectronIdMVAProducer::ElectronIdMVAProducer(const edm::ParameterSet& iConfig) {
 	  throw invalid_argument( err );
 	}
  
-        mvaID_ = new ElectronMVAEstimator();
+        mvaID_ = new EGammaMvaEleEstimator();
  
-        ElectronMVAEstimator::MVAType type_;
+        EGammaMvaEleEstimator::MVAType type_;
         if(Trig_){
-          type_ = ElectronMVAEstimator::kTrig;
+          type_ = EGammaMvaEleEstimator::kTrig;
         }else{
-          type_ = ElectronMVAEstimator::kNonTrig;
+          type_ = EGammaMvaEleEstimator::kNonTrig;
         }
 
         mvaID_->initialize(method_, mvaWeightFile_, type_);
