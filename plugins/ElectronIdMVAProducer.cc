@@ -9,7 +9,6 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-//#include "RecoEgamma/ElectronIdentification/interface/EGammaMvaEleEstimator.h"
 #include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
@@ -41,7 +40,7 @@ class ElectronIdMVAProducer : public edm::EDFilter {
  
 
                 string method_;
-                string mvaWeightFile_;
+                vector<string> mvaWeightFiles_;
                 bool Trig_;
  
                 EGammaMvaEleEstimator* mvaID_;
@@ -66,23 +65,11 @@ ElectronIdMVAProducer::ElectronIdMVAProducer(const edm::ParameterSet& iConfig) {
         reducedEBRecHitCollection_ = iConfig.getParameter<edm::InputTag>("reducedEBRecHitCollection");
         reducedEERecHitCollection_ = iConfig.getParameter<edm::InputTag>("reducedEERecHitCollection");
 	method_ = iConfig.getParameter<string>("method");
-	mvaWeightFile_ = iConfig.getParameter<string>("mvaWeightFile");
+	mvaWeightFiles_ = iConfig.getParameter<std::vector<std::string> >("mvaWeightFile");
 	Trig_ = iConfig.getParameter<bool>("Trig");
 
         produces<edm::ValueMap<float> >("");
 
-	FILE * fileEleID = fopen(mvaWeightFile_.c_str(), "r");
-
-	if (fileEleID) {
-	  fclose(fileEleID);
-	}
-	else {
-	  string err = "ElectronIdMVAProducer: cannot open weight file '";
-	  err += mvaWeightFile_;
-	  err += "'";
-	  throw invalid_argument( err );
-	}
- 
         mvaID_ = new EGammaMvaEleEstimator();
  
         EGammaMvaEleEstimator::MVAType type_;
@@ -92,7 +79,9 @@ ElectronIdMVAProducer::ElectronIdMVAProducer(const edm::ParameterSet& iConfig) {
           type_ = EGammaMvaEleEstimator::kNonTrig;
         }
 
-        mvaID_->initialize(method_, mvaWeightFile_, type_);
+        bool manualCat_ = true;
+
+        mvaID_->initialize(method_, type_, manualCat_, mvaWeightFiles_);
 
 }
 
