@@ -734,7 +734,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
     // New Isolation Calculations
     //************************************************************
     double dr = sqrt(pow(iP->eta() - ele.eta(),2) + pow(acos(cos(iP->phi() - ele.phi())),2));
-    Double_t deta = (iP->eta() - ele.eta());
+    //Double_t deta = (iP->eta() - ele.eta());
 
     if (dr < 1.0) {
       Bool_t IsLeptonFootprint = kFALSE;

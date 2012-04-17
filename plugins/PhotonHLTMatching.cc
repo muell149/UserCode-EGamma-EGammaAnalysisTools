@@ -11,7 +11,7 @@
 //
 // Original Author:  Matteo Sani,40 3-A02,+41227671577,
 //         Created:  Wed Mar 28 18:07:47 CEST 2012
-// $Id$
+// $Id: PhotonHLTMatching.cc,v 1.1 2012/04/04 12:03:59 sani Exp $
 //
 //
 
@@ -67,6 +67,7 @@ private:
   edm::InputTag triggerResultsLabel;
   edm::InputTag triggerSummaryLabel;
   std::vector<std::string> triggerPaths;
+  std::vector<std::string> modules;
   std::string recoCuts;
   std::string hltCuts;
   bool doMatching;
@@ -79,11 +80,11 @@ private:
 
 PhotonHLTMatching::PhotonHLTMatching(const edm::ParameterSet& iConfig) {
   
-  inputCollection = iConfig.getParameter<edm::InputTag>("InputCollection");
+  inputCollection     = iConfig.getParameter<edm::InputTag>("InputCollection");
   triggerResultsLabel = iConfig.getParameter<edm::InputTag>("TriggerResults");
   triggerSummaryLabel = iConfig.getParameter<edm::InputTag>("HLTTriggerSummaryAOD");
-  
-  triggerPaths = iConfig.getParameter<std::vector<std::string> >("TriggerPaths");
+  modules             = iConfig.getParameter<std::vector<std::string> >("ModuleLabels");
+  triggerPaths        = iConfig.getParameter<std::vector<std::string> >("TriggerPaths");
   
   recoCuts = iConfig.getParameter<std::string>("RecoCuts");
   hltCuts  = iConfig.getParameter<std::string>("HLTCuts");
@@ -91,42 +92,18 @@ PhotonHLTMatching::PhotonHLTMatching(const edm::ParameterSet& iConfig) {
   dR = iConfig.getParameter<double>("DeltaR");
   
   doMatching = iConfig.getParameter<bool>("DoMatching");
-  
-  produces<reco::PhotonCollection>();
+   
+  if (modules.size() != triggerPaths.size()) {
+    edm::LogWarning("HLTMatchingFilter") << "You are specifying a different number of modules and trigger paths !!"; 
+  }
 
+  produces<reco::PhotonCollection>();
 }
 
 PhotonHLTMatching::~PhotonHLTMatching() 
 {}
 
-void PhotonHLTMatching::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {
-
-  // FIXME check way it is not called
-  // Update when necessary the trigger table
-  bool changedConfig = false;
-  if (!hltConfig.init(iRun, iSetup, triggerResultsLabel.process(), changedConfig)) {
-    edm::LogError("HLTMatchingPhoton") << "Initialization of HLTConfigProvider failed!!"; 
-    return;
-  }
-  
-  if (changedConfig or realHltPaths.size() == 0) {
-    realHltPaths.clear();
-    moduleLabels.clear();
-
-    for (size_t i = 0; i < triggerPaths.size(); i++) {
-      TPRegexp pattern(triggerPaths[i]);
-      for (size_t j = 0; j < hltConfig.triggerNames().size(); j++) {
-	if (TString(hltConfig.triggerNames()[j]).Contains(pattern))
-	  realHltPaths.push_back(hltConfig.triggerNames()[j]);
-      }
-    }
-    
-    for (unsigned int j=0; j<realHltPaths.size(); j++) {
-      std::vector<std::string> temp = hltConfig.saveTagsModules(realHltPaths[j]);
-      moduleLabels.push_back(edm::InputTag(temp[temp.size()-1], "", triggerResultsLabel.process()));
-    }
-  }
-}
+void PhotonHLTMatching::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {}
 
 void PhotonHLTMatching::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // Update when necessary the trigger table
@@ -147,11 +124,15 @@ void PhotonHLTMatching::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 	  realHltPaths.push_back(hltConfig.triggerNames()[j]);
       }
     }
-    
+
+    for (unsigned int j=0; j<modules.size(); j++)
+      moduleLabels.push_back(edm::InputTag(modules[j], "", triggerResultsLabel.process()));
+    /*
     for (size_t j=0; j<realHltPaths.size(); j++) {
       std::vector<std::string> temp = hltConfig.saveTagsModules(realHltPaths[j]);
       moduleLabels.push_back(edm::InputTag(temp[temp.size()-1], "", triggerResultsLabel.process()));
     }
+    */
   }
   
   std::auto_ptr<reco::PhotonCollection> filteredPhotons(new reco::PhotonCollection() );
