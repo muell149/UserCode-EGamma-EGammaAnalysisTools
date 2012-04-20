@@ -27,12 +27,24 @@ process.patElectrons.electronIDSources = cms.PSet(
     mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0"),
 )
 
+#add pat conversions
+process.patConversions = cms.EDProducer("PATConversionProducer",
+    # input collection
+    #electronSource = cms.InputTag("gsfElectrons"),
+    electronSource = cms.InputTag("cleanPatElectrons")  
+    # this should be your last selected electron collection name since currently index is used to match with electron later. We can fix this using reference pointer. ,
+)
+
 ## let it run
 process.p = cms.Path(
     process.mvaID + 
-    process.patDefaultSequence
+    process.patDefaultSequence+
+    process.patConversions
     )
 
+process.out.outputCommands +=[
+     'keep *_patConversions*_*_*'
+]
 ## ------------------------------------------------------
 #  In addition you usually want to change the following
 #  parameters:
