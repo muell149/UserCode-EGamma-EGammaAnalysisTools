@@ -31,6 +31,8 @@
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
+#include "TH1.h"
+#include "TH2.h"
 
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -67,10 +69,10 @@ class PFIsolationEstimator{
   Bool_t   isInitialized() const { return fisInitialized; }
   
 
-  float fGetIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, edm::Handle< reco::VertexCollection >  vertices );
+  float fGetIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices ,bool kDoPlots = false);
   
 
-  vector<float >  fGetIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl,edm::Handle< reco::VertexCollection > vertices );
+  vector<float >  fGetIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl,reco::Vertex& vtx, edm::Handle< reco::VertexCollection > vertices, bool kDoPlots = false);
   
   VertexRef chargedHadronVertex(edm::Handle< reco::VertexCollection > verticies, const reco::PFCandidate& pfcand );
 
@@ -113,6 +115,8 @@ class PFIsolationEstimator{
   float  isPhotonParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand );
   float  isNeutralParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand );
   float  isChargedParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand, edm::Handle< reco::VertexCollection > vertices);  
+  float  isChargedParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices  );
+ 
   
   float getIsolationPhoton(){   fIsolationPhoton = 	fIsolationInRingsPhoton[0]; return fIsolationPhoton; };
   float getIsolationNeutral(){ fIsolationNeutral = 	fIsolationInRingsNeutral[0]; return fIsolationNeutral; };
@@ -130,6 +134,24 @@ class PFIsolationEstimator{
 
   int getNumbersOfRings(){return iNumberOfRings;};
   float getRingSize(){return fRingSize; };
+  
+
+  
+  TH2F *hDeltaEtaDeltaPhiPhoton[2];
+  TH2F *hDeltaEtaDeltaPhiPhotonPtWeighted[2];
+  TH2F *hDeltaEtaDeltaPhiNeutral[2];
+  TH2F *hDeltaEtaDeltaPhiNeutralPtWeighted[2];
+  TH2F *hDeltaEtaDeltaPhiCharged[2];
+  TH2F *hDeltaEtaDeltaPhiChargedPtWeighted[2];
+  
+  
+  TH1F *hDeltaRPhoton[2];
+  TH1F *hDeltaRPhotonPtWeighted[2];
+  TH1F *hDeltaRNeutral[2];
+  TH1F *hDeltaRNeutralPtWeighted[2];
+  TH1F *hDeltaRCharged[2];
+  TH1F *hDeltaRChargedPtWeighted[2];
+
 
 #ifndef STANDALONE
  
