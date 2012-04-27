@@ -11,7 +11,7 @@
 //
 // Original Author:  Matteo Sani,40 3-A02,+41227671577,
 //         Created:  Wed Mar 28 18:07:47 CEST 2012
-// $Id: PhotonHLTMatching.cc,v 1.1 2012/04/04 12:03:59 sani Exp $
+// $Id: PhotonHLTMatching.cc,v 1.2 2012/04/17 17:13:43 sani Exp $
 //
 //
 
@@ -171,8 +171,10 @@ void PhotonHLTMatching::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
   }
 
-  if (!passTrigger)
+  if (!passTrigger) {
+    iEvent.put(filteredPhotons);
     return;
+  }
 
   // Select reco and HLT objects and do the matching
   trigger::TriggerObjectCollection allTriggerObjects = triggerSummary->getObjects();

@@ -13,7 +13,7 @@
 //
 // Original Author:  Matteo Sani,40 3-A02,+41227671577,
 //         Created:  Wed Mar 28 18:07:47 CEST 2012
-// $Id: DoubleElectronHLTMatching.cc,v 1.1 2012/04/04 12:03:58 sani Exp $
+// $Id: DoublePhotonHLTMatching.cc,v 1.1 2012/04/04 14:28:23 sani Exp $
 //
 //
 
@@ -165,8 +165,10 @@ void DoublePhotonHLTMatching::produce(edm::Event& iEvent, const edm::EventSetup&
     }
   }
 
-  if (!passTrigger)
+  if (!passTrigger) {
+    iEvent.put(filteredPhotons);
     return;
+  }
 
   // Select reco and HLT objects and do the matching
   trigger::TriggerObjectCollection allTriggerObjects = triggerSummary->getObjects();

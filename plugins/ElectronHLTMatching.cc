@@ -13,7 +13,7 @@
 //
 // Original Author:  Matteo Sani,40 3-A02,+41227671577,
 //         Created:  Wed Mar 28 18:07:47 CEST 2012
-// $Id: ElectronHLTMatching.cc,v 1.1 2012/04/04 12:03:58 sani Exp $
+// $Id: ElectronHLTMatching.cc,v 1.2 2012/04/17 17:13:43 sani Exp $
 //
 //
 
@@ -173,8 +173,10 @@ void ElectronHLTMatching::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     }
   }
 
-  if (!passTrigger)
+  if (!passTrigger) {
+    iEvent.put(filteredElectrons);
     return;
+  }
 
   // Select reco and HLT objects and do the matching
   trigger::TriggerObjectCollection allTriggerObjects = triggerSummary->getObjects();
