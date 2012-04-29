@@ -129,7 +129,26 @@ class EGammaMvaEleEstimator{
                       Double_t pt,
                       Bool_t printDebug = kFALSE );
  
-
+    Double_t isoMvaValue(Double_t Pt,
+                         Double_t Eta,
+                         Double_t Rho,
+                         ElectronEffectiveArea::ElectronEffectiveAreaTarget EATarget,
+                         Double_t ChargedIso_DR0p0To0p1,
+                         Double_t ChargedIso_DR0p1To0p2,
+                         Double_t ChargedIso_DR0p2To0p3,
+                         Double_t ChargedIso_DR0p3To0p4,
+                         Double_t ChargedIso_DR0p4To0p5,
+                         Double_t GammaIso_DR0p0To0p1,
+                         Double_t GammaIso_DR0p1To0p2,
+                         Double_t GammaIso_DR0p2To0p3,
+                         Double_t GammaIso_DR0p3To0p4,
+                         Double_t GammaIso_DR0p4To0p5,
+                         Double_t NeutralHadronIso_DR0p0To0p1,
+                         Double_t NeutralHadronIso_DR0p1To0p2,
+                         Double_t NeutralHadronIso_DR0p2To0p3,
+                         Double_t NeutralHadronIso_DR0p3To0p4,
+                         Double_t NeutralHadronIso_DR0p4To0p5,
+                         Bool_t printDebug = kFALSE );
  
   private:
 
