@@ -466,6 +466,79 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
   return mva;
 }
 
+Double_t EGammaMvaEleEstimator::isoMvaValue(Double_t Pt,
+                                            Double_t Eta,
+                                            Double_t Rho,
+                                            ElectronEffectiveArea::ElectronEffectiveAreaTarget EATarget,
+                                            Double_t ChargedIso_DR0p0To0p1,
+                                            Double_t ChargedIso_DR0p1To0p2,
+                                            Double_t ChargedIso_DR0p2To0p3,
+                                            Double_t ChargedIso_DR0p3To0p4,
+                                            Double_t ChargedIso_DR0p4To0p5,
+                                            Double_t GammaIso_DR0p0To0p1,
+                                            Double_t GammaIso_DR0p1To0p2,
+                                            Double_t GammaIso_DR0p2To0p3,
+                                            Double_t GammaIso_DR0p3To0p4,
+                                            Double_t GammaIso_DR0p4To0p5,
+                                            Double_t NeutralHadronIso_DR0p0To0p1,
+                                            Double_t NeutralHadronIso_DR0p1To0p2,
+                                            Double_t NeutralHadronIso_DR0p2To0p3,
+                                            Double_t NeutralHadronIso_DR0p3To0p4,
+                                            Double_t NeutralHadronIso_DR0p4To0p5,
+                                            Bool_t printDebug) {
+
+  if (!fisInitialized) { 
+    std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
+    return -9999;
+  }
+
+  fMVAVar_ChargedIso_DR0p0To0p1   = TMath::Min((ChargedIso_DR0p0To0p1)/Pt, 2.5);
+  fMVAVar_ChargedIso_DR0p1To0p2   = TMath::Min((ChargedIso_DR0p1To0p2)/Pt, 2.5);
+  fMVAVar_ChargedIso_DR0p2To0p3 = TMath::Min((ChargedIso_DR0p2To0p3)/Pt, 2.5);
+  fMVAVar_ChargedIso_DR0p3To0p4 = TMath::Min((ChargedIso_DR0p3To0p4)/Pt, 2.5);
+  fMVAVar_ChargedIso_DR0p4To0p5 = TMath::Min((ChargedIso_DR0p4To0p5)/Pt, 2.5); 
+  fMVAVar_GammaIso_DR0p0To0p1 = TMath::Max(TMath::Min((GammaIso_DR0p0To0p1 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p0To0p1, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p1To0p2 = TMath::Max(TMath::Min((GammaIso_DR0p1To0p2 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p1To0p2, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p2To0p3 = TMath::Max(TMath::Min((GammaIso_DR0p2To0p3 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p2To0p3, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p3To0p4 = TMath::Max(TMath::Min((GammaIso_DR0p3To0p4 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p3To0p4, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_GammaIso_DR0p4To0p5 = TMath::Max(TMath::Min((GammaIso_DR0p4To0p5 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaIsoDR0p4To0p5, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p0To0p1 = TMath::Max(TMath::Min((NeutralHadronIso_DR0p0To0p1 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p0To0p1, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p1To0p2 = TMath::Max(TMath::Min((NeutralHadronIso_DR0p1To0p2 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p1To0p2, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p2To0p3 = TMath::Max(TMath::Min((NeutralHadronIso_DR0p2To0p3 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p2To0p3, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p3To0p4 = TMath::Max(TMath::Min((NeutralHadronIso_DR0p3To0p4 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p3To0p4, Eta, EATarget))/Pt, 2.5), 0.0);
+  fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((NeutralHadronIso_DR0p4To0p5 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p4To0p5, Eta, EATarget))/Pt, 2.5), 0.0);
+
+  // evaluate
+  Double_t mva = fTMVAReader[GetMVABin(Eta,Pt)]->EvaluateMVA(fMethodname);
+
+  if(fPrintMVADebug) {
+    cout << " *** Inside the class fMethodname " << fMethodname << " fMVAType " << fMVAType << endl;
+    cout  << "ChargedIso ( 0.0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 ): " 
+          << fMVAVar_ChargedIso_DR0p0To0p1   << " "
+          << fMVAVar_ChargedIso_DR0p1To0p2   << " "
+          << fMVAVar_ChargedIso_DR0p2To0p3 << " "
+          << fMVAVar_ChargedIso_DR0p3To0p4 << " "
+          << fMVAVar_ChargedIso_DR0p4To0p5 << endl;
+    cout  << "PF Gamma Iso ( 0.0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 ): " 
+          << fMVAVar_GammaIso_DR0p0To0p1 << " "
+          << fMVAVar_GammaIso_DR0p1To0p2 << " "
+          << fMVAVar_GammaIso_DR0p2To0p3 << " "
+          << fMVAVar_GammaIso_DR0p3To0p4 << " "
+          << fMVAVar_GammaIso_DR0p4To0p5 << endl;
+    cout  << "PF Neutral Hadron Iso ( 0.0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 ): " 
+          << fMVAVar_NeutralHadronIso_DR0p0To0p1 << " "
+          << fMVAVar_NeutralHadronIso_DR0p1To0p2 << " "
+          << fMVAVar_NeutralHadronIso_DR0p2To0p3 << " "
+          << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
+          << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "
+          << endl;
+    cout << " ### MVA " << mva << endl;
+  }
+
+  return mva;
+
+}
+
 
 //--------------------------------------------------------------------------------------------------
 #ifndef STANDALONE
@@ -516,7 +589,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
   // Energy matching
   fMVAVar_HoE             =  ele.hadronicOverEm();
   fMVAVar_EoP             =  ele.eSuperClusterOverP();
-  fMVAVar_IoEmIoP         =  (1.0/(ele.superCluster()->energy())) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
+  fMVAVar_IoEmIoP         =  (1.0/ele.ecalEnergy()) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
   fMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
   fMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
   // fMVAVar_EoPout          =  ele.eSeedClusterOverPout();     //  save also this in your ntuple 
@@ -734,7 +807,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
     // New Isolation Calculations
     //************************************************************
     double dr = sqrt(pow(iP->eta() - ele.eta(),2) + pow(acos(cos(iP->phi() - ele.phi())),2));
-    Double_t deta = (iP->eta() - ele.eta());
+    //Double_t deta = (iP->eta() - ele.eta());
 
     if (dr < 1.0) {
       Bool_t IsLeptonFootprint = kFALSE;
