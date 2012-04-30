@@ -42,6 +42,9 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PileUpPFCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PileUpPFCandidateFwd.h"
 
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
+
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
@@ -69,11 +72,12 @@ class PFIsolationEstimator{
   Bool_t   isInitialized() const { return fisInitialized; }
   
 
-  float fGetIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices ,bool kDoPlots = false);
+  float fGetIsolation(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices );
+  vector<float >  fGetIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl,reco::Vertex& vtx, edm::Handle< reco::VertexCollection > vertices);
   
+   float fGetIsolation(const reco::Photon* photon,const reco::PFCandidateCollection* pfParticlesColl, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices );
+  vector<float >  fGetIsolationInRings(const reco::Photon* photon,const reco::PFCandidateCollection* pfParticlesColl,reco::Vertex& vtx, edm::Handle< reco::VertexCollection > vertices);
 
-  vector<float >  fGetIsolationInRings(const reco::PFCandidate * pfCandidate,const reco::PFCandidateCollection* pfParticlesColl,reco::Vertex& vtx, edm::Handle< reco::VertexCollection > vertices, bool kDoPlots = false);
-  
   VertexRef chargedHadronVertex(edm::Handle< reco::VertexCollection > verticies, const reco::PFCandidate& pfcand );
 
   void setConeSize(float fValue = 0.4){ fConeSize = fValue;};
@@ -112,10 +116,10 @@ class PFIsolationEstimator{
   void setRectangleDeltaEtaVetoEndcapCharged(float fValue = -1.0){fRectangleDeltaEtaVetoEndcapPhotons=fValue;};
 
   //Veto implementation
-  float  isPhotonParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand );
-  float  isNeutralParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand );
-  float  isChargedParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand, edm::Handle< reco::VertexCollection > vertices);  
-  float  isChargedParticleVetoed(const reco::PFCandidate* pfcand , const reco::PFCandidate* pfIsoCand, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices  );
+  float  isPhotonParticleVetoed( const reco::PFCandidate* pfIsoCand );
+  float  isNeutralParticleVetoed( const reco::PFCandidate* pfIsoCand );
+  float  isChargedParticleVetoed(const reco::PFCandidate* pfIsoCand, edm::Handle< reco::VertexCollection > vertices);  
+  float  isChargedParticleVetoed( const reco::PFCandidate* pfIsoCand, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices  );
  
   
   float getIsolationPhoton(){   fIsolationPhoton = 	fIsolationInRingsPhoton[0]; return fIsolationPhoton; };
@@ -135,27 +139,7 @@ class PFIsolationEstimator{
   int getNumbersOfRings(){return iNumberOfRings;};
   float getRingSize(){return fRingSize; };
   
-
-  
-  TH2F *hDeltaEtaDeltaPhiPhoton[2];
-  TH2F *hDeltaEtaDeltaPhiPhotonPtWeighted[2];
-  TH2F *hDeltaEtaDeltaPhiNeutral[2];
-  TH2F *hDeltaEtaDeltaPhiNeutralPtWeighted[2];
-  TH2F *hDeltaEtaDeltaPhiCharged[2];
-  TH2F *hDeltaEtaDeltaPhiChargedPtWeighted[2];
-  
-  
-  TH1F *hDeltaRPhoton[2];
-  TH1F *hDeltaRPhotonPtWeighted[2];
-  TH1F *hDeltaRNeutral[2];
-  TH1F *hDeltaRNeutralPtWeighted[2];
-  TH1F *hDeltaRCharged[2];
-  TH1F *hDeltaRChargedPtWeighted[2];
-
-
-#ifndef STANDALONE
- 
-#endif
+  int matchPFObject(const reco::Photon* photon, const reco::PFCandidateCollection* pfParticlesColl );
   
  
  private:
@@ -216,6 +200,14 @@ class PFIsolationEstimator{
   float                   fDeltaR;
   float                   fDeltaEta;
   float                   fDeltaPhi;
+
+  float                   fEta;
+  float                   fPhi;
+  float                   fPt;
+  float                   fVx;
+  float                   fVy;
+  float                   fVz;
+
 
   math::XYZVector         vtxWRTCandidate;
    
