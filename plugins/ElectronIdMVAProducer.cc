@@ -65,7 +65,7 @@ ElectronIdMVAProducer::ElectronIdMVAProducer(const edm::ParameterSet& iConfig) {
         reducedEBRecHitCollection_ = iConfig.getParameter<edm::InputTag>("reducedEBRecHitCollection");
         reducedEERecHitCollection_ = iConfig.getParameter<edm::InputTag>("reducedEERecHitCollection");
 	method_ = iConfig.getParameter<string>("method");
-	mvaWeightFiles_ = iConfig.getParameter<std::vector<std::string> >("mvaWeightFile");
+	std::vector<string> fpMvaWeightFiles = iConfig.getParameter<std::vector<std::string> >("mvaWeightFile");
 	Trig_ = iConfig.getParameter<bool>("Trig");
 
         produces<edm::ValueMap<float> >("");
@@ -81,6 +81,12 @@ ElectronIdMVAProducer::ElectronIdMVAProducer(const edm::ParameterSet& iConfig) {
 
         bool manualCat_ = true;
 
+	string path_mvaWeightFileEleID;
+	for(unsigned ifile=0 ; ifile < fpMvaWeightFiles.size() ; ++ifile) {
+	  path_mvaWeightFileEleID = edm::FileInPath ( fpMvaWeightFiles[ifile].c_str() ).fullPath();
+	  mvaWeightFiles_.push_back(path_mvaWeightFileEleID);
+	}
+	
         mvaID_->initialize(method_, type_, manualCat_, mvaWeightFiles_);
 
 }
