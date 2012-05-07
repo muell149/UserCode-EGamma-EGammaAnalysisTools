@@ -1,5 +1,5 @@
 #include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
-
+#include "EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 
 #include <algorithm>
@@ -265,7 +265,7 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint, const bool i
     unsigned int idx = isEB ? 0 : 1;
 
     // effective area for isolation
-    float AEff = EgammaCutBasedEleId::GetEffectiveArea(eta);
+    float AEff = ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03, eta, ElectronEffectiveArea::kEleEAData2011);
 
     // apply to neutrals
     double rhoPrime = std::max(rho, 0.0);
@@ -303,19 +303,5 @@ void EgammaCutBasedEleId::PrintDebug(unsigned int mask)
     printf("iso(%i), ",     bool(mask & ISO));
     printf("vtxfit(%i), ",  bool(mask & VTXFIT));
     printf("mhits(%i)\n",   bool(mask & MHITS));
-}
-
-float EgammaCutBasedEleId::GetEffectiveArea(const float eta)
-{
-
-    float etaAbs = fabs(eta);
-    float AEff = 0.18;
-    if (etaAbs > 1.0 && etaAbs <= 1.479) AEff = 0.19;
-    if (etaAbs > 1.479 && etaAbs <= 2.0) AEff = 0.21;
-    if (etaAbs > 2.0 && etaAbs <= 2.2) AEff = 0.38;
-    if (etaAbs > 2.2 && etaAbs <= 2.3) AEff = 0.61;
-    if (etaAbs > 2.3 && etaAbs <= 2.4) AEff = 0.73;
-    if (etaAbs > 2.4) AEff = 0.78;
-    return AEff;
 }
 

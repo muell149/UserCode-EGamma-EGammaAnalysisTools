@@ -122,8 +122,5 @@ unsigned int TestWP(WorkingPoint workingPoint, const bool isEB, const float pt, 
 // print the bit mask
 void PrintDebug(unsigned int mask);
 
-// get the effective area values
-float GetEffectiveArea(const float eta);
-
 }
 
