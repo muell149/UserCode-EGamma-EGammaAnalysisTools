@@ -482,7 +482,7 @@ void ElectronAnalyzer::myVar(const reco::GsfElectron& ele,
   
   myMVAVar_HoE             =  ele.hadronicOverEm();
   myMVAVar_EoP             =  ele.eSuperClusterOverP();
-  myMVAVar_IoEmIoP         =  (1.0/(ele.superCluster()->energy())) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
+  myMVAVar_IoEmIoP         =  (1.0/ele.ecalEnergy()) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
   myMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
   myMVAVar_EoPout          =  ele.eSeedClusterOverPout();
   myMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
