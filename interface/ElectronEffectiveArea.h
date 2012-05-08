@@ -111,6 +111,15 @@ class ElectronEffectiveArea{
           if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.063;
           if (fabs(SCEta) >= 2.4 ) EffectiveArea = 0.028;
         }
+        if (type == kEleGammaAndNeutralHadronIso04) {
+          if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.19;
+          if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.25;
+          if (fabs(SCEta) >= 1.479 && fabs(SCEta) < 2.0 ) EffectiveArea = 0.12;
+          if (fabs(SCEta) >= 2.0 && fabs(SCEta) < 2.2 ) EffectiveArea = 0.21;
+          if (fabs(SCEta) >= 2.2 && fabs(SCEta) < 2.3 ) EffectiveArea = 0.27;
+          if (fabs(SCEta) >= 2.3 && fabs(SCEta) < 2.4 ) EffectiveArea = 0.44;
+          if (fabs(SCEta) >= 2.4) EffectiveArea = 0.52;
+        }
         if (type == kEleGammaIsoDR0p0To0p1) {
           if (fabs(SCEta) >= 0.0 && fabs(SCEta) < 1.0 ) EffectiveArea = 0.082;
           if (fabs(SCEta) >= 1.0 && fabs(SCEta) < 1.479 ) EffectiveArea = 0.106;
