@@ -689,6 +689,9 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
     return -9999;
   }
   
+  // Spectators 	 
+  fMVAVar_eta             =  ele.superCluster()->eta(); 	 
+  fMVAVar_pt              =  ele.pt();
   
   //**********************************************************
   //Isolation variables
