@@ -66,11 +66,10 @@ class EGammaMvaEleEstimator{
                       const TransientTrackBuilder& transientTrackBuilder,
                       EcalClusterLazyTools myEcalCluster,
                       bool printDebug = kFALSE);
+    
     Double_t mvaValue(const reco::GsfElectron& ele, 
                       const reco::Vertex& vertex, 
-                      const TransientTrackBuilder& transientTrackBuilder,
-                      EcalClusterLazyTools myEcalCluster,
-                      const reco::PFCandidateCollection &PFCandidates,
+		      const reco::PFCandidateCollection &PFCandidates,
                       double Rho,
                       ElectronEffectiveArea::ElectronEffectiveAreaTarget EATarget,
                       const reco::GsfElectronCollection &IdentifiedElectrons,

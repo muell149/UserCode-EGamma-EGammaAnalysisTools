@@ -677,94 +677,16 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
 
 
 Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele, 
-                                        const reco::Vertex& vertex, 
-                                        const TransientTrackBuilder& transientTrackBuilder,
-                                        EcalClusterLazyTools myEcalCluster,
-                                        const reco::PFCandidateCollection &PFCandidates,
-                                        double Rho,
-                                        ElectronEffectiveArea::ElectronEffectiveAreaTarget EATarget,
-                                        const reco::GsfElectronCollection &IdentifiedElectrons,
-                                        const reco::MuonCollection &IdentifiedMuons) {
+					 const reco::Vertex& vertex, 
+					 const reco::PFCandidateCollection &PFCandidates,
+					 double Rho,
+					 ElectronEffectiveArea::ElectronEffectiveAreaTarget EATarget,
+					 const reco::GsfElectronCollection &IdentifiedElectrons,
+					 const reco::MuonCollection &IdentifiedMuons) {
   
   if (!fisInitialized) { 
     std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
-  }
-  
-
-  bool validKF= false; 
-  reco::TrackRef myTrackRef = ele.closestCtfTrackRef();
-  validKF = (myTrackRef.isAvailable());
-  validKF = (myTrackRef.isNonnull());  
-
-  // Pure tracking variables
-  fMVAVar_fbrem           =  ele.fbrem();
-  fMVAVar_kfchi2          =  (validKF) ? myTrackRef->normalizedChi2() : 0 ;
-  fMVAVar_kfhits          =  (validKF) ? myTrackRef->hitPattern().trackerLayersWithMeasurement() : -1. ; 
-  fMVAVar_kfhitsall       =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ;   //  save also this in your ntuple as possible alternative
-  fMVAVar_gsfchi2         =  ele.gsfTrack()->normalizedChi2();  
-
-  
-  // Geometrical matchings
-  fMVAVar_deta            =  ele.deltaEtaSuperClusterTrackAtVtx();
-  fMVAVar_dphi            =  ele.deltaPhiSuperClusterTrackAtVtx();
-  fMVAVar_detacalo        =  ele.deltaEtaSeedClusterTrackAtCalo();
-  // fMVAVar_dphicalo        =  ele.deltaPhiSeedClusterTrackAtCalo();   //  save also this in your ntuple 
-
-
-  // Pure ECAL -> shower shapes
-  fMVAVar_see             =  ele.sigmaIetaIeta();    //EleSigmaIEtaIEta
-  std::vector<float> vCov = myEcalCluster.localCovariances(*(ele.superCluster()->seed())) ;
-  if (!isnan(vCov[2])) fMVAVar_spp = sqrt (vCov[2]);   //EleSigmaIPhiIPhi
-  else fMVAVar_spp = 0.;    
-  // fMVAVar_sigmaIEtaIPhi = vCov[1];  //  save also this in your ntuple 
-
-  fMVAVar_etawidth        =  ele.superCluster()->etaWidth();
-  fMVAVar_phiwidth        =  ele.superCluster()->phiWidth();
-  fMVAVar_e1x5e5x5        =  (ele.e5x5()) !=0. ? 1.-(ele.e1x5()/ele.e5x5()) : -1. ;
-  fMVAVar_R9              =  myEcalCluster.e3x3(*(ele.superCluster()->seed())) / ele.superCluster()->rawEnergy();
-  //fMVAVar_nbrems          =  fabs(ele.numberOfBrems());    //  save also this in your ntuple 
-
-  // Energy matching
-  fMVAVar_HoE             =  ele.hadronicOverEm();
-  fMVAVar_EoP             =  ele.eSuperClusterOverP();
-  fMVAVar_IoEmIoP         =  (1.0/ele.ecalEnergy()) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
-  fMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
-  fMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
-  fMVAVar_EoPout          =  ele.eSeedClusterOverPout();     //  save also this in your ntuple 
-
-
-  // Spectators
-  fMVAVar_eta             =  ele.superCluster()->eta();         
-  fMVAVar_pt              =  ele.pt();                          
-
- 
-  // for triggering electrons get the impact parameteres
-  if(fMVAType == kTrig || fMVAType == kIsoRings) {
-    //d0
-    if (ele.gsfTrack().isNonnull()) {
-      fMVAVar_d0 = (-1.0)*ele.gsfTrack()->dxy(vertex.position()); 
-    } else if (ele.closestCtfTrackRef().isNonnull()) {
-      fMVAVar_d0 = (-1.0)*ele.closestCtfTrackRef()->dxy(vertex.position()); 
-    } else {
-      fMVAVar_d0 = -9999.0;
-    }
-    
-    //default values for IP3D
-    fMVAVar_ip3d = -999.0; 
-    // fMVAVar_ip3dSig = 0.0;
-    if (ele.gsfTrack().isNonnull()) {
-      const double gsfsign   = ( (-ele.gsfTrack()->dxy(vertex.position()))   >=0 ) ? 1. : -1.;
-      
-      const reco::TransientTrack &tt = transientTrackBuilder.build(ele.gsfTrack()); 
-      const std::pair<bool,Measurement1D> &ip3dpv =  IPTools::absoluteImpactParameter3D(tt,vertex);
-      if (ip3dpv.first) {
-	double ip3d = gsfsign*ip3dpv.second.value();
-	//double ip3derr = ip3dpv.second.error();  
-	fMVAVar_ip3d = ip3d; 
-	// fMVAVar_ip3dSig = ip3d/ip3derr;
-      }
-    }
   }
   
   
@@ -921,31 +843,6 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
 
   if(fPrintMVADebug) {
     cout << " *** Inside the class fMethodname " << fMethodname << " fMVAType " << fMVAType << endl;
-    cout << " fbrem " <<  fMVAVar_fbrem  
-      	 << " kfchi2 " << fMVAVar_kfchi2  
-	 << " kfhits " << fMVAVar_kfhits  
-	 << " kfhitsall " << fMVAVar_kfhitsall  
-	 << " gsfchi2 " << fMVAVar_gsfchi2  
-	 << " deta " <<  fMVAVar_deta  
-	 << " dphi " << fMVAVar_dphi  
-      	 << " detacalo " << fMVAVar_detacalo  
-      // << " dphicalo " << fMVAVar_dphicalo  
-	 << " see " << fMVAVar_see  
-	 << " spp " << fMVAVar_spp  
-	 << " etawidth " << fMVAVar_etawidth  
-	 << " phiwidth " << fMVAVar_phiwidth  
-	 << " e1x5e5x5 " << fMVAVar_e1x5e5x5  
-	 << " R9 " << fMVAVar_R9  
-      // << " mynbrems " << fMVAVar_nbrems  
-	 << " HoE " << fMVAVar_HoE  
-	 << " EoP " << fMVAVar_EoP  
-	 << " IoEmIoP " << fMVAVar_IoEmIoP  
-	 << " eleEoPout " << fMVAVar_eleEoPout  
-         << " EoPout " << fMVAVar_EoPout  
-	 << " d0 " << fMVAVar_d0  
-	 << " ip3d " << fMVAVar_ip3d  
-	 << " eta " << fMVAVar_eta  
-	 << " pt " << fMVAVar_pt << endl;
     cout  << "ChargedIso ( 0.0 | 0.1 | 0.2 | 0.3 | 0.4 | 0.5 ): " 
           << fMVAVar_ChargedIso_DR0p0To0p1   << " "
           << fMVAVar_ChargedIso_DR0p1To0p2   << " "
