@@ -616,7 +616,7 @@ void ElectronAnalyzer::myBindVariables() {
 bool ElectronAnalyzer::trainTrigPresel(const reco::GsfElectron& ele) {
   
   bool myTrigPresel = false;
-  if(fabs(ele.superCluster()->eta()) < 1.485) {
+  if(fabs(ele.superCluster()->eta()) < 1.479) {
     if(ele.sigmaIetaIeta() < 0.014 &&
        ele.hadronicOverEm() < 0.15 &&
        ele.dr03TkSumPt()/ele.pt() < 0.2 &&
