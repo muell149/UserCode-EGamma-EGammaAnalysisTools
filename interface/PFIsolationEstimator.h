@@ -45,6 +45,8 @@
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
@@ -77,6 +79,10 @@ class PFIsolationEstimator{
   
    float fGetIsolation(const reco::Photon* photon,const reco::PFCandidateCollection* pfParticlesColl, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices );
   vector<float >  fGetIsolationInRings(const reco::Photon* photon,const reco::PFCandidateCollection* pfParticlesColl,reco::Vertex& vtx, edm::Handle< reco::VertexCollection > vertices);
+
+   float fGetIsolation(const reco::GsfElectron* electron,const reco::PFCandidateCollection* pfParticlesColl, reco::Vertex& vtx, edm::Handle< reco::VertexCollection >  vertices );
+  vector<float >  fGetIsolationInRings(const reco::GsfElectron* electron,const reco::PFCandidateCollection* pfParticlesColl,reco::Vertex& vtx, edm::Handle< reco::VertexCollection > vertices);
+
 
   VertexRef chargedHadronVertex(edm::Handle< reco::VertexCollection > verticies, const reco::PFCandidate& pfcand );
 
@@ -140,7 +146,7 @@ class PFIsolationEstimator{
   float getRingSize(){return fRingSize; };
   
   int matchPFObject(const reco::Photon* photon, const reco::PFCandidateCollection* pfParticlesColl );
-  
+  int matchPFObject(const reco::GsfElectron* photon, const reco::PFCandidateCollection* pfParticlesColl );
  
  private:
  

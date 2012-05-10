@@ -304,6 +304,83 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
 }
 
 
+
+//--------------------------------------------------------------------------------------------------
+float PFIsolationEstimator::fGetIsolation(const reco::GsfElectron * electron, const reco::PFCandidateCollection* pfParticlesColl, reco::Vertex& vtx, edm::Handle< reco::VertexCollection > vertices) {
+ 
+  fGetIsolationInRings( electron, pfParticlesColl, vtx, vertices);
+  fIsolation = fIsolationInRings[0];
+  
+  return fIsolation;
+}
+
+
+//--------------------------------------------------------------------------------------------------
+vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::GsfElectron * electron, const reco::PFCandidateCollection* pfParticlesColl, reco::Vertex& vtx, edm::Handle< reco::VertexCollection > vertices) {
+
+  int isoBin;
+  
+  for(isoBin =0;isoBin<iNumberOfRings;isoBin++){
+    fIsolationInRings[isoBin]=0.;
+    fIsolationInRingsPhoton[isoBin]=0.;
+    fIsolationInRingsNeutral[isoBin]=0.;
+    fIsolationInRingsCharged[isoBin]=0.;
+    fIsolationInRingsChargedAll[isoBin]=0.;
+  }
+  
+  int iMatch =  matchPFObject(electron,pfParticlesColl);
+
+
+  fEta =  electron->eta();
+  fPhi =  electron->phi();
+  fPt =  electron->pt();
+  fVx =  electron->vx();
+  fVy =  electron->vy();
+  fVz =  electron->vz();
+
+  
+  for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
+
+    const reco::PFCandidate& pfParticle= (*pfParticlesColl)[iPF]; 
+    
+
+    if(iMatch == (int)iPF)
+      continue;
+
+    if(pfParticle.pdgId()==22){
+    
+      if(isPhotonParticleVetoed(&pfParticle)>=0.){
+	isoBin = (int)(fDeltaR/fRingSize);
+	fIsolationInRingsPhoton[isoBin]  = fIsolationInRingsPhoton[isoBin] + pfParticle.pt();
+
+      }
+      
+    }else if(abs(pfParticle.pdgId())==130){
+        
+      if(isNeutralParticleVetoed( &pfParticle)>=0.){
+       	isoBin = (int)(fDeltaR/fRingSize);
+	fIsolationInRingsNeutral[isoBin]  = fIsolationInRingsNeutral[isoBin] + pfParticle.pt();
+      }
+
+      //}else if(abs(pfParticle.pdgId()) == 11 ||abs(pfParticle.pdgId()) == 13 || abs(pfParticle.pdgId()) == 211){
+    }else if(abs(pfParticle.pdgId()) == 211){
+      if(isChargedParticleVetoed(  &pfParticle, vtx, vertices)>=0.){
+	isoBin = (int)(fDeltaR/fRingSize);
+	fIsolationInRingsCharged[isoBin]  = fIsolationInRingsCharged[isoBin] + pfParticle.pt();
+      }
+
+    }
+  }
+
+ 
+  for(int isoBin =0;isoBin<iNumberOfRings;isoBin++){
+    fIsolationInRings[isoBin]= fIsolationInRingsPhoton[isoBin]+ fIsolationInRingsNeutral[isoBin] +  fIsolationInRingsCharged[isoBin];
+    }
+  
+  return fIsolationInRings;
+}
+
+
 //--------------------------------------------------------------------------------------------------
 float  PFIsolationEstimator::isPhotonParticleVetoed( const reco::PFCandidate* pfIsoCand ){
   
@@ -599,6 +676,50 @@ int PFIsolationEstimator::matchPFObject(const reco::Photon* photon, const reco::
       if((((pfParticle.pdgId()==22 ) || TMath::Abs(pfParticle.pdgId())==11) )){
 	if(pfParticle.pt()>fPt){
 	  fDeltaR = deltaR(pfParticle.eta(),pfParticle.phi(),photon->eta(),photon->phi());
+	  if(fDeltaR<0.1){
+	    iMatch = i;
+	    fPt = pfParticle.pt();
+	  }
+	}
+      }
+      i++;
+    }
+  }
+  
+  return iMatch;
+
+}
+
+
+
+
+
+int PFIsolationEstimator::matchPFObject(const reco::GsfElectron* electron, const reco::PFCandidateCollection* Candidates ){
+  
+  Int_t iMatch = -1;
+
+  int i=0;
+  for(reco::PFCandidateCollection::const_iterator iPF=Candidates->begin();iPF !=Candidates->end();iPF++){
+    const reco::PFCandidate& pfParticle = (*iPF);
+    //    if((((pfParticle.pdgId()==22 && pfParticle.mva_nothing_gamma()>0.01) || TMath::Abs(pfParticle.pdgId())==11) )){
+    if((((pfParticle.pdgId()==22 ) || TMath::Abs(pfParticle.pdgId())==11) )){
+     
+      if(pfParticle.superClusterRef()==electron->superCluster())
+	iMatch= i;
+     
+    }
+    
+    i++;
+  }
+  
+  if(iMatch == -1){
+    i=0;
+    float fPt = -1;
+    for(reco::PFCandidateCollection::const_iterator iPF=Candidates->begin();iPF !=Candidates->end();iPF++){
+      const reco::PFCandidate& pfParticle = (*iPF);
+      if((((pfParticle.pdgId()==22 ) || TMath::Abs(pfParticle.pdgId())==11) )){
+	if(pfParticle.pt()>fPt){
+	  fDeltaR = deltaR(pfParticle.eta(),pfParticle.phi(),electron->eta(),electron->phi());
 	  if(fDeltaR<0.1){
 	    iMatch = i;
 	    fPt = pfParticle.pt();
