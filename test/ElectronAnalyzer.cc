@@ -25,6 +25,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "DataFormats/MuonReco/interface/Muon.h"
+
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -80,6 +82,8 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
 			 const TransientTrackBuilder& transientTrackBuilder,
 			 EcalClusterLazyTools myEcalCluster,
 			 bool printDebug = kFALSE);
+			 virtual void evaluate_mvas(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+
   bool trainTrigPresel(const reco::GsfElectron& ele);
   
   ParameterSet conf_;
@@ -87,6 +91,7 @@ class ElectronAnalyzer : public edm::EDAnalyzer {
   //  EGammaMvaEleEstimator *fMVASiDanV2;
   EGammaMvaEleEstimator* myMVANonTrig;
   EGammaMvaEleEstimator* myMVATrig;
+	EGammaMvaEleEstimator *fElectronIsoMVA;
   
   TMVA::Reader             *myTMVAReader;
   Float_t                   myMVAVar_fbrem;
@@ -164,6 +169,19 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
   conf_(iConfig)
 
 {
+
+  fElectronIsoMVA = new EGammaMvaEleEstimator();
+  vector<string> eleiso_weightfiles;
+  eleiso_weightfiles.push_back("../../../UserCode/sixie/EGamma/EGammaAnalysisTools/data/ElectronIso_BDTG_V0_BarrelPt5To10.weights.xml");
+  eleiso_weightfiles.push_back("../../../UserCode/sixie/EGamma/EGammaAnalysisTools/data/ElectronIso_BDTG_V0_EndcapPt5To10.weights.xml");
+  eleiso_weightfiles.push_back("../../../UserCode/sixie/EGamma/EGammaAnalysisTools/data/ElectronIso_BDTG_V0_BarrelPt10ToInf.weights.xml");
+  eleiso_weightfiles.push_back("../../../UserCode/sixie/EGamma/EGammaAnalysisTools/data/ElectronIso_BDTG_V0_EndcapPt10ToInf.weights.xml");
+
+  fElectronIsoMVA->initialize("EleIso_BDTG_IsoRings",
+                   EGammaMvaEleEstimator::kIsoRings,
+                   kTRUE,
+                   eleiso_weightfiles);
+  fElectronIsoMVA->SetPrintMVADebug(kTRUE);
 
   ev = 0;
   myMVANonTrig = new EGammaMvaEleEstimator();
@@ -254,11 +272,12 @@ void
 ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
+	ElectronAnalyzer::evaluate_mvas(iEvent, iSetup);
+
   InputTag gsfEleLabel(string("gsfElectrons"));
   Handle<GsfElectronCollection> theEGammaCollection;
   iEvent.getByLabel(gsfEleLabel,theEGammaCollection);
   const GsfElectronCollection theEGamma = *(theEGammaCollection.product());
-
 
   InputTag  mcTruthLabel(string("generator"));
   edm::Handle<edm::HepMCProduct> pMCTruth;
@@ -282,7 +301,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     dummy = Vertex(p, e, 0, 0, 0);
   }
   
-
 
   InputTag  reducedEBRecHitCollection(string("reducedEcalRecHitsEB"));
   InputTag  reducedEERecHitCollection(string("reducedEcalRecHitsEE"));
@@ -328,8 +346,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	
 
 	if(dR < 0.1) {
-
-	  // ********************* Non-Triggering electrons
 
 	  double myMVANonTrigMethod1 = myMVANonTrig->mvaValue((theEGamma[j]),*pv,thebuilder,lazyTools,debugMVAclass);
 
@@ -650,5 +666,122 @@ void
 ElectronAnalyzer::endJob() {
   cout << " endJob:: #events " << ev << endl;
 }
+
+void
+ElectronAnalyzer::evaluate_mvas(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
+
+
+  edm::Handle<reco::VertexCollection> hVertex;
+  iEvent.getByLabel("offlinePrimaryVertices", hVertex);
+  const reco::VertexCollection *pvCol = hVertex.product();
+
+  Handle<double> hRho;
+  edm::InputTag tag("kt6PFJets","rho");
+  iEvent.getByLabel(tag,hRho);
+  double Rho = *hRho;
+
+  Handle<reco::PFCandidateCollection> hPfCandProduct;
+	iEvent.getByLabel("particleFlow", hPfCandProduct);
+  const reco::PFCandidateCollection &inPfCands = *(hPfCandProduct.product());
+
+  InputTag gsfEleLabel(string("gsfElectrons"));
+  Handle<GsfElectronCollection> theEGammaCollection;
+  iEvent.getByLabel(gsfEleLabel,theEGammaCollection);
+  const GsfElectronCollection inElectrons = *(theEGammaCollection.product());
+
+  Handle<reco::MuonCollection> hMuonProduct;
+  iEvent.getByLabel("muons", hMuonProduct);  
+  const reco::MuonCollection inMuons = *(hMuonProduct.product());  
+
+
+	reco::MuonCollection IdentifiedMuons;
+  reco::GsfElectronCollection IdentifiedElectrons;
+
+  for (reco::GsfElectronCollection::const_iterator iE = inElectrons.begin(); 
+       iE != inElectrons.end(); ++iE) {
+
+    double electronTrackZ = 0;
+    if (iE->gsfTrack().isNonnull()) {
+      electronTrackZ = iE->gsfTrack()->dz(pvCol->at(0).position());
+    } else if (iE->closestCtfTrackRef().isNonnull()) {
+      electronTrackZ = iE->closestCtfTrackRef()->dz(pvCol->at(0).position());
+    }    
+    if(fabs(electronTrackZ) > 0.2)  continue;
+
+    
+    if(fabs(iE->superCluster()->eta())<1.479) {     
+      if(iE->pt() > 20) {
+        if(iE->sigmaIetaIeta()       > 0.01)  continue;
+        if(fabs(iE->deltaEtaSuperClusterTrackAtVtx()) > 0.007) continue;
+        if(fabs(iE->deltaPhiSuperClusterTrackAtVtx()) > 0.8)  continue;
+        if(iE->hadronicOverEm()       > 0.15)  continue;    
+      } else {
+        if(iE->sigmaIetaIeta()       > 0.012)  continue;
+        if(fabs(iE->deltaEtaSuperClusterTrackAtVtx()) > 0.007) continue;
+        if(fabs(iE->deltaPhiSuperClusterTrackAtVtx()) > 0.8)  continue;
+        if(iE->hadronicOverEm()       > 0.15) continue;    
+      } 
+    } else {     
+      if(iE->pt() > 20) {
+        if(iE->sigmaIetaIeta()       > 0.03)  continue;
+        if(fabs(iE->deltaEtaSuperClusterTrackAtVtx()) > 0.010) continue;
+        if(fabs(iE->deltaPhiSuperClusterTrackAtVtx()) > 0.8)  continue;
+      } else {
+        if(iE->sigmaIetaIeta()       > 0.032)  continue;
+        if(fabs(iE->deltaEtaSuperClusterTrackAtVtx()) > 0.010) continue;
+        if(fabs(iE->deltaPhiSuperClusterTrackAtVtx()) > 0.8)  continue;
+      }
+    }
+    IdentifiedElectrons.push_back(*iE);
+  }
+
+  for (reco::MuonCollection::const_iterator iM = inMuons.begin(); 
+       iM != inMuons.end(); ++iM) {
+
+    if(!(iM->innerTrack().isNonnull())) {
+      continue;
+    } 
+        
+    if(!(iM->isGlobalMuon() || iM->isTrackerMuon())) continue;
+    if(iM->innerTrack()->numberOfValidHits() < 11 ) continue;
+
+    IdentifiedMuons.push_back(*iM);
+  }
+
+  InputTag  reducedEBRecHitCollection(string("reducedEcalRecHitsEB"));
+  InputTag  reducedEERecHitCollection(string("reducedEcalRecHitsEE"));
+	
+	EcalClusterLazyTools lazyTools(iEvent, iSetup, reducedEBRecHitCollection, reducedEERecHitCollection);
+  
+  edm::ESHandle<TransientTrackBuilder> builder;
+  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", builder);
+  TransientTrackBuilder thebuilder = *(builder.product());
+
+ for (reco::GsfElectronCollection::const_iterator iE = inElectrons.begin(); 
+       iE != inElectrons.end(); ++iE) {
+
+		GsfElectron ele = *iE;
+	
+		double isomva = fElectronIsoMVA->mvaValue( ele, pvCol->at(0), 
+                                   inPfCands, Rho, 
+                                   ElectronEffectiveArea::kEleEAData2011,
+                                   IdentifiedElectrons, IdentifiedMuons);
+																	 
+ 		double idmva = myMVATrig->mvaValue(ele, 
+					pvCol->at(0), 
+					thebuilder,					
+					lazyTools);
+
+																	 
+		cout << "isomva = " << isomva << endl;
+		cout << "idmva = " << idmva << endl;
+	
+	}
+																	 
+
+}
+
+
 //define this as a plug-in
 DEFINE_FWK_MODULE(ElectronAnalyzer);
