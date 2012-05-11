@@ -170,6 +170,7 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
 
 {
 
+  // To get these files just do (from the CMSSW_XYZ/src) cvs co -r V00-00-00 UserCode/sixie/EGamma/EGammaAnalysisTools/data/
   fElectronIsoMVA = new EGammaMvaEleEstimator();
   vector<string> eleiso_weightfiles;
   eleiso_weightfiles.push_back("../../../UserCode/sixie/EGamma/EGammaAnalysisTools/data/ElectronIso_BDTG_V0_BarrelPt5To10.weights.xml");
