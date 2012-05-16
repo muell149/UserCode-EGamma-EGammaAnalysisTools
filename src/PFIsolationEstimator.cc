@@ -77,7 +77,7 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
   if(bApplyVeto && iParticleType==kElectron){
     
     //Setup veto conditions for electrons
-    setDeltaRVetoBarrel(kFALSE);
+    setDeltaRVetoBarrel(kTRUE);
     setDeltaRVetoEndcap(kTRUE);
     setRectangleVetoBarrel(kFALSE);
     setRectangleVetoEndcap(kFALSE);
@@ -85,8 +85,13 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
     setApplyPFPUVeto(kTRUE);
     //Current recommended default value for the electrons
     
+    setDeltaRVetoBarrelPhotons(1E-5);   //NOTE: just to be in synch with the isoDep
+    setDeltaRVetoBarrelCharged(1E-5);    //NOTE: just to be in synch with the isoDep
+    setDeltaRVetoBarrelNeutrals(1E-5);   //NOTE: just to be in synch with the isoDep
     setDeltaRVetoEndcapPhotons(0.08);
     setDeltaRVetoEndcapCharged(0.015);
+    setDeltaRVetoEndcapNeutrals(1E-5);  //NOTE: just to be in synch with the isoDep
+
     setConeSize(0.4);
 
     
@@ -352,7 +357,6 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::GsfElectr
   fVz =  electron->vz();
 
 
-
   for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
 
     const reco::PFCandidate& pfParticle= (*pfParticlesColl)[iPF]; 
@@ -377,6 +381,7 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::GsfElectr
     }else if(abs(pfParticle.pdgId()) == 211){
       if(isChargedParticleVetoed(  &pfParticle, vtx, vertices)>=0.){
 	isoBin = (int)(fDeltaR/fRingSize);
+	
 	fIsolationInRingsCharged[isoBin]  = fIsolationInRingsCharged[isoBin] + pfParticle.pt();
       }
 
@@ -407,6 +412,8 @@ float  PFIsolationEstimator::isPhotonParticleVetoed( const reco::PFCandidate* pf
   if(!bApplyVeto)
     return fDeltaR;
  
+  //NOTE: get the direction for the EB/EE transition region from the deposit just to be in synch with the isoDep
+  //      this will be changed in the future
 
   if(fabs(pfIsoCand->eta()) < 1.479){
     if(bDeltaRVetoBarrel){
@@ -448,6 +455,8 @@ float  PFIsolationEstimator::isNeutralParticleVetoed( const reco::PFCandidate* p
   if(!bApplyVeto)
     return fDeltaR;
 
+  //NOTE: get the direction for the EB/EE transition region from the deposit just to be in synch with the isoDep
+  //      this will be changed in the future
   if(fabs(pfIsoCand->eta()) < 1.479){
     if(!bDeltaRVetoBarrel&&!bRectangleVetoBarrel){
       return fDeltaR;
@@ -493,7 +502,7 @@ float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pf
 float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pfIsoCand,reco::VertexRef vtxMain, edm::Handle< reco::VertexCollection >  vertices  ){
   
 
-  
+
   
   VertexRef vtx = chargedHadronVertex(vertices,  *pfIsoCand );
   if(vtx.isNull())
@@ -555,9 +564,17 @@ float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pf
   fDeltaPhi = deltaPhi(fPhi,pfIsoCand->phi()); 
   fDeltaEta = fEta-pfIsoCand->eta(); 
   
+
+//   std::cout << " charged hadron: DR " <<  fDeltaR 
+// 	    << " pt " <<  pfIsoCand->pt() << " eta,phi " << pfIsoCand->eta() << ", " << pfIsoCand->phi()
+// 	    << " fVtxMainZ " << (*vtxMain).z() << " cand z " << vtx->z() << std::endl;
+  
+
   if(!bApplyVeto)
     return fDeltaR;  
   
+  //NOTE: get the direction for the EB/EE transition region from the deposit just to be in synch with the isoDep
+  //      this will be changed in the future  
   if(fabs(pfIsoCand->eta()) < 1.479){
     if(!bDeltaRVetoBarrel&&!bRectangleVetoBarrel){
       return fDeltaR;
@@ -589,6 +606,7 @@ float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pf
   }
 		   
   
+
 
   return fDeltaR;
 }
