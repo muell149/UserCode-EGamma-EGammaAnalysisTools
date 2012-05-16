@@ -121,8 +121,7 @@ bool ElectronIsoProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 
 	// All PF Candidate for alternate isolation
 	Handle<reco::PFCandidateCollection> pfCandidatesH;
-	InputTag label("particleFlow"); 
-	iEvent.getByLabel(label, pfCandidatesH);
+	iEvent.getByLabel(particleFlowTag_, pfCandidatesH);
 	const  PFCandidateCollection thePfColl = *(pfCandidatesH.product());
 
 
@@ -158,27 +157,23 @@ bool ElectronIsoProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 
 	}
 
-	bool myfilter = false;
-	if(egCollection->size() > 0.) {
 	  
-	  chFiller.insert(egCollection, chIsoValues.begin(), chIsoValues.end() );
-	  chFiller.fill();
+	chFiller.insert(egCollection, chIsoValues.begin(), chIsoValues.end() );
+	chFiller.fill();
+	
+	phFiller.insert(egCollection, phIsoValues.begin(), phIsoValues.end() );
+	phFiller.fill();
+	
+	nhFiller.insert(egCollection, nhIsoValues.begin(), nhIsoValues.end() );
+	nhFiller.fill();
+	
+	
+	iEvent.put(chIsoMap,nameIsoCh_);
+	iEvent.put(phIsoMap,nameIsoPh_);
+	iEvent.put(nhIsoMap,nameIsoNh_);
+	
 	  
-	  phFiller.insert(egCollection, phIsoValues.begin(), phIsoValues.end() );
-	  phFiller.fill();
-	  
-	  nhFiller.insert(egCollection, nhIsoValues.begin(), nhIsoValues.end() );
-	  nhFiller.fill();
-	  
-
-	  iEvent.put(chIsoMap,nameIsoCh_);
-	  iEvent.put(phIsoMap,nameIsoPh_);
-	  iEvent.put(nhIsoMap,nameIsoNh_);
-	  
-	  myfilter = true;
-
-	}
-	return myfilter;
+	return true;
 }
 
 //define this as a plug-in
