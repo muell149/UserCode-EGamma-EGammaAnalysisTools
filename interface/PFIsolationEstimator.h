@@ -92,8 +92,9 @@ class PFIsolationEstimator{
 
   //Veto booleans
   void setApplyVeto(Bool_t bValue = kTRUE){  bApplyVeto = bValue;};
-  void setApplyPFPUVeto(Bool_t bValue = kTRUE){bApplyPFPUVeto = bValue;};
+  void setApplyPFPUVeto(Bool_t bValue = kFALSE){bApplyPFPUVeto = bValue;};
   void setApplyDzDxyVeto(Bool_t bValue = kTRUE){  bApplyDzDxyVeto = bValue;};
+  void setApplyMissHitPhVeto(Bool_t bValue = kFALSE){  bApplyMissHitPhVeto = bValue;};
   void setDeltaRVetoBarrel(Bool_t bValue = kTRUE){  bDeltaRVetoBarrel = bValue;};
   void setDeltaRVetoEndcap(Bool_t bValue = kTRUE){  bDeltaRVetoEndcap = bValue;};
   void setRectangleVetoBarrel(Bool_t bValue = kTRUE){  bRectangleVetoBarrel = bValue;};
@@ -172,7 +173,8 @@ class PFIsolationEstimator{
   float                     fConeSize;
   Bool_t                    bApplyVeto;
   Bool_t                    bApplyDzDxyVeto;  
-  Bool_t                    bApplyPFPUVeto;  
+  Bool_t                    bApplyPFPUVeto;
+  Bool_t                    bApplyMissHitPhVeto;
 
   Bool_t                    bDeltaRVetoBarrel; 
   Bool_t                    bDeltaRVetoEndcap; 
@@ -205,6 +207,8 @@ class PFIsolationEstimator{
   float                   fRectangleDeltaEtaVetoEndcapCharged;
 
   int                     iNumberOfRings;
+  int                     iMissHits;
+
   float                   fRingSize;
 
   float                   fDeltaR;
@@ -221,6 +225,7 @@ class PFIsolationEstimator{
   float                   fVy;
   float                   fVz;
   
+  SuperClusterRef         refEleSC;
 
   math::XYZVector         vtxWRTCandidate;
    

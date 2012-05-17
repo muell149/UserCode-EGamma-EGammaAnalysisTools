@@ -7,6 +7,7 @@ using namespace std;
 #ifndef STANDALONE
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
@@ -83,6 +84,7 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
     setRectangleVetoEndcap(kFALSE);
     setApplyDzDxyVeto(kFALSE);
     setApplyPFPUVeto(kTRUE);
+    setApplyMissHitPhVeto(kFALSE);
     //Current recommended default value for the electrons
     
     setDeltaRVetoBarrelPhotons(1E-5);   //NOTE: just to be in synch with the isoDep
@@ -97,6 +99,9 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
     
   }else{
     //Setup veto conditions for photons
+    setApplyDzDxyVeto(kTRUE);
+    setApplyPFPUVeto(kFALSE);
+    setApplyMissHitPhVeto(kFALSE);
     setDeltaRVetoBarrel(kFALSE);
     setDeltaRVetoEndcap(kFALSE);
     setRectangleVetoBarrel(kFALSE);
@@ -355,7 +360,12 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::GsfElectr
   fVx =  electron->vx();
   fVy =  electron->vy();
   fVz =  electron->vz();
-
+  iMissHits = electron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
+  
+  
+  if(electron->ecalDrivenSeed())
+    refEleSC = electron->superCluster();
+  
 
   for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
 
@@ -414,6 +424,16 @@ float  PFIsolationEstimator::isPhotonParticleVetoed( const reco::PFCandidate* pf
  
   //NOTE: get the direction for the EB/EE transition region from the deposit just to be in synch with the isoDep
   //      this will be changed in the future
+  
+  if(bApplyMissHitPhVeto) {
+    if(iMissHits > 0)
+      if(pfIsoCand->mva_nothing_gamma() > 0.99) {
+	if(pfIsoCand->superClusterRef().isNonnull() && refEleSC.isNonnull()) {
+	  if(pfIsoCand->superClusterRef() == refEleSC)
+	    return -999.;
+	}
+      }
+  }
 
   if(fabs(pfIsoCand->eta()) < 1.479){
     if(bDeltaRVetoBarrel){

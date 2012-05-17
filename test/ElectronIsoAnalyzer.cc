@@ -30,7 +30,10 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
 #include "DataFormats/Common/interface/ValueMap.h"
+#include "EGamma/EGammaAnalysisTools/interface/ElectronEffectiveArea.h"
 
 #include <iostream>
 #include <string>
@@ -64,7 +67,10 @@ class ElectronIsoAnalyzer : public edm::EDAnalyzer {
   edm::InputTag inputTagGsfElectrons_;
   std::vector<edm::InputTag> inputTagIsoValElectrons_;   
   typedef std::vector< edm::Handle< edm::ValueMap<double> > > IsoValues; 
-
+  ElectronEffectiveArea::ElectronEffectiveAreaTarget effAreaTarget_;
+  ElectronEffectiveArea::ElectronEffectiveAreaType   effAreaGammaPlusNeutralHad_;
+  std::string rho_; 
+  std::string deltaR_;
 
 
   // Control histos
@@ -79,6 +85,8 @@ class ElectronIsoAnalyzer : public edm::EDAnalyzer {
   TH1F* sumBarrel_       ;
   TH1F* sumEndcaps_      ;
 
+  TH1F* missHitsBarrel_  ;
+  TH1F* missHitsEndcap_  ;
 };
 
 //
@@ -97,9 +105,25 @@ ElectronIsoAnalyzer::ElectronIsoAnalyzer(const edm::ParameterSet& iConfig):
 
 {
 
-  verbose_ = iConfig.getUntrackedParameter<bool>("verbose", false);
-  inputTagGsfElectrons_ = iConfig.getParameter<edm::InputTag>("Electrons");
-  inputTagIsoValElectrons_   = iConfig.getParameter< std::vector<edm::InputTag> >("IsoValElectrons");   
+  verbose_                    = iConfig.getUntrackedParameter<bool>("verbose", false);
+  inputTagGsfElectrons_       = iConfig.getParameter<edm::InputTag>("Electrons");
+  inputTagIsoValElectrons_    = iConfig.getParameter< std::vector<edm::InputTag> >("IsoValElectrons");   
+  //rho_                        = iConfig.getParameter<std::string>("rho");  
+  deltaR_                     = iConfig.getParameter<std::string>("deltaR");  
+  std::string eaTarget        = iConfig.getParameter<std::string>("effectiveAreaTarget");
+
+  if      (eaTarget == "NoCorr")     effAreaTarget_ = ElectronEffectiveArea::kEleEANoCorr;
+  else if (eaTarget == "Data2011")   effAreaTarget_ = ElectronEffectiveArea::kEleEAData2011;   // default for HZZ 
+  else if (eaTarget == "Data2012")   effAreaTarget_ = ElectronEffectiveArea::kEleEAData2012;   // default for HWW
+  else if (eaTarget == "Summer11MC") effAreaTarget_ = ElectronEffectiveArea::kEleEASummer11MC;
+  else if (eaTarget == "Fall11MC")   effAreaTarget_ = ElectronEffectiveArea::kEleEAFall11MC;
+  else throw cms::Exception("Configuration") << "Unknown effective area " << eaTarget << "\n";
+
+  if (deltaR_ == "03") {
+    effAreaGammaPlusNeutralHad_ = ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03;
+  } else if (deltaR_ == "04") {
+    effAreaGammaPlusNeutralHad_ = ElectronEffectiveArea::kEleGammaAndNeutralHadronIso04;
+  } else throw cms::Exception("Configuration") << "Unsupported deltaR " << deltaR_ << "\n";
 
   
   edm::Service<TFileService> fs;
@@ -114,6 +138,8 @@ ElectronIsoAnalyzer::ElectronIsoAnalyzer(const edm::ParameterSet& iConfig):
   sumBarrel_        = fs->make<TH1F>("allbarrel",";Sum pT/pT",100,0,4);
   sumEndcaps_       = fs->make<TH1F>("allendcaps",";Sum pT/pT",100,0,4);
 
+  missHitsBarrel_   = fs->make<TH1F>("missHitsBarrel_","",10,0,10);
+  missHitsEndcap_   = fs->make<TH1F>("missHitsEndcap_","",10,0,10);
 
 }
 
@@ -162,6 +188,16 @@ ElectronIsoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     double photon = (*(*myIsoValues)[1])[myElectronRef];
     double neutral = (*(*myIsoValues)[2])[myElectronRef];
     
+    float abseta = fabs(myElectronRef->superCluster()->eta());
+    
+    float eff_area_phnh = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaGammaPlusNeutralHad_, abseta, effAreaTarget_);
+    
+    float rho = 0.; // read rho from the event
+    float myRho = max<float>(0.f, rho);
+    
+    float myPfIsoPuCorr = charged + max<float>(0.f, (photon+neutral) - eff_area_phnh*rho);
+
+
     if(verbose_) { 
       
       std::cout << " run " << iEvent.id().run() << " lumi " << iEvent.id().luminosityBlock() << " event " << iEvent.id().event();
@@ -173,21 +209,21 @@ ElectronIsoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       std::cout << " PhotonIso " <<  photon << std::endl;
       std::cout << " NeutralHadron Iso " << neutral << std::endl;
 
-      if(myElectronRef->isEB()) {
-	chargedBarrel_ ->Fill(charged/myElectronRef->pt());
-	photonBarrel_->Fill(photon/myElectronRef->pt());
-	neutralBarrel_->Fill(neutral/myElectronRef->pt());
-	sumBarrel_->Fill((charged+photon+neutral)/myElectronRef->pt());
-      } else {
-	chargedEndcaps_ ->Fill(charged/myElectronRef->pt());
-	photonEndcaps_->Fill(photon/myElectronRef->pt());
-	neutralEndcaps_->Fill(neutral/myElectronRef->pt());
-	sumEndcaps_->Fill((charged+photon+neutral)/myElectronRef->pt());
-      }
-      
     }
-    
-
+    if(myElectronRef->isEB()) {
+      chargedBarrel_ ->Fill(charged/myElectronRef->pt());
+      photonBarrel_->Fill(photon/myElectronRef->pt());
+      neutralBarrel_->Fill(neutral/myElectronRef->pt());
+      sumBarrel_->Fill((charged+photon+neutral)/myElectronRef->pt());
+      missHitsBarrel_->Fill(myElectronRef->gsfTrack()->trackerExpectedHitsInner().numberOfHits());
+      
+    } else {
+      chargedEndcaps_ ->Fill(charged/myElectronRef->pt());
+      photonEndcaps_->Fill(photon/myElectronRef->pt());
+      neutralEndcaps_->Fill(neutral/myElectronRef->pt());
+      sumEndcaps_->Fill((charged+photon+neutral)/myElectronRef->pt());
+      missHitsEndcap_->Fill(myElectronRef->gsfTrack()->trackerExpectedHitsInner().numberOfHits());
+    }
   }
 
 }
