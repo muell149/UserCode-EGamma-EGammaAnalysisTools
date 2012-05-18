@@ -284,6 +284,7 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
   fVx =  photon->vx();
   fVy =  photon->vy();
   fVz =  photon->vz();
+  iMissHits = 0;
 
   for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
 
