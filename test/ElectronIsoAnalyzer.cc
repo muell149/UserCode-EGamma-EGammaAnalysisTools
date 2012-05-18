@@ -65,6 +65,7 @@ class ElectronIsoAnalyzer : public edm::EDAnalyzer {
       // ----------member data ---------------------------
   bool verbose_;
   edm::InputTag inputTagGsfElectrons_;
+  edm::InputTag rhoIsoInputTag_;
   std::vector<edm::InputTag> inputTagIsoValElectrons_;   
   typedef std::vector< edm::Handle< edm::ValueMap<double> > > IsoValues; 
   ElectronEffectiveArea::ElectronEffectiveAreaTarget effAreaTarget_;
@@ -87,6 +88,10 @@ class ElectronIsoAnalyzer : public edm::EDAnalyzer {
 
   TH1F* missHitsBarrel_  ;
   TH1F* missHitsEndcap_  ;
+
+  TH1F* sumCorrBarrel_   ;
+  TH1F* sumCorrEndcaps_  ;
+
 };
 
 //
@@ -108,9 +113,9 @@ ElectronIsoAnalyzer::ElectronIsoAnalyzer(const edm::ParameterSet& iConfig):
   verbose_                    = iConfig.getUntrackedParameter<bool>("verbose", false);
   inputTagGsfElectrons_       = iConfig.getParameter<edm::InputTag>("Electrons");
   inputTagIsoValElectrons_    = iConfig.getParameter< std::vector<edm::InputTag> >("IsoValElectrons");   
-  //rho_                        = iConfig.getParameter<std::string>("rho");  
   deltaR_                     = iConfig.getParameter<std::string>("deltaR");  
   std::string eaTarget        = iConfig.getParameter<std::string>("effectiveAreaTarget");
+  rhoIsoInputTag_             = iConfig.getParameter<edm::InputTag>("rhoIsoInputTag");
 
   if      (eaTarget == "NoCorr")     effAreaTarget_ = ElectronEffectiveArea::kEleEANoCorr;
   else if (eaTarget == "Data2011")   effAreaTarget_ = ElectronEffectiveArea::kEleEAData2011;   // default for HZZ 
@@ -137,6 +142,10 @@ ElectronIsoAnalyzer::ElectronIsoAnalyzer(const edm::ParameterSet& iConfig):
   		      
   sumBarrel_        = fs->make<TH1F>("allbarrel",";Sum pT/pT",100,0,4);
   sumEndcaps_       = fs->make<TH1F>("allendcaps",";Sum pT/pT",100,0,4);
+
+  sumCorrBarrel_        = fs->make<TH1F>("allcorrbarrel",";Sum pT/pT",100,0,4);
+  sumCorrEndcaps_       = fs->make<TH1F>("allcorrendcaps",";Sum pT/pT",100,0,4);
+
 
   missHitsBarrel_   = fs->make<TH1F>("missHitsBarrel_","",10,0,10);
   missHitsEndcap_   = fs->make<TH1F>("missHitsEndcap_","",10,0,10);
@@ -169,6 +178,11 @@ ElectronIsoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   iEvent.getByLabel(inputTagGsfElectrons_,theEGammaCollection);
   const GsfElectronCollection theEGamma = *(theEGammaCollection.product());
 
+  // rho for isolation
+  edm::Handle<double> rhoIso_h;
+  iEvent.getByLabel(rhoIsoInputTag_, rhoIso_h);
+  double rhoIso = *(rhoIso_h.product());
+
 
   unsigned nTypes=3;
   IsoValues  electronIsoValues(nTypes);
@@ -192,10 +206,9 @@ ElectronIsoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     
     float eff_area_phnh = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaGammaPlusNeutralHad_, abseta, effAreaTarget_);
     
-    float rho = 0.; // read rho from the event
-    float myRho = max<float>(0.f, rho);
+    double myRho = max<double>(0.d,rhoIso);
     
-    float myPfIsoPuCorr = charged + max<float>(0.f, (photon+neutral) - eff_area_phnh*rho);
+    float myPfIsoPuCorr = charged + max<float>(0.f, (photon+neutral) - eff_area_phnh*myRho);
 
 
     if(verbose_) { 
@@ -215,6 +228,7 @@ ElectronIsoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       photonBarrel_->Fill(photon/myElectronRef->pt());
       neutralBarrel_->Fill(neutral/myElectronRef->pt());
       sumBarrel_->Fill((charged+photon+neutral)/myElectronRef->pt());
+      sumCorrBarrel_->Fill(myPfIsoPuCorr/myElectronRef->pt());
       missHitsBarrel_->Fill(myElectronRef->gsfTrack()->trackerExpectedHitsInner().numberOfHits());
       
     } else {
@@ -222,6 +236,7 @@ ElectronIsoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       photonEndcaps_->Fill(photon/myElectronRef->pt());
       neutralEndcaps_->Fill(neutral/myElectronRef->pt());
       sumEndcaps_->Fill((charged+photon+neutral)/myElectronRef->pt());
+      sumCorrEndcaps_->Fill(myPfIsoPuCorr/myElectronRef->pt());
       missHitsEndcap_->Fill(myElectronRef->gsfTrack()->trackerExpectedHitsInner().numberOfHits());
     }
   }
