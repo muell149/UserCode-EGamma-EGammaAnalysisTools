@@ -127,7 +127,7 @@ class EGammaMvaEleEstimator{
                       Double_t eta,
                       Double_t pt,
                       Bool_t printDebug = kFALSE );
- 
+ #ifndef STANDALONE
     Double_t isoMvaValue(Double_t Pt,
                          Double_t Eta,
                          Double_t Rho,
@@ -148,6 +148,7 @@ class EGammaMvaEleEstimator{
                          Double_t NeutralHadronIso_DR0p3To0p4,
                          Double_t NeutralHadronIso_DR0p4To0p5,
                          Bool_t printDebug = kFALSE );
+#endif
  
   private:
 

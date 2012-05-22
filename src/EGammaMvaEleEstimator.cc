@@ -465,7 +465,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
 
   return mva;
 }
-
+#ifndef STANDALONE
 Double_t EGammaMvaEleEstimator::isoMvaValue(Double_t Pt,
                                             Double_t Eta,
                                             Double_t Rho,
@@ -541,7 +541,7 @@ Double_t EGammaMvaEleEstimator::isoMvaValue(Double_t Pt,
 
 
 //--------------------------------------------------------------------------------------------------
-#ifndef STANDALONE
+
 Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele, 
 					const reco::Vertex& vertex, 
 					const TransientTrackBuilder& transientTrackBuilder,					
