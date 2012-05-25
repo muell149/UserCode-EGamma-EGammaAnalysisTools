@@ -72,7 +72,7 @@ ElectronIsoProducer::ElectronIsoProducer(const edm::ParameterSet& iConfig) {
         isolator.initializeElectronIsolation(kTRUE); //NOTE: this automatically set all the correct defaul veto values 
 	//IMPORTANT!!!!: 0.3 is the default value for the cut-based-id. But it is analysis dependent, eg HZZ is 0.4
         isolator.setConeSize(0.3); 
-	// isolator.setApplyMissHitPhVeto(kTRUE); // NOTE: for the moment set to FALSE just to be in synch wit the isoDep
+	// isolator.setApplyMissHitPhVeto(kTRUE); // NOTE: for the moment set to FALSE just to be in synch wit the isoDep: 26May become true by default in the PFIsolationEstimator.cc
 
 	// below just examples on how to change parameters but don't uncomment unless you have a good motivation to change
 	// the default values aumatically set by initializeElectronIsolation(kTRUE)

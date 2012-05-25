@@ -225,7 +225,8 @@ class PFIsolationEstimator{
   float                   fVy;
   float                   fVz;
   
-  SuperClusterRef         refEleSC;
+  SuperClusterRef         refSC;
+  bool                    pivotInBarrel;
 
   math::XYZVector         vtxWRTCandidate;
    

@@ -84,15 +84,15 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
     setRectangleVetoEndcap(kFALSE);
     setApplyDzDxyVeto(kFALSE);
     setApplyPFPUVeto(kTRUE);
-    setApplyMissHitPhVeto(kFALSE);
+    setApplyMissHitPhVeto(kTRUE); //NOTE: decided to go for this on the 26May 2012
     //Current recommended default value for the electrons
     
-    setDeltaRVetoBarrelPhotons(1E-5);   //NOTE: just to be in synch with the isoDep
-    setDeltaRVetoBarrelCharged(1E-5);    //NOTE: just to be in synch with the isoDep
-    setDeltaRVetoBarrelNeutrals(1E-5);   //NOTE: just to be in synch with the isoDep
+    // setDeltaRVetoBarrelPhotons(1E-5);   //NOTE: just to be in synch with the isoDep: fixed isoDep in 26May
+    // setDeltaRVetoBarrelCharged(1E-5);    //NOTE: just to be in synch with the isoDep: fixed isoDep in 26May
+    // setDeltaRVetoBarrelNeutrals(1E-5);   //NOTE: just to be in synch with the isoDep: fixed isoDep in 26May
     setDeltaRVetoEndcapPhotons(0.08);
     setDeltaRVetoEndcapCharged(0.015);
-    setDeltaRVetoEndcapNeutrals(1E-5);  //NOTE: just to be in synch with the isoDep
+    // setDeltaRVetoEndcapNeutrals(1E-5);  //NOTE: just to be in synch with the isoDep: fixed isoDep in 26May
 
     setConeSize(0.4);
 
@@ -182,6 +182,7 @@ void PFIsolationEstimator::initializeRings(int iNumberOfRings, float fRingSize){
 float PFIsolationEstimator::fGetIsolation(const reco::PFCandidate * pfCandidate, const reco::PFCandidateCollection* pfParticlesColl,reco::VertexRef vtx, edm::Handle< reco::VertexCollection > vertices) {
  
   fGetIsolationInRings( pfCandidate, pfParticlesColl, vtx, vertices);
+  refSC = SuperClusterRef();
   fIsolation = fIsolationInRings[0];
   
   return fIsolation;
@@ -210,6 +211,8 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::PFCandida
   fVx =  pfCandidate->vx();
   fVy =  pfCandidate->vy();
   fVz =  pfCandidate->vz();
+
+  pivotInBarrel = fabs(pfCandidate->positionAtECALEntrance().eta())<1.479;
 
   for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
 
@@ -285,6 +288,9 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
   fVy =  photon->vy();
   fVz =  photon->vz();
   iMissHits = 0;
+
+  refSC = photon->superCluster();
+  pivotInBarrel = fabs((refSC->position().eta()))<1.479;
 
   for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
 
@@ -363,10 +369,9 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::GsfElectr
   fVz =  electron->vz();
   iMissHits = electron->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
   
-  
-  if(electron->ecalDrivenSeed())
-    refEleSC = electron->superCluster();
-  
+  //  if(electron->ecalDrivenSeed())
+  refSC = electron->superCluster();
+  pivotInBarrel = fabs((refSC->position().eta()))<1.479;
 
   for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
 
@@ -429,14 +434,14 @@ float  PFIsolationEstimator::isPhotonParticleVetoed( const reco::PFCandidate* pf
   if(bApplyMissHitPhVeto) {
     if(iMissHits > 0)
       if(pfIsoCand->mva_nothing_gamma() > 0.99) {
-	if(pfIsoCand->superClusterRef().isNonnull() && refEleSC.isNonnull()) {
-	  if(pfIsoCand->superClusterRef() == refEleSC)
+	if(pfIsoCand->superClusterRef().isNonnull() && refSC.isNonnull()) {
+	  if(pfIsoCand->superClusterRef() == refSC)
 	    return -999.;
 	}
       }
   }
 
-  if(fabs(pfIsoCand->eta()) < 1.479){
+  if(pivotInBarrel){
     if(bDeltaRVetoBarrel){
       if(fDeltaR < fDeltaRVetoBarrelPhotons)
         return -999.;
@@ -478,7 +483,7 @@ float  PFIsolationEstimator::isNeutralParticleVetoed( const reco::PFCandidate* p
 
   //NOTE: get the direction for the EB/EE transition region from the deposit just to be in synch with the isoDep
   //      this will be changed in the future
-  if(fabs(pfIsoCand->eta()) < 1.479){
+  if(pivotInBarrel){
     if(!bDeltaRVetoBarrel&&!bRectangleVetoBarrel){
       return fDeltaR;
     }
@@ -596,7 +601,7 @@ float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pf
   
   //NOTE: get the direction for the EB/EE transition region from the deposit just to be in synch with the isoDep
   //      this will be changed in the future  
-  if(fabs(pfIsoCand->eta()) < 1.479){
+  if(pivotInBarrel){
     if(!bDeltaRVetoBarrel&&!bRectangleVetoBarrel){
       return fDeltaR;
     }
