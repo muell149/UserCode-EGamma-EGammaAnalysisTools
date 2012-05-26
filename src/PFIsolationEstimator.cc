@@ -100,13 +100,33 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
   }else{
     //Setup veto conditions for photons
     setApplyDzDxyVeto(kTRUE);
-    setApplyPFPUVeto(kFALSE);
+    setApplyPFPUVeto(kTRUE);
     setApplyMissHitPhVeto(kFALSE);
-    setDeltaRVetoBarrel(kFALSE);
-    setDeltaRVetoEndcap(kFALSE);
-    setRectangleVetoBarrel(kFALSE);
+    setDeltaRVetoBarrel(kTRUE);
+    setDeltaRVetoEndcap(kTRUE);
+    setRectangleVetoBarrel(kTRUE);
     setRectangleVetoEndcap(kFALSE);
-    setConeSize(0.4);
+    setConeSize(0.3);
+
+    setDeltaRVetoBarrelPhotons(-1);
+    setDeltaRVetoBarrelNeutrals(-1);
+    setDeltaRVetoBarrelCharged(0.02);
+    setRectangleDeltaPhiVetoBarrelPhotons(1.);
+    setRectangleDeltaPhiVetoBarrelNeutrals(-1);
+    setRectangleDeltaPhiVetoBarrelCharged(-1);
+    setRectangleDeltaEtaVetoBarrelPhotons(0.015);
+    setRectangleDeltaEtaVetoBarrelNeutrals(-1);
+    setRectangleDeltaEtaVetoBarrelCharged(-1);
+
+    setDeltaRVetoEndcapPhotons(0.07);
+    setDeltaRVetoEndcapNeutrals(-1);
+    setDeltaRVetoEndcapCharged(0.02);
+    setRectangleDeltaPhiVetoEndcapPhotons(-1);
+    setRectangleDeltaPhiVetoEndcapNeutrals(-1);
+    setRectangleDeltaPhiVetoEndcapCharged(-1);
+    setRectangleDeltaEtaVetoEndcapPhotons(-1);
+    setRectangleDeltaEtaVetoEndcapNeutrals(-1);
+    setRectangleDeltaEtaVetoEndcapCharged(-1);
   }
 
 
@@ -280,13 +300,19 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
   
   int iMatch =  matchPFObject(photon,pfParticlesColl);
 
+  // Set the vertex of reco::Photon to the first PV
+  math::XYZVector direction = math::XYZVector(photon->superCluster()->x() - (*vtx).x(), 
+					      photon->superCluster()->y() - (*vtx).y(), 
+					      photon->superCluster()->z() - (*vtx).z());
+  math::XYZVector momentum = direction.unit() * photon->energy();
+  const reco::Particle::LorentzVector newPho(momentum.x(), momentum.y(), momentum.z(), photon->energy());
 
-  fEta =  photon->eta();
-  fPhi =  photon->phi();
-  fPt =  photon->pt();
-  fVx =  photon->vx();
-  fVy =  photon->vy();
-  fVz =  photon->vz();
+  fEta = newPho.Eta();
+  fPhi = newPho.Phi();
+  fPt  = newPho.Pt();
+  fVx  = newPho.x();
+  fVy  = newPho.y();
+  fVz  = newPho.z();
   iMissHits = 0;
 
   refSC = photon->superCluster();
@@ -295,7 +321,6 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
   for(unsigned iPF=0; iPF<pfParticlesColl->size(); iPF++) {
 
     const reco::PFCandidate& pfParticle= (*pfParticlesColl)[iPF]; 
-    
 
     if(iMatch == (int)iPF)
       continue;
@@ -305,7 +330,6 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
       if(isPhotonParticleVetoed(&pfParticle)>=0.){
 	isoBin = (int)(fDeltaR/fRingSize);
 	fIsolationInRingsPhoton[isoBin]  = fIsolationInRingsPhoton[isoBin] + pfParticle.pt();
-
       }
       
     }else if(abs(pfParticle.pdgId())==130){
@@ -527,15 +551,12 @@ float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pf
 //-----------------------------------------------------------------------------------------------------
 float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pfIsoCand,reco::VertexRef vtxMain, edm::Handle< reco::VertexCollection >  vertices  ){
   
-
-
-  
   VertexRef vtx = chargedHadronVertex(vertices,  *pfIsoCand );
   if(vtx.isNull())
     return -999.;
   
-  float fVtxMainX = (*vtxMain).x();
-  float fVtxMainY = (*vtxMain).y();
+//   float fVtxMainX = (*vtxMain).x();
+//   float fVtxMainY = (*vtxMain).y();
   float fVtxMainZ = (*vtxMain).z();
 
   if(bApplyPFPUVeto) {
@@ -547,18 +568,15 @@ float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pf
   if(bApplyDzDxyVeto) {
     if(iParticleType==kPhoton){
       
+      float dz = fabs( pfIsoCand->trackRef()->dz( (*vtxMain).position() ) );
+      if (dz > 0.2)
+        return -999.;
+	
+      double dxy = pfIsoCand->trackRef()->dxy( (*vtxMain).position() );  
+      if (fabs(dxy) > 0.1)
+        return -999.;
       
-      //this piece of code does not use the chargedhadronvertex function. 
-      /*  float dz = fabs(pfIsoCand->vz() - fVtxMainZ);
-	  if (dz > 1.)
-	  return -999.;
-	  
-	  double dxy = ( -(pfIsoCand->vx() - fVtxMainX)*pfIsoCand->py() + (pfIsoCand->vy() - fVtxMainY)*pfIsoCand->px()) / pfIsoCand->pt();
-	  
-	  if(fabs(dxy) > 0.1)
-	  return -999.;
-      */
-      
+      /*
       float dz = fabs(vtx->z() - fVtxMainZ);
       if (dz > 1.)
 	return -999.;
@@ -568,7 +586,7 @@ float  PFIsolationEstimator::isChargedParticleVetoed(const reco::PFCandidate* pf
       
       if(fabs(dxy) > 0.2)
 	return -999.;
-      
+      */
     }else{
       
       
@@ -731,6 +749,7 @@ int PFIsolationEstimator::matchPFObject(const reco::Photon* photon, const reco::
     i++;
   }
   
+/*
   if(iMatch == -1){
     i=0;
     float fPt = -1;
@@ -748,7 +767,8 @@ int PFIsolationEstimator::matchPFObject(const reco::Photon* photon, const reco::
       i++;
     }
   }
-  
+*/
+
   return iMatch;
 
 }
@@ -796,3 +816,4 @@ int PFIsolationEstimator::matchPFObject(const reco::GsfElectron* electron, const
   return iMatch;
 
 }
+
