@@ -298,8 +298,6 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
     fIsolationInRingsChargedAll[isoBin]=0.;
   }
   
-  int iMatch =  matchPFObject(photon,pfParticlesColl);
-
   // Set the vertex of reco::Photon to the first PV
   math::XYZVector direction = math::XYZVector(photon->superCluster()->x() - (*vtx).x(), 
 					      photon->superCluster()->y() - (*vtx).y(), 
@@ -322,7 +320,9 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
 
     const reco::PFCandidate& pfParticle= (*pfParticlesColl)[iPF]; 
 
-    if(iMatch == (int)iPF)
+    if (pfParticle.superClusterRef().isNonnull() && 
+	photon->superCluster().isNonnull() && 
+	pfParticle.superClusterRef() == photon->superCluster())
       continue;
 
     if(pfParticle.pdgId()==22){
