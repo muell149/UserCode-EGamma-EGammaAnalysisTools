@@ -298,19 +298,6 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
     fIsolationInRingsChargedAll[isoBin]=0.;
   }
   
-  // Set the vertex of reco::Photon to the first PV
-  math::XYZVector direction = math::XYZVector(photon->superCluster()->x() - (*vtx).x(), 
-					      photon->superCluster()->y() - (*vtx).y(), 
-					      photon->superCluster()->z() - (*vtx).z());
-  math::XYZVector momentum = direction.unit() * photon->energy();
-  const reco::Particle::LorentzVector newPho(momentum.x(), momentum.y(), momentum.z(), photon->energy());
-
-  fEta = newPho.Eta();
-  fPhi = newPho.Phi();
-  fPt  = newPho.Pt();
-  fVx  = newPho.x();
-  fVy  = newPho.y();
-  fVz  = newPho.z();
   iMissHits = 0;
 
   refSC = photon->superCluster();
@@ -327,13 +314,35 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
 
     if(pfParticle.pdgId()==22){
     
+      // Set the vertex of reco::Photon to the first PV
+      math::XYZVector direction = math::XYZVector(photon->superCluster()->x() - pfParticle.vx(), 
+  	  			    	          photon->superCluster()->y() - pfParticle.vy(), 
+		    				  photon->superCluster()->z() - pfParticle.vz());
+
+      fEta = direction.Eta();
+      fPhi = direction.Phi();
+      fVx  = pfParticle.vx();
+      fVy  = pfParticle.vy();
+      fVz  = pfParticle.vz();
+
       if(isPhotonParticleVetoed(&pfParticle)>=0.){
 	isoBin = (int)(fDeltaR/fRingSize);
 	fIsolationInRingsPhoton[isoBin]  = fIsolationInRingsPhoton[isoBin] + pfParticle.pt();
       }
       
     }else if(abs(pfParticle.pdgId())==130){
-        
+       
+       // Set the vertex of reco::Photon to the first PV
+      math::XYZVector direction = math::XYZVector(photon->superCluster()->x() - pfParticle.vx(), 
+                                                  photon->superCluster()->y() - pfParticle.vy(),
+                                                  photon->superCluster()->z() - pfParticle.vz());
+
+      fEta = direction.Eta();
+      fPhi = direction.Phi();
+      fVx  = pfParticle.vx();
+      fVy  = pfParticle.vy();
+      fVz  = pfParticle.vz();
+ 
       if(isNeutralParticleVetoed( &pfParticle)>=0.){
        	isoBin = (int)(fDeltaR/fRingSize);
 	fIsolationInRingsNeutral[isoBin]  = fIsolationInRingsNeutral[isoBin] + pfParticle.pt();
@@ -341,6 +350,18 @@ vector<float >  PFIsolationEstimator::fGetIsolationInRings(const reco::Photon * 
 
       //}else if(abs(pfParticle.pdgId()) == 11 ||abs(pfParticle.pdgId()) == 13 || abs(pfParticle.pdgId()) == 211){
     }else if(abs(pfParticle.pdgId()) == 211){
+ 
+      // Set the vertex of reco::Photon to the first PV
+      math::XYZVector direction = math::XYZVector(photon->superCluster()->x() - (*vtx).x(),
+                                                  photon->superCluster()->y() - (*vtx).y(),
+                                                  photon->superCluster()->z() - (*vtx).z());
+
+      fEta = direction.Eta();
+      fPhi = direction.Phi();
+      fVx  = (*vtx).x();
+      fVy  = (*vtx).y();
+      fVz  = (*vtx).z();
+
       if(isChargedParticleVetoed(  &pfParticle, vtx, vertices)>=0.){
 	isoBin = (int)(fDeltaR/fRingSize);
 	fIsolationInRingsCharged[isoBin]  = fIsolationInRingsCharged[isoBin] + pfParticle.pt();
