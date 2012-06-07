@@ -111,7 +111,7 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
     setDeltaRVetoBarrelPhotons(-1);
     setDeltaRVetoBarrelNeutrals(-1);
     setDeltaRVetoBarrelCharged(0.02);
-    setRectangleDeltaPhiVetoBarrelPhotons(-1);
+    setRectangleDeltaPhiVetoBarrelPhotons(1.);
     setRectangleDeltaPhiVetoBarrelNeutrals(-1);
     setRectangleDeltaPhiVetoBarrelCharged(-1);
     setRectangleDeltaEtaVetoBarrelPhotons(0.015);
