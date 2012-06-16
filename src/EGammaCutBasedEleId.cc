@@ -115,7 +115,8 @@ bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint, const bool isEB, con
     const bool vtxFitConversion, const unsigned int mHits, const double rho)
 {
     unsigned int mask = EgammaCutBasedEleId::TestWP(workingPoint, isEB, pt, eta, dEtaIn, dPhiIn,
-        sigmaIEtaIEta, hoe, ooemoop, d0vtx, dzvtx, iso_nh, iso_ch, iso_em, vtxFitConversion, mHits, rho);
+        sigmaIEtaIEta, hoe, ooemoop, d0vtx, dzvtx, iso_ch, iso_em, iso_nh, vtxFitConversion, mHits, rho);
+
     if ((mask & PassAll) == PassAll) return true;
     return false;
 }
