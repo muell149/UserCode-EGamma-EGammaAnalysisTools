@@ -1180,7 +1180,7 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
   // Energy matching
   fMVAVar_HoE             =  ele.hadronicOverEm();
   fMVAVar_EoP             =  ele.eSuperClusterOverP();
-  fMVAVar_IoEmIoP         =  (1.0/ele.superCluster()->energy()) - (1.0 / ele.gsfTrack()->p()); //this is the proper variable
+  fMVAVar_IoEmIoP         =  (1.0/ele.superCluster()->energy()) - (1.0 / ele.trackMomentumAtVtx().R()); //this is the proper variable
   fMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
   fMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
 
