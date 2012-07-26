@@ -86,7 +86,8 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
     setApplyPFPUVeto(kTRUE);
     setApplyMissHitPhVeto(kTRUE); //NOTE: decided to go for this on the 26May 2012
     //Current recommended default value for the electrons
-    
+    setUseCrystalSize(kFALSE);
+
     // setDeltaRVetoBarrelPhotons(1E-5);   //NOTE: just to be in synch with the isoDep: fixed isoDep in 26May
     // setDeltaRVetoBarrelCharged(1E-5);    //NOTE: just to be in synch with the isoDep: fixed isoDep in 26May
     // setDeltaRVetoBarrelNeutrals(1E-5);   //NOTE: just to be in synch with the isoDep: fixed isoDep in 26May
@@ -106,6 +107,7 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
     setDeltaRVetoEndcap(kTRUE);
     setRectangleVetoBarrel(kTRUE);
     setRectangleVetoEndcap(kFALSE);
+    setUseCrystalSize(kTRUE);
     setConeSize(0.3);
 
     setDeltaRVetoBarrelPhotons(-1);
@@ -127,6 +129,7 @@ void PFIsolationEstimator::initialize( Bool_t  bApplyVeto, int iParticleType ) {
     setRectangleDeltaEtaVetoEndcapPhotons(-1);
     setRectangleDeltaEtaVetoEndcapNeutrals(-1);
     setRectangleDeltaEtaVetoEndcapCharged(-1);
+    setNumberOfCrystalEndcapPhotons(4.);
   }
 
 
@@ -498,6 +501,10 @@ float  PFIsolationEstimator::isPhotonParticleVetoed( const reco::PFCandidate* pf
       }
     }
   }else{
+    if (bUseCrystalSize == true) {
+      fDeltaRVetoEndcapPhotons = 0.00864*fabs(sinh(refSC->position().eta()))*fNumberOfCrystalEndcapPhotons;
+    }
+
     if(bDeltaRVetoEndcap){
       if(fDeltaR < fDeltaRVetoEndcapPhotons)
 	return -999.;

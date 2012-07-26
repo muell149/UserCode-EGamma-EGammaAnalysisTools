@@ -99,6 +99,8 @@ class PFIsolationEstimator{
   void setDeltaRVetoEndcap(Bool_t bValue = kTRUE){  bDeltaRVetoEndcap = bValue;};
   void setRectangleVetoBarrel(Bool_t bValue = kTRUE){  bRectangleVetoBarrel = bValue;};
   void setRectangleVetoEndcap(Bool_t bValue = kTRUE){  bRectangleVetoEndcap = bValue;};
+  //Use crystal size
+  void setUseCrystalSize(Bool_t bValue = kFALSE) { bUseCrystalSize = bValue;};
 
   //Veto Values
   void setDeltaRVetoBarrelPhotons(float fValue = -1.0){fDeltaRVetoBarrelPhotons=fValue;};
@@ -107,7 +109,7 @@ class PFIsolationEstimator{
   void setDeltaRVetoEndcapPhotons(float fValue = -1.0){fDeltaRVetoEndcapPhotons=fValue;};
   void setDeltaRVetoEndcapNeutrals(float fValue = -1.0){fDeltaRVetoEndcapNeutrals=fValue;};
   void setDeltaRVetoEndcapCharged(float fValue = -1.0){fDeltaRVetoEndcapCharged=fValue;};
-
+  void setNumberOfCrystalEndcapPhotons(float fValue = -1){fNumberOfCrystalEndcapPhotons=fValue;};
   
   void setRectangleDeltaPhiVetoBarrelPhotons(float fValue = -1.0){fRectangleDeltaPhiVetoBarrelPhotons=fValue;};
   void setRectangleDeltaPhiVetoBarrelNeutrals(float fValue = -1.0){fRectangleDeltaPhiVetoBarrelNeutrals=fValue;};
@@ -175,6 +177,7 @@ class PFIsolationEstimator{
   Bool_t                    bApplyDzDxyVeto;  
   Bool_t                    bApplyPFPUVeto;
   Bool_t                    bApplyMissHitPhVeto;
+  Bool_t		    bUseCrystalSize;
 
   Bool_t                    bDeltaRVetoBarrel; 
   Bool_t                    bDeltaRVetoEndcap; 
@@ -189,6 +192,8 @@ class PFIsolationEstimator{
   float                   fDeltaRVetoEndcapPhotons; 
   float                   fDeltaRVetoEndcapNeutrals;
   float                   fDeltaRVetoEndcapCharged;  
+
+  float			  fNumberOfCrystalEndcapPhotons;
 
   float                   fRectangleDeltaPhiVetoBarrelPhotons; 
   float                   fRectangleDeltaPhiVetoBarrelNeutrals;
