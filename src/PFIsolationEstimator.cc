@@ -502,6 +502,10 @@ float  PFIsolationEstimator::isPhotonParticleVetoed( const reco::PFCandidate* pf
     }
   }else{
     if (bUseCrystalSize == true) {
+      // In endcap
+      // eta width: 0.00864 * fabs( sinh(phoSCEta) * tanh(phoSCEta) )
+      // phi width: 0.00864 * fabs( sinh(phoSCEta) )
+      fDeltaR = sqrt( pow(fDeltaPhi, 2) + pow(fDeltaEta/tanh(refSC->position().eta()), 2) );
       fDeltaRVetoEndcapPhotons = 0.00864*fabs(sinh(refSC->position().eta()))*fNumberOfCrystalEndcapPhotons;
     }
 
@@ -514,6 +518,10 @@ float  PFIsolationEstimator::isPhotonParticleVetoed( const reco::PFCandidate* pf
 	 return -999.;
       }
     }
+
+    // re-initialize dR value
+    if (bUseCrystalSize == true)
+      fDeltaR = deltaR(fEta,fPhi,pfIsoCand->eta(),pfIsoCand->phi()); 
   }
 
   return fDeltaR;
