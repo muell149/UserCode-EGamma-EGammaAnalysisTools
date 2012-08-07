@@ -269,7 +269,7 @@ void EGammaMvaEleEstimator::initialize( std::string methodName,
       tmpTMVAReader->AddVariable("kfchi2",                     &fMVAVar_kfchi2);
       tmpTMVAReader->AddVariable("kflayers",                   &fMVAVar_kfhits);
       tmpTMVAReader->AddVariable("gsfchi2",                    &fMVAVar_gsfchi2);
-
+ 
       // Geometrical matchings
       tmpTMVAReader->AddVariable("deta",                       &fMVAVar_deta);
       tmpTMVAReader->AddVariable("dphi",                       &fMVAVar_dphi);
@@ -281,7 +281,7 @@ void EGammaMvaEleEstimator::initialize( std::string methodName,
       tmpTMVAReader->AddVariable("etawidth",                   &fMVAVar_etawidth);
       tmpTMVAReader->AddVariable("phiwidth",                   &fMVAVar_phiwidth);
       tmpTMVAReader->AddVariable("OneMinusSeedE1x5OverE5x5",   &fMVAVar_OneMinusE1x5E5x5);
-      tmpTMVAReader->AddVariable("R9",                         &fMVAVar_R9);
+      tmpTMVAReader->AddVariable("R9",                         &fMVAVar_R9); 
 
       // Energy matching
       tmpTMVAReader->AddVariable("HoE",                        &fMVAVar_HoE);
@@ -627,11 +627,11 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(Double_t fbrem,
     return -9999;
   }
 
-  fMVAVar_fbrem           = fbrem; 
-  fMVAVar_kfchi2          = kfchi2;
+  fMVAVar_fbrem           = ( fbrem < -1.0 ) ? -1.0 : fbrem; 
+  fMVAVar_kfchi2          = ( kfchi2 > 10 ) ? 10 : kfchi2;
   fMVAVar_kfhits          = float(kfhits);   // BTD does not support int variables
-  fMVAVar_gsfchi2         = gsfchi2;
-  fMVAVar_deta            = deta;
+  fMVAVar_gsfchi2         = ( gsfchi2 > 200 ) ? 200 : gsfchi2;
+  fMVAVar_deta            = ( fabs(deta) > 0.06 ) ? 0.06 : fabs(deta);
   fMVAVar_dphi            = dphi;
   fMVAVar_detacalo        = detacalo;
 
@@ -639,13 +639,13 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(Double_t fbrem,
   fMVAVar_spp             = spp;
   fMVAVar_etawidth        = etawidth;
   fMVAVar_phiwidth        = phiwidth;
-  fMVAVar_OneMinusE1x5E5x5= OneMinusE1x5E5x5;
-  fMVAVar_R9              = R9;
+  fMVAVar_OneMinusE1x5E5x5= max(min(double(OneMinusE1x5E5x5),2.0),-1.0);
+  fMVAVar_R9              = (R9 > 5) ? 5: R9;
 
   fMVAVar_HoE             = HoE;
-  fMVAVar_EoP             = EoP;
+  fMVAVar_EoP             = (EoP > 20) ? 20 : EoP;
   fMVAVar_IoEmIoP         = IoEmIoP;
-  fMVAVar_eleEoPout       = eleEoPout;
+  fMVAVar_eleEoPout       = (eleEoPout > 20) ? 20 : eleEoPout;
   fMVAVar_PreShowerOverRaw= PreShowerOverRaw;
 
   fMVAVar_d0              = d0;
@@ -671,7 +671,6 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(Double_t fbrem,
   fMVAVar_eta             = eta;
   fMVAVar_pt              = pt;
 
-  bindVariables();
   Double_t mva = -9999;  
   if (fUseBinnedVersion) {
     mva = fTMVAReader[GetMVABin(fMVAVar_eta,fMVAVar_pt)]->EvaluateMVA(fMethodname);
@@ -1153,15 +1152,17 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
   validKF = (myTrackRef.isNonnull());  
 
   // Pure tracking variables
-  fMVAVar_fbrem           =  ele.fbrem();
-  fMVAVar_kfchi2          =  (validKF) ? myTrackRef->normalizedChi2() : 0 ;
+  fMVAVar_fbrem           =  (ele.fbrem() < -1. ) ? -1. : ele.fbrem();
+  fMVAVar_kfchi2           =  (validKF) ? myTrackRef->normalizedChi2() : 0 ; 
+  if (fMVAVar_kfchi2 > 10) fMVAVar_kfchi2 = 10;
   fMVAVar_kfhits          =  (validKF) ? myTrackRef->hitPattern().trackerLayersWithMeasurement() : -1. ; 
   fMVAVar_kfhitsall          =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ;   //  save also this in your ntuple as possible alternative
   fMVAVar_gsfchi2         =  ele.gsfTrack()->normalizedChi2();  
+  if (fMVAVar_gsfchi2 > 200) fMVAVar_gsfchi2 = 200;
 
   
   // Geometrical matchings
-  fMVAVar_deta            =  ele.deltaEtaSuperClusterTrackAtVtx();
+  fMVAVar_deta            =  ( fabs(ele.deltaEtaSuperClusterTrackAtVtx()) > 0.06 ) ? 0.06 : fabs(ele.deltaEtaSuperClusterTrackAtVtx());
   fMVAVar_dphi            =  ele.deltaPhiSuperClusterTrackAtVtx();
   fMVAVar_detacalo        =  ele.deltaEtaSeedClusterTrackAtCalo();
 
@@ -1175,15 +1176,16 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
   fMVAVar_etawidth        =  ele.superCluster()->etaWidth();
   fMVAVar_phiwidth        =  ele.superCluster()->phiWidth();
   fMVAVar_OneMinusE1x5E5x5        =  (ele.e5x5()) !=0. ? 1.-(ele.e1x5()/ele.e5x5()) : -1. ;
+  fMVAVar_OneMinusE1x5E5x5 = max(min(double(fMVAVar_OneMinusE1x5E5x5),2.0),-1.0);
   fMVAVar_R9              =  myEcalCluster.e3x3(*(ele.superCluster()->seed())) / ele.superCluster()->rawEnergy();
+  if (fMVAVar_R9 > 5) fMVAVar_R9 = 5;
 
   // Energy matching
   fMVAVar_HoE             =  ele.hadronicOverEm();
-  fMVAVar_EoP             =  ele.eSuperClusterOverP();
+  fMVAVar_EoP             =  ( ele.eSuperClusterOverP() > 20 ) ? 20 : ele.eSuperClusterOverP();
   fMVAVar_IoEmIoP         =  (1.0/ele.superCluster()->energy()) - (1.0 / ele.trackMomentumAtVtx().R()); //this is the proper variable
-  fMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
+  fMVAVar_eleEoPout       =  ( ele.eEleClusterOverPout() > 20 ) ? 20 : ele.eEleClusterOverPout();
   fMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
-
 
   // Spectators
   fMVAVar_eta             =  ele.superCluster()->eta();         
@@ -1327,7 +1329,6 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
   }
 
   // evaluate
-  bindVariables();
   Double_t mva = -9999;  
   if (fUseBinnedVersion) {
     mva = fTMVAReader[GetMVABin(fMVAVar_eta,fMVAVar_pt)]->EvaluateMVA(fMethodname);
@@ -1410,10 +1411,7 @@ void EGammaMvaEleEstimator::bindVariables() {
   if(fMVAVar_dphi > 0.6)
     fMVAVar_dphi = 0.6;
   
-  
-//   if(fMVAVar_EoPout > 20.)
-//     fMVAVar_EoPout = 20.;
-  
+
   if(fMVAVar_EoP > 20.)
     fMVAVar_EoP = 20.;
   
@@ -1424,12 +1422,6 @@ void EGammaMvaEleEstimator::bindVariables() {
   fMVAVar_detacalo = fabs(fMVAVar_detacalo);
   if(fMVAVar_detacalo > 0.2)
     fMVAVar_detacalo = 0.2;
-  
-  
-//   fMVAVar_dphicalo = fabs(fMVAVar_dphicalo);
-//   if(fMVAVar_dphicalo > 0.4)
-//     fMVAVar_dphicalo = 0.4;
-  
   
   if(fMVAVar_OneMinusE1x5E5x5 < -1.)
     fMVAVar_OneMinusE1x5E5x5 = -1;
