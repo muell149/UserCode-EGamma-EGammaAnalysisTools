@@ -182,7 +182,6 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig):
                    EGammaMvaEleEstimator::kIsoRings,
                    kTRUE,
                    eleiso_weightfiles);
-  fElectronIsoMVA->SetPrintMVADebug(kTRUE);
 
   ev = 0;
   myMVANonTrig = new EGammaMvaEleEstimator();
@@ -696,7 +695,7 @@ ElectronAnalyzer::evaluate_mvas(const edm::Event& iEvent, const edm::EventSetup&
   const reco::MuonCollection inMuons = *(hMuonProduct.product());  
 
 
-	reco::MuonCollection IdentifiedMuons;
+  reco::MuonCollection IdentifiedMuons;
   reco::GsfElectronCollection IdentifiedElectrons;
 
   for (reco::GsfElectronCollection::const_iterator iE = inElectrons.begin(); 
@@ -764,7 +763,7 @@ ElectronAnalyzer::evaluate_mvas(const edm::Event& iEvent, const edm::EventSetup&
 
 		GsfElectron ele = *iE;
 	
-		double isomva = fElectronIsoMVA->mvaValue( ele, pvCol->at(0), 
+		double isomva = fElectronIsoMVA->isoMvaValue( ele, pvCol->at(0), 
                                    inPfCands, Rho, 
                                    ElectronEffectiveArea::kEleEAData2011,
                                    IdentifiedElectrons, IdentifiedMuons);
