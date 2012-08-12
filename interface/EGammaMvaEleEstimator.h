@@ -14,7 +14,7 @@
 ///  Then you need just to load it in your root macro the lib with the correct path, eg:
 ///  gSystem->Load("/data/benedet/CMSSW_5_2_2/lib/slc5_amd64_gcc462/pluginEGammaEGammaAnalysisTools.so");
 
-#define STANDALONE   // <---- this line
+//#define STANDALONE   // <---- this line
 
 #ifndef EGammaMvaEleEstimator_H
 #define EGammaMvaEleEstimator_H
@@ -74,7 +74,7 @@ class EGammaMvaEleEstimator{
                          ElectronEffectiveArea::ElectronEffectiveAreaTarget EATarget,
                          const reco::GsfElectronCollection &IdentifiedElectrons,
                          const reco::MuonCollection &IdentifiedMuons,
-                         bool printDebug);
+                         bool printDebug = kFALSE);
     Double_t IDIsoCombinedMvaValue(const reco::GsfElectron& ele, 
                                    const reco::Vertex& vertex, 
                                    const TransientTrackBuilder& transientTrackBuilder,
