@@ -82,7 +82,7 @@ class EGammaMvaEleEstimator{
                                    const reco::PFCandidateCollection &PFCandidates,
                                    double Rho,
                                    ElectronEffectiveArea::ElectronEffectiveAreaTarget EATarget,
-                                   bool printDebug);
+                                   bool printDebug = kFALSE);
     
     Double_t isoMvaValue(Double_t Pt,
                          Double_t Eta,
