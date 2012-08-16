@@ -7,7 +7,7 @@
 #ifndef STANDALONEID
 
 bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint,
-    const reco::GsfElectronRef &ele,
+    const reco::GsfElectron &ele,
     const edm::Handle<reco::ConversionCollection> &conversions,
     const reco::BeamSpot &beamspot,
     const edm::Handle<reco::VertexCollection> &vtxs,
@@ -25,40 +25,63 @@ bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint,
     return false;
 }
 
-bool EgammaCutBasedEleId::PassTriggerCuts(TriggerWorkingPoint triggerWorkingPoint, const reco::GsfElectronRef &ele)
+bool EgammaCutBasedEleId::PassWP(WorkingPoint workingPoint,
+    const reco::GsfElectronRef &ele,
+    const edm::Handle<reco::ConversionCollection> &conversions,
+    const reco::BeamSpot &beamspot,
+    const edm::Handle<reco::VertexCollection> &vtxs,
+    const double &iso_ch,
+    const double &iso_em,
+    const double &iso_nh,
+    const double &rho)
+{
+  return PassWP(workingPoint,*ele,conversions,beamspot,vtxs,iso_ch,iso_em,iso_nh,rho);
+}
+
+bool EgammaCutBasedEleId::PassTriggerCuts(TriggerWorkingPoint triggerWorkingPoint, const reco::GsfElectron &ele)
 {
 
     // get the variables
-    bool isEB           = ele->isEB() ? true : false;
-    float pt            = ele->pt();
-    float dEtaIn        = ele->deltaEtaSuperClusterTrackAtVtx();
-    float dPhiIn        = ele->deltaPhiSuperClusterTrackAtVtx();
-    float sigmaIEtaIEta = ele->sigmaIetaIeta();
-    float hoe           = ele->hadronicOverEm();
-    float trackIso      = ele->dr03TkSumPt();
-    float ecalIso       = ele->dr03EcalRecHitSumEt();
-    float hcalIso       = ele->dr03HcalTowerSumEt();
+    bool isEB           = ele.isEB() ? true : false;
+    float pt            = ele.pt();
+    float dEtaIn        = ele.deltaEtaSuperClusterTrackAtVtx();
+    float dPhiIn        = ele.deltaPhiSuperClusterTrackAtVtx();
+    float sigmaIEtaIEta = ele.sigmaIetaIeta();
+    float hoe           = ele.hadronicOverEm();
+    float trackIso      = ele.dr03TkSumPt();
+    float ecalIso       = ele.dr03EcalRecHitSumEt();
+    float hcalIso       = ele.dr03HcalTowerSumEt();
 
     // test the trigger cuts
     return EgammaCutBasedEleId::PassTriggerCuts(triggerWorkingPoint, isEB, pt, dEtaIn, dPhiIn, sigmaIEtaIEta, hoe, trackIso, ecalIso, hcalIso);
 
 }
 
-bool EgammaCutBasedEleId::PassEoverPCuts(const reco::GsfElectronRef &ele)
+bool EgammaCutBasedEleId::PassTriggerCuts(TriggerWorkingPoint triggerWorkingPoint, const reco::GsfElectronRef &ele) 
+{
+  return EgammaCutBasedEleId::PassTriggerCuts(triggerWorkingPoint, *ele);
+}
+
+bool EgammaCutBasedEleId::PassEoverPCuts(const reco::GsfElectron &ele)
 {
 
     // get the variables
-    float eta           = ele->superCluster()->eta();
-    float eopin         = ele->eSuperClusterOverP();
-    float fbrem         = ele->fbrem();    
+    float eta           = ele.superCluster()->eta();
+    float eopin         = ele.eSuperClusterOverP();
+    float fbrem         = ele.fbrem();    
 
     // test the eop/fbrem cuts
     return EgammaCutBasedEleId::PassEoverPCuts(eta, eopin, fbrem);
 
 }
 
+bool EgammaCutBasedEleId::PassEoverPCuts(const reco::GsfElectronRef &ele) {
+  return PassEoverPCuts(*ele);
+}
+
+
 unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
-    const reco::GsfElectronRef &ele,
+    const reco::GsfElectron &ele,
     const edm::Handle<reco::ConversionCollection> &conversions,
     const reco::BeamSpot &beamspot,
     const edm::Handle<reco::VertexCollection> &vtxs,
@@ -71,32 +94,32 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
     // get the ID variables from the electron object
 
     // kinematic variables
-    bool isEB           = ele->isEB() ? true : false;
-    float pt            = ele->pt();
-    float eta           = ele->superCluster()->eta();
+    bool isEB           = ele.isEB() ? true : false;
+    float pt            = ele.pt();
+    float eta           = ele.superCluster()->eta();
 
     // id variables
-    float dEtaIn        = ele->deltaEtaSuperClusterTrackAtVtx();
-    float dPhiIn        = ele->deltaPhiSuperClusterTrackAtVtx();
-    float sigmaIEtaIEta = ele->sigmaIetaIeta();
-    float hoe           = ele->hadronicOverEm();
-    float ooemoop       = (1.0/ele->ecalEnergy() - ele->eSuperClusterOverP()/ele->ecalEnergy());
+    float dEtaIn        = ele.deltaEtaSuperClusterTrackAtVtx();
+    float dPhiIn        = ele.deltaPhiSuperClusterTrackAtVtx();
+    float sigmaIEtaIEta = ele.sigmaIetaIeta();
+    float hoe           = ele.hadronicOverEm();
+    float ooemoop       = (1.0/ele.ecalEnergy() - ele.eSuperClusterOverP()/ele.ecalEnergy());
 
     // impact parameter variables
     float d0vtx         = 0.0;
     float dzvtx         = 0.0;
     if (vtxs->size() > 0) {
         reco::VertexRef vtx(vtxs, 0);    
-        d0vtx = ele->gsfTrack()->dxy(vtx->position());
-        dzvtx = ele->gsfTrack()->dz(vtx->position());
+        d0vtx = ele.gsfTrack()->dxy(vtx->position());
+        dzvtx = ele.gsfTrack()->dz(vtx->position());
     } else {
-        d0vtx = ele->gsfTrack()->dxy();
-        dzvtx = ele->gsfTrack()->dz();
+        d0vtx = ele.gsfTrack()->dxy();
+        dzvtx = ele.gsfTrack()->dz();
     }
 
     // conversion rejection variables
-    bool vtxFitConversion = ConversionTools::hasMatchedConversion(*ele, conversions, beamspot.position());
-    float mHits = ele->gsfTrack()->trackerExpectedHitsInner().numberOfHits(); 
+    bool vtxFitConversion = ConversionTools::hasMatchedConversion(ele, conversions, beamspot.position());
+    float mHits = ele.gsfTrack()->trackerExpectedHitsInner().numberOfHits(); 
 
     // get the mask value
     unsigned int mask = EgammaCutBasedEleId::TestWP(workingPoint, isEB, pt, eta, dEtaIn, dPhiIn,
@@ -106,6 +129,19 @@ unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
     return mask;
 
 }
+
+unsigned int EgammaCutBasedEleId::TestWP(WorkingPoint workingPoint,
+					 const reco::GsfElectronRef &ele,
+					 const edm::Handle<reco::ConversionCollection> &conversions,
+					 const reco::BeamSpot &beamspot,
+					 const edm::Handle<reco::VertexCollection> &vtxs,
+					 const double &iso_ch,
+					 const double &iso_em,
+					 const double &iso_nh,
+					 const double &rho) {
+  return TestWP(workingPoint,*ele,conversions,beamspot,vtxs,iso_ch,iso_em,iso_nh,rho);
+}
+
 
 #endif
 

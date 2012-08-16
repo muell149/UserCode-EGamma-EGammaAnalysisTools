@@ -81,12 +81,38 @@ bool PassWP(const WorkingPoint workingPoint,
     const double &iso_nh,
     const double &rho);
 
+
+bool PassWP(const WorkingPoint workingPoint,
+    const reco::GsfElectron &ele,
+    const edm::Handle<reco::ConversionCollection> &conversions,
+    const reco::BeamSpot &beamspot,
+    const edm::Handle<reco::VertexCollection> &vtxs,
+    const double &iso_ch,
+    const double &iso_em,
+    const double &iso_nh,
+    const double &rho);
+
+
 bool PassTriggerCuts(const TriggerWorkingPoint triggerWorkingPoint, const reco::GsfElectronRef &ele);
+
+bool PassTriggerCuts(const TriggerWorkingPoint triggerWorkingPoint, const reco::GsfElectron &ele);
 
 bool PassEoverPCuts(const reco::GsfElectronRef &ele);
 
+bool PassEoverPCuts(const reco::GsfElectron &ele);
+
 unsigned int TestWP(const WorkingPoint workingPoint,
     const reco::GsfElectronRef &ele,
+    const edm::Handle<reco::ConversionCollection> &conversions,
+    const reco::BeamSpot &beamspot,
+    const edm::Handle<reco::VertexCollection> &vtxs,
+    const double &iso_ch,
+    const double &iso_em,
+    const double &iso_nh,
+    const double &rho);
+
+unsigned int TestWP(const WorkingPoint workingPoint,
+    const reco::GsfElectron &ele,
     const edm::Handle<reco::ConversionCollection> &conversions,
     const reco::BeamSpot &beamspot,
     const edm::Handle<reco::VertexCollection> &vtxs,
