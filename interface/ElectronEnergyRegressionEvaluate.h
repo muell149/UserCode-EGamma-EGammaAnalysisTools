@@ -1,16 +1,14 @@
 /*
    Class to apply electron energy regression. To be used in conjunction with the output of the macro trainElectronEnergyRegression.C
  */
-#ifndef ELECTRONENERGYREGRESSIONEVALUATE
-#define ELECTRONENERGYREGRESSIONEVALUATE
+#ifndef ELECTRONENERGYREGRESSIONEVALUATE_H
+#define ELECTRONENERGYREGRESSIONEVALUATE_H
 
 #include "TFile.h"
 #include "TTree.h"
 
 // For applying regression
 #include "CondFormats/EgammaObjects/interface/GBRForest.h"
-#include "MitEdm/GBRTrain/interface/GBRApply.h"
-#include "MitEdm/GBRTrain/interface/GBRTrainer.h"
 
 #endif
 
@@ -19,15 +17,15 @@ class ElectronEnergyRegressionEvaluate{
 		ElectronEnergyRegressionEvaluate();
 		~ElectronEnergyRegressionEvaluate();
 
-		enum versionType {
-		  NoTrkVar,
-		  WithTrkVar,
-		  NoTrkVarTwoPtBins,
-		  WithTrkVarTwoPtBins
+		enum ElectronEnergyRegressionType {
+		  kNoTrkVar,
+		  kWithTrkVar,
+		  kNoTrkVarTwoPtBins,
+		  kWithTrkVarTwoPtBins
 		};
 
 		void initialize(std::string weightsFile,
-				ElectronEnergyRegressionEvaluate::versionType type);
+				ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionType type);
 
 		bool isInitialized() const {return fIsInitialized;}
 
@@ -113,7 +111,7 @@ class ElectronEnergyRegressionEvaluate{
 
 	private:
 		bool fIsInitialized;
-		ElectronEnergyRegressionEvaluate::versionType fVersionType;
+		ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionType fVersionType;
 		GBRForest *forest_eb;		// Pointer to the GBRForest for barrel
 		GBRForest *forest_ee;		// Pointer to the GBRForest for endcap
 		GBRForest *forest_lowPt_eb;	// Pointer to the GBRForest for barrel, low Pt

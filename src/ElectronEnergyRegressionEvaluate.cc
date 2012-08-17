@@ -2,13 +2,13 @@
    Class to apply electron energy regression. To be used in conjunction with the output of the macro trainElectronEnergyRegression.C
 
  */
-#include "../interface/ElectronEnergyRegressionEvaluate.h"
+#include "EGamma/EGammaAnalysisTools/interface/ElectronEnergyRegressionEvaluate.h"
 #include <cmath>
 #include <cassert>
 
 ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionEvaluate() : 
 	fIsInitialized(kFALSE),
-	fVersionType(NoTrkVar),
+	fVersionType(kNoTrkVar),
 	forest_eb(0), 
 	forest_ee(0), 
 	forest_lowPt_eb(0), 
@@ -22,12 +22,12 @@ ElectronEnergyRegressionEvaluate::~ElectronEnergyRegressionEvaluate() {}
 
 
 void ElectronEnergyRegressionEvaluate::initialize(std::string weightsFile, 
-		ElectronEnergyRegressionEvaluate::versionType type) {
+		ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionType type) {
 
   // Loading forest object according to different versions
   TFile file(weightsFile.c_str());
 
-  if (type == NoTrkVar || type == WithTrkVar) {
+  if (type == kNoTrkVar || type == kWithTrkVar) {
     forest_eb = (GBRForest*) file.Get("EBCorrection");
     forest_ee = (GBRForest*) file.Get("EECorrection");
 
@@ -36,7 +36,7 @@ void ElectronEnergyRegressionEvaluate::initialize(std::string weightsFile,
     assert(forest_ee);
   }
 
-  else if (type == NoTrkVarTwoPtBins || type == WithTrkVarTwoPtBins) {
+  else if (type == kNoTrkVarTwoPtBins || type == kWithTrkVarTwoPtBins) {
     forest_lowPt_eb = (GBRForest*) file.Get("EBCorrection_lowPt");
     forest_lowPt_ee = (GBRForest*) file.Get("EECorrection_lowPt");
     forest_highPt_eb = (GBRForest*) file.Get("EBCorrection_highPt");
@@ -99,7 +99,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
   }
 
   // Checking if type is correct
-  assert(fVersionType == NoTrkVar || fVersionType == NoTrkVarTwoPtBins);
+  assert(fVersionType == kNoTrkVar || fVersionType == kNoTrkVarTwoPtBins);
 
   // Now applying regression according to version and (endcap/barrel)
   float *vals = (scEta <= 1.479) ? new float[39] : new float[32];
@@ -183,12 +183,12 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
   // Now evaluating the regression
   double regressionResult = 0;
 
-  if (fVersionType == NoTrkVar) {
+  if (fVersionType == kNoTrkVar) {
     if (scEta <= 1.479) regressionResult = SCRawEnergy * forest_eb->GetResponse(vals);
     else if (scEta > 1.479) regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_ee->GetResponse(vals);
   }
 
-  else if (fVersionType == NoTrkVarTwoPtBins) {
+  else if (fVersionType == kNoTrkVarTwoPtBins) {
     if (scEta <= 1.479) {
       if (pt <= 15) regressionResult = pt * forest_lowPt_eb->GetResponse(vals);
       if (pt > 15) regressionResult = SCRawEnergy * forest_highPt_eb->GetResponse(vals);
@@ -253,7 +253,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
   }
 
   // Checking if fVersionType is correct
-  assert(fVersionType == WithTrkVar || fVersionType == WithTrkVarTwoPtBins);
+  assert(fVersionType == kWithTrkVar || fVersionType == kWithTrkVarTwoPtBins);
 
   float *vals = (scEta <= 1.479) ? new float[43] : new float[36];
   if (scEta <= 1.479) {		// Barrel
@@ -344,12 +344,12 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
   // Now evaluating the regression
   double regressionResult = 0;
 
-  if (fVersionType == WithTrkVar) {
+  if (fVersionType == kWithTrkVar) {
     if (scEta <= 1.479) regressionResult = SCRawEnergy * forest_eb->GetResponse(vals);
     else if (scEta > 1.479) regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_ee->GetResponse(vals);
   }
 
-  else if (fVersionType == WithTrkVarTwoPtBins) {
+  else if (fVersionType == kWithTrkVarTwoPtBins) {
     if (scEta <= 1.479) {
       if (pt <= 15) regressionResult = pt * forest_lowPt_eb->GetResponse(vals);
       if (pt > 15) regressionResult = SCRawEnergy * forest_highPt_eb->GetResponse(vals);
