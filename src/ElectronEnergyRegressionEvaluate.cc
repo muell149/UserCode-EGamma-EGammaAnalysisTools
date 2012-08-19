@@ -1,10 +1,15 @@
-/*
-   Class to apply electron energy regression. To be used in conjunction with the output of the macro trainElectronEnergyRegression.C
-
- */
 #include "EGamma/EGammaAnalysisTools/interface/ElectronEnergyRegressionEvaluate.h"
 #include <cmath>
 #include <cassert>
+
+#ifndef STANDALONE
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "DataFormats/EcalDetId/interface/EcalSubdetector.h"
+#include "RecoEgamma/EgammaTools/interface/EcalClusterLocal.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EcalDetId/interface/EBDetId.h"
+#include "DataFormats/EcalDetId/interface/EEDetId.h"
+#endif
 
 ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionEvaluate() : 
 	fIsInitialized(kFALSE),
@@ -54,12 +59,153 @@ void ElectronEnergyRegressionEvaluate::initialize(std::string weightsFile,
   fIsInitialized = kTRUE;
 }
 
+
+
+#ifndef STANDALONE
+double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::GsfElectron *ele, 
+                                                                   EcalClusterLazyTools &myEcalCluster, 
+                                                                   const edm::EventSetup &setup,
+                                                                   double rho, double nvertices, 
+                                                                   bool printDebug) {
+  
+  if (!fIsInitialized) {
+    std::cout << "Error: Electron Energy Regression has not been initialized yet. return 0. \n";
+    return 0;
+  }
+
+  std::vector<float> vCov = myEcalCluster.localCovariances(*(ele->superCluster()->seed()));
+  double spp = 0;
+  if (!isnan(vCov[2])) spp = sqrt (vCov[2]);
+  double sep;
+  if (ele->sigmaIetaIeta()*spp > 0) {
+    sep = vCov[1] / ele->sigmaIetaIeta()*spp;
+  } else if (vCov[1] > 0) {
+    sep = 1.0;
+  } else {
+    sep = -1.0;
+  }
+
+  //local coordinates
+  EcalClusterLocal local;  
+  double ietaseed = 0;
+  double iphiseed = 0;
+  double etacryseed = 0;
+  double phicryseed = 0;
+
+  if (ele->superCluster()->seed()->hitsAndFractions().at(0).first.subdetId()==EcalBarrel) {
+    float etacry, phicry, thetatilt, phitilt;
+    int ieta, iphi;
+    local.localCoordsEB(*ele->superCluster()->seed(),setup,etacry,phicry,ieta,iphi,thetatilt,phitilt);
+    
+    EBDetId edet(ele->superCluster()->seed()->hitsAndFractions().at(0).first);
+    ietaseed = edet.ieta();
+    iphiseed = edet.iphi();
+    etacryseed = etacry;
+    phicryseed = phicry;
+  }
+  
+  if (printDebug) {
+    std::cout << "Regression Type: " << fVersionType << std::endl;
+    std::cout << "Electron : " << ele->pt() << " " << ele->eta() << " " << ele->phi() << "\n";
+  }
+
+  if (fVersionType == kNoTrkVar || fVersionType == kNoTrkVarTwoPtBins) {
+    return regressionValueNoTrkVar(
+      ele->superCluster()->rawEnergy(),
+      ele->superCluster()->eta(),
+      ele->superCluster()->phi(),
+      myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
+      ele->superCluster()->etaWidth(),
+      ele->superCluster()->phiWidth(),
+      ele->superCluster()->clustersSize(),
+      ele->hadronicOverEm(),
+      rho,
+      nvertices,
+      ele->superCluster()->seed()->eta(),
+      ele->superCluster()->seed()->phi(),
+      ele->superCluster()->seed()->energy(),
+      myEcalCluster.e3x3(*ele->superCluster()->seed()),
+      myEcalCluster.e5x5(*ele->superCluster()->seed()),
+      ele->sigmaIetaIeta(),
+      spp,
+      sep,
+      myEcalCluster.eMax(*ele->superCluster()->seed()),
+      myEcalCluster.e2nd(*ele->superCluster()->seed()),
+      myEcalCluster.eTop(*ele->superCluster()->seed()),
+      myEcalCluster.eBottom(*ele->superCluster()->seed()),
+      myEcalCluster.eLeft(*ele->superCluster()->seed()),
+      myEcalCluster.eRight(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
+      ele->pt(),
+      ietaseed,
+      iphiseed,
+      etacryseed,
+      phicryseed,
+      ele->superCluster()->preshowerEnergy(),
+      printDebug
+      );
+  } else if (fVersionType == kWithTrkVar || fVersionType == kWithTrkVarTwoPtBins) {
+    return regressionValueWithTrkVar(
+      ele->superCluster()->rawEnergy(),
+      ele->superCluster()->eta(),
+      ele->superCluster()->phi(),
+      myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
+      ele->superCluster()->etaWidth(),
+      ele->superCluster()->phiWidth(),
+      ele->superCluster()->clustersSize(),
+      ele->hadronicOverEm(),
+      rho,
+      nvertices,
+      ele->superCluster()->seed()->eta(),
+      ele->superCluster()->seed()->phi(),
+      ele->superCluster()->seed()->energy(),
+      myEcalCluster.e3x3(*ele->superCluster()->seed()),
+      myEcalCluster.e5x5(*ele->superCluster()->seed()),
+      ele->sigmaIetaIeta(),
+      spp,
+      sep,
+      myEcalCluster.eMax(*ele->superCluster()->seed()),
+      myEcalCluster.e2nd(*ele->superCluster()->seed()),
+      myEcalCluster.eTop(*ele->superCluster()->seed()),
+      myEcalCluster.eBottom(*ele->superCluster()->seed()),
+      myEcalCluster.eLeft(*ele->superCluster()->seed()),
+      myEcalCluster.eRight(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
+      myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
+      ele->pt(),      
+      ele->trackMomentumAtVtx().R(),
+      ele->fbrem(),
+      ele->charge(),
+      ele->eSuperClusterOverP(),
+      ietaseed,
+      iphiseed,
+      etacryseed,
+      phicryseed,
+      ele->superCluster()->preshowerEnergy(),
+      printDebug
+      );
+  } else {
+    std::cout << "Warning: Electron Regression Type " << fVersionType << " is not supported. Reverting to default electron momentum.\n"; 
+    return ele->p();
+  }
+
+
+}
+#endif
+
+
 double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
 		double SCRawEnergy,
 		double scEta,
 		double scPhi,
 		double R9,
-		double E5x5,
 		double etawidth,
 		double phiwidth,
 		double NClusters,
@@ -90,7 +236,8 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
 		double IPhiSeed,
 		double EtaCrySeed,
 		double PhiCrySeed,
-		double PreShowerOverRaw ) 
+		double PreShowerOverRaw, 
+                bool printDebug) 
 {
   // Checking if instance has been initialized
   if (fIsInitialized == kFALSE) {
@@ -108,7 +255,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     vals[1]  = scEta;
     vals[2]  = scPhi;
     vals[3]  = R9;
-    vals[4]  = E5x5/SCRawEnergy;
+    vals[4]  = E5x5Seed/SCRawEnergy;
     vals[5]  = etawidth;
     vals[6]  = phiwidth;
     vals[7]  = NClusters;
@@ -150,7 +297,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     vals[1]  = scEta;
     vals[2]  = scPhi;
     vals[3]  = R9;
-    vals[4]  = E5x5/SCRawEnergy;
+    vals[4]  = E5x5Seed/SCRawEnergy;
     vals[5]  = etawidth;
     vals[6]  = phiwidth;
     vals[7]  = NClusters;
@@ -182,22 +329,59 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
 
   // Now evaluating the regression
   double regressionResult = 0;
+  Int_t BinIndex = -1;
 
   if (fVersionType == kNoTrkVar) {
-    if (scEta <= 1.479) regressionResult = SCRawEnergy * forest_eb->GetResponse(vals);
-    else if (scEta > 1.479) regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_ee->GetResponse(vals);
+    if (scEta <= 1.479) { 
+      regressionResult = SCRawEnergy * forest_eb->GetResponse(vals); 
+      BinIndex = 0;
+    }
+    else if (scEta > 1.479) {
+      regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_ee->GetResponse(vals);
+      BinIndex = 1;
+    }
   }
 
   else if (fVersionType == kNoTrkVarTwoPtBins) {
     if (scEta <= 1.479) {
-      if (pt <= 15) regressionResult = pt * forest_lowPt_eb->GetResponse(vals);
-      if (pt > 15) regressionResult = SCRawEnergy * forest_highPt_eb->GetResponse(vals);
+      if (pt <= 15) {
+        regressionResult = pt * forest_lowPt_eb->GetResponse(vals);
+        BinIndex = 0;
+      }
+      else {
+        regressionResult = SCRawEnergy * forest_highPt_eb->GetResponse(vals);
+        BinIndex = 1;
+      }
     }
-    if (scEta > 1.479) {
-      if (pt <= 15) regressionResult = (pt*(1+PreShowerOverRaw)) * forest_lowPt_ee->GetResponse(vals);
-      if (pt > 15) regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_highPt_ee->GetResponse(vals);
+    else {
+      if (pt <= 15) {
+        regressionResult = (pt*(1+PreShowerOverRaw)) * forest_lowPt_ee->GetResponse(vals);
+        BinIndex = 2;
+      }
+      else {
+        regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_highPt_ee->GetResponse(vals);
+        BinIndex = 3;
+      }
     }
   }
+  
+  //print debug
+  if (printDebug) {    
+    if (scEta <= 1.479) {
+      std::cout << "Barrel :";
+      for (uint v=0; v < 39; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    else {
+      std::cout << "Endcap :";
+      for (uint v=0; v < 32; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    std::cout << "BinIndex : " << BinIndex << "\n";
+    std::cout << "pt = " << pt << " : SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "regression energy = " << regressionResult << std::endl;
+  }
+  
 
   // Cleaning up and returning
   delete[] vals;
@@ -209,7 +393,6 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
 		double scEta,
 		double scPhi,
 		double R9,
-		double E5x5,
 		double etawidth,
 		double phiwidth,
 		double NClusters,
@@ -244,7 +427,8 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
 		double IPhiSeed,
 		double EtaCrySeed,
 		double PhiCrySeed,
-		double PreShowerOverRaw ) 
+		double PreShowerOverRaw, 
+                bool printDebug) 
 {
   // Checking if instance has been initialized
   if (fIsInitialized == kFALSE) {
@@ -261,7 +445,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
     vals[1]  = scEta;
     vals[2]  = scPhi;
     vals[3]  = R9;
-    vals[4]  = E5x5/SCRawEnergy;
+    vals[4]  = E5x5Seed/SCRawEnergy;
     vals[5]  = etawidth;
     vals[6]  = phiwidth;
     vals[7]  = NClusters;
@@ -307,7 +491,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
     vals[1]  = scEta;
     vals[2]  = scPhi;
     vals[3]  = R9;
-    vals[4]  = E5x5/SCRawEnergy;
+    vals[4]  = E5x5Seed/SCRawEnergy;
     vals[5]  = etawidth;
     vals[6]  = phiwidth;
     vals[7]  = NClusters;
@@ -359,6 +543,23 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
       if (pt > 15) regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_highPt_ee->GetResponse(vals);
     }
   }
+
+  //print debug
+  if (printDebug) {
+    if (scEta <= 1.479) {
+      std::cout << "Barrel :";
+      for (uint v=0; v < 43; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    else {
+      std::cout << "Endcap :";
+      for (uint v=0; v < 36; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    std::cout << "pt = " << pt << " : SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "regression energy = " << regressionResult << std::endl;
+  }
+
 
   // Cleaning up and returning
   delete[] vals;
