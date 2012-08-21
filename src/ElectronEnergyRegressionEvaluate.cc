@@ -111,6 +111,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
 
   if (fVersionType == kNoTrkVar || fVersionType == kNoTrkVarTwoPtBins) {
     return regressionValueNoTrkVar(
+      ele->p(),
       ele->superCluster()->rawEnergy(),
       ele->superCluster()->eta(),
       ele->superCluster()->phi(),
@@ -150,6 +151,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
       );
   } else if (fVersionType == kWithTrkVar || fVersionType == kWithTrkVarTwoPtBins) {
     return regressionValueWithTrkVar(
+      ele->p(),
       ele->superCluster()->rawEnergy(),
       ele->superCluster()->eta(),
       ele->superCluster()->phi(),
@@ -202,6 +204,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
 
 
 double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
+                double electronP, 
 		double SCRawEnergy,
 		double scEta,
 		double scPhi,
@@ -345,7 +348,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
   else if (fVersionType == kNoTrkVarTwoPtBins) {
     if (scEta <= 1.479) {
       if (pt <= 15) {
-        regressionResult = pt * forest_lowPt_eb->GetResponse(vals);
+        regressionResult = electronP * forest_lowPt_eb->GetResponse(vals);
         BinIndex = 0;
       }
       else {
@@ -355,7 +358,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     }
     else {
       if (pt <= 15) {
-        regressionResult = (pt*(1+PreShowerOverRaw)) * forest_lowPt_ee->GetResponse(vals);
+        regressionResult = electronP * forest_lowPt_ee->GetResponse(vals);
         BinIndex = 2;
       }
       else {
@@ -389,7 +392,8 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
 }
 
 double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
-		double SCRawEnergy,
+                double electronP, 
+		double SCRawEnergy,                
 		double scEta,
 		double scPhi,
 		double R9,
@@ -535,11 +539,11 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
 
   else if (fVersionType == kWithTrkVarTwoPtBins) {
     if (scEta <= 1.479) {
-      if (pt <= 15) regressionResult = pt * forest_lowPt_eb->GetResponse(vals);
+      if (pt <= 15) regressionResult = electronP * forest_lowPt_eb->GetResponse(vals);
       if (pt > 15) regressionResult = SCRawEnergy * forest_highPt_eb->GetResponse(vals);
     }
     if (scEta > 1.479) {
-      if (pt <= 15) regressionResult = (pt*(1+PreShowerOverRaw)) * forest_lowPt_ee->GetResponse(vals);
+      if (pt <= 15) regressionResult = electronP * forest_lowPt_ee->GetResponse(vals);
       if (pt > 15) regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_highPt_ee->GetResponse(vals);
     }
   }

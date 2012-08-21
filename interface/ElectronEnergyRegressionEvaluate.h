@@ -58,6 +58,7 @@ class ElectronEnergyRegressionEvaluate{
 
     // Evaluates regression without tracker variables
     double regressionValueNoTrkVar(
+      double electronP,
       double SCRawEnergy,
       double scEta,
       double scPhi,
@@ -97,6 +98,7 @@ class ElectronEnergyRegressionEvaluate{
 
     // Evaluates regression using tracker variables
     double regressionValueWithTrkVar(				
+      double electronP,
       double SCRawEnergy,
       double scEta,
       double scPhi,
