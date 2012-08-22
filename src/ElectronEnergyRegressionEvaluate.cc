@@ -252,8 +252,8 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
   assert(fVersionType == kNoTrkVar || fVersionType == kNoTrkVarTwoPtBins);
 
   // Now applying regression according to version and (endcap/barrel)
-  float *vals = (scEta <= 1.479) ? new float[39] : new float[32];
-  if (scEta <= 1.479) {		// Barrel
+  float *vals = (fabs(scEta) <= 1.479) ? new float[39] : new float[32];
+  if (fabs(scEta) <= 1.479) {		// Barrel
     vals[0]  = SCRawEnergy;
     vals[1]  = scEta;
     vals[2]  = scPhi;
@@ -294,8 +294,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     vals[37] = EtaCrySeed;
     vals[38] = PhiCrySeed;
   }
-
-  else if (scEta > 1.479) {	// Endcap
+  else {	// Endcap
     vals[0]  = SCRawEnergy;
     vals[1]  = scEta;
     vals[2]  = scPhi;
@@ -335,18 +334,18 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
   Int_t BinIndex = -1;
 
   if (fVersionType == kNoTrkVar) {
-    if (scEta <= 1.479) { 
+    if (fabs(scEta) <= 1.479) { 
       regressionResult = SCRawEnergy * forest_eb->GetResponse(vals); 
       BinIndex = 0;
     }
-    else if (scEta > 1.479) {
+    else {
       regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_ee->GetResponse(vals);
       BinIndex = 1;
     }
   }
 
   else if (fVersionType == kNoTrkVarTwoPtBins) {
-    if (scEta <= 1.479) {
+    if (fabs(scEta) <= 1.479) {
       if (pt <= 15) {
         regressionResult = electronP * forest_lowPt_eb->GetResponse(vals);
         BinIndex = 0;
@@ -443,8 +442,8 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
   // Checking if fVersionType is correct
   assert(fVersionType == kWithTrkVar || fVersionType == kWithTrkVarTwoPtBins);
 
-  float *vals = (scEta <= 1.479) ? new float[43] : new float[36];
-  if (scEta <= 1.479) {		// Barrel
+  float *vals = (fabs(scEta) <= 1.479) ? new float[43] : new float[36];
+  if (fabs(scEta) <= 1.479) {		// Barrel
     vals[0]  = SCRawEnergy;
     vals[1]  = scEta;
     vals[2]  = scPhi;
@@ -490,7 +489,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
     vals[42] = PhiCrySeed;
   }
 
-  else if (scEta > 1.479) {	// Endcap
+  else {	// Endcap
     vals[0]  = SCRawEnergy;
     vals[1]  = scEta;
     vals[2]  = scPhi;
@@ -533,18 +532,18 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
   double regressionResult = 0;
 
   if (fVersionType == kWithTrkVar) {
-    if (scEta <= 1.479) regressionResult = SCRawEnergy * forest_eb->GetResponse(vals);
-    else if (scEta > 1.479) regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_ee->GetResponse(vals);
+    if (fabs(scEta) <= 1.479) regressionResult = SCRawEnergy * forest_eb->GetResponse(vals);
+    else regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_ee->GetResponse(vals);
   }
 
   else if (fVersionType == kWithTrkVarTwoPtBins) {
-    if (scEta <= 1.479) {
+    if (fabs(scEta) <= 1.479) {
       if (pt <= 15) regressionResult = electronP * forest_lowPt_eb->GetResponse(vals);
-      if (pt > 15) regressionResult = SCRawEnergy * forest_highPt_eb->GetResponse(vals);
+      else regressionResult = SCRawEnergy * forest_highPt_eb->GetResponse(vals);
     }
-    if (scEta > 1.479) {
+    else {
       if (pt <= 15) regressionResult = electronP * forest_lowPt_ee->GetResponse(vals);
-      if (pt > 15) regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_highPt_ee->GetResponse(vals);
+      else regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forest_highPt_ee->GetResponse(vals);
     }
   }
 
