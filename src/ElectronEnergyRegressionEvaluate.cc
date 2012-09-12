@@ -115,9 +115,8 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
     int ieta, iphi;
     local.localCoordsEB(*ele->superCluster()->seed(),setup,etacry,phicry,ieta,iphi,thetatilt,phitilt);
     
-    EBDetId edet(ele->superCluster()->seed()->hitsAndFractions().at(0).first);
-    ietaseed = edet.ieta();
-    iphiseed = edet.iphi();
+    ietaseed = ieta;
+    iphiseed = iphi;
     etacryseed = etacry;
     phicryseed = phicry;
   }
@@ -254,9 +253,8 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
     int ieta, iphi;
     local.localCoordsEB(*ele->superCluster()->seed(),setup,etacry,phicry,ieta,iphi,thetatilt,phitilt);
     
-    EBDetId edet(ele->superCluster()->seed()->hitsAndFractions().at(0).first);
-    ietaseed = edet.ieta();
-    iphiseed = edet.iphi();
+    ietaseed = ieta;
+    iphiseed = iphi;
     etacryseed = etacry;
     phicryseed = phicry;
   }
