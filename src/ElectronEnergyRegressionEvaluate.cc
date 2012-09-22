@@ -410,7 +410,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
   }
 
   // Now applying regression according to version and (endcap/barrel)
-  float *vals = (fabs(scEta) <= 1.479) ? new float[39] : new float[32];
+  float *vals = (fabs(scEta) <= 1.479) ? new float[38] : new float[31];
   if (fabs(scEta) <= 1.479) {		// Barrel
     vals[0]  = SCRawEnergy;
     vals[1]  = scEta;
@@ -442,15 +442,14 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     vals[27] = E2x5BottomSeed/ESeed;
     vals[28] = E2x5LeftSeed/ESeed;
     vals[29] = E2x5RightSeed/ESeed;
-    vals[30] = pt;
-    vals[31] = IEtaSeed;
-    vals[32] = IPhiSeed;
-    vals[33] = ((int) IEtaSeed)%5;
-    vals[34] = ((int) IPhiSeed)%2;
-    vals[35] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
-    vals[36] = ((int) IPhiSeed)%20;
-    vals[37] = EtaCrySeed;
-    vals[38] = PhiCrySeed;
+    vals[30] = IEtaSeed;
+    vals[31] = IPhiSeed;
+    vals[32] = ((int) IEtaSeed)%5;
+    vals[33] = ((int) IPhiSeed)%2;
+    vals[34] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[35] = ((int) IPhiSeed)%20;
+    vals[36] = EtaCrySeed;
+    vals[37] = PhiCrySeed;
   }
   else {	// Endcap
     vals[0]  = SCRawEnergy;
@@ -483,8 +482,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     vals[27] = E2x5BottomSeed/ESeed;
     vals[28] = E2x5LeftSeed/ESeed;
     vals[29] = E2x5RightSeed/ESeed;
-    vals[30] = pt;
-    vals[31] = PreShowerOverRaw;
+    vals[30] = PreShowerOverRaw;
   }
 
   // Now evaluating the regression
@@ -600,7 +598,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
   }
 
   // Now applying regression according to version and (endcap/barrel)
-  float *vals = (fabs(scEta) <= 1.479) ? new float[39] : new float[32];
+  float *vals = (fabs(scEta) <= 1.479) ? new float[38] : new float[31];
   if (fabs(scEta) <= 1.479) {		// Barrel
     vals[0]  = SCRawEnergy;
     vals[1]  = scEta;
@@ -632,15 +630,14 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
     vals[27] = E2x5BottomSeed/ESeed;
     vals[28] = E2x5LeftSeed/ESeed;
     vals[29] = E2x5RightSeed/ESeed;
-    vals[30] = pt;
-    vals[31] = IEtaSeed;
-    vals[32] = IPhiSeed;
-    vals[33] = ((int) IEtaSeed)%5;
-    vals[34] = ((int) IPhiSeed)%2;
-    vals[35] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
-    vals[36] = ((int) IPhiSeed)%20;
-    vals[37] = EtaCrySeed;
-    vals[38] = PhiCrySeed;
+    vals[30] = IEtaSeed;
+    vals[31] = IPhiSeed;
+    vals[32] = ((int) IEtaSeed)%5;
+    vals[33] = ((int) IPhiSeed)%2;
+    vals[34] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[35] = ((int) IPhiSeed)%20;
+    vals[36] = EtaCrySeed;
+    vals[37] = PhiCrySeed;
   }
   else {	// Endcap
     vals[0]  = SCRawEnergy;
@@ -673,8 +670,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
     vals[27] = E2x5BottomSeed/ESeed;
     vals[28] = E2x5LeftSeed/ESeed;
     vals[29] = E2x5RightSeed/ESeed;
-    vals[30] = pt;
-    vals[31] = PreShowerOverRaw;
+    vals[30] = PreShowerOverRaw;
   }
 
   // Now evaluating the regression
