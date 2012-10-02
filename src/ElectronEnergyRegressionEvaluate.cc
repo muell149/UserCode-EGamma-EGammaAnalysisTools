@@ -16,16 +16,8 @@ ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionEvaluate() :
 	fVersionType(kNoTrkVar),
 	forestCorrection_eb(0), 
 	forestCorrection_ee(0), 
-	forestCorrection_lowPt_eb(0), 
-	forestCorrection_lowPt_ee(0), 
-	forestCorrection_highPt_eb(0), 
-	forestCorrection_highPt_ee(0),
 	forestUncertainty_eb(0), 
-	forestUncertainty_ee(0), 
-	forestUncertainty_lowPt_eb(0), 
-	forestUncertainty_lowPt_ee(0), 
-	forestUncertainty_highPt_eb(0), 
-	forestUncertainty_highPt_ee(0) {
+	forestUncertainty_ee(0) {
 	}
 
 ElectronEnergyRegressionEvaluate::~ElectronEnergyRegressionEvaluate() {}
@@ -33,10 +25,10 @@ ElectronEnergyRegressionEvaluate::~ElectronEnergyRegressionEvaluate() {}
 
 
 void ElectronEnergyRegressionEvaluate::initialize(std::string weightsFile, 
-		ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionType type) {
+                                                  ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionType type) {
 
   // Loading forest object according to different versions
-  TFile file(weightsFile.c_str());
+  TFile file(edm::FileInPath(weightsFile.c_str()).fullPath().c_str());
 
   if (type == kNoTrkVar || type == kWithTrkVar) {
     forestCorrection_eb = (GBRForest*) file.Get("EBCorrection");
@@ -49,27 +41,6 @@ void ElectronEnergyRegressionEvaluate::initialize(std::string weightsFile,
     assert(forestCorrection_ee);
     assert(forestUncertainty_eb);
     assert(forestUncertainty_ee);
-  }
-
-  else if (type == kNoTrkVarTwoPtBins || type == kWithTrkVarTwoPtBins) {
-    forestCorrection_lowPt_eb = (GBRForest*) file.Get("EBCorrection_lowPt");
-    forestCorrection_lowPt_ee = (GBRForest*) file.Get("EECorrection_lowPt");
-    forestCorrection_highPt_eb = (GBRForest*) file.Get("EBCorrection_highPt");
-    forestCorrection_highPt_ee = (GBRForest*) file.Get("EECorrection_highPt");
-    forestUncertainty_lowPt_eb = (GBRForest*) file.Get("EBUncertainty_lowPt");
-    forestUncertainty_lowPt_ee = (GBRForest*) file.Get("EEUncertainty_lowPt");
-    forestUncertainty_highPt_eb = (GBRForest*) file.Get("EBUncertainty_highPt");
-    forestUncertainty_highPt_ee = (GBRForest*) file.Get("EEUncertainty_highPt");
-
-    // Just checking
-    assert(forestCorrection_lowPt_eb);
-    assert(forestCorrection_lowPt_ee);
-    assert(forestCorrection_highPt_eb);
-    assert(forestCorrection_highPt_ee);
-    assert(forestUncertainty_lowPt_eb);
-    assert(forestUncertainty_lowPt_ee);
-    assert(forestUncertainty_highPt_eb);
-    assert(forestUncertainty_highPt_ee);
   }
 
   // Updating type and marking as initialized
@@ -126,7 +97,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
     std::cout << "Electron : " << ele->pt() << " " << ele->eta() << " " << ele->phi() << "\n";
   }
 
-  if (fVersionType == kNoTrkVar || fVersionType == kNoTrkVarTwoPtBins) {
+  if (fVersionType == kNoTrkVar) {
     return regressionValueNoTrkVar(
       ele->p(),
       ele->superCluster()->rawEnergy(),
@@ -158,7 +129,6 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
       myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
       myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
       myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-      ele->pt(),
       ietaseed,
       iphiseed,
       etacryseed,
@@ -166,7 +136,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
       ele->superCluster()->preshowerEnergy(),
       printDebug
       );
-  } else if (fVersionType == kWithTrkVar || fVersionType == kWithTrkVarTwoPtBins) {
+  } else if (fVersionType == kWithTrkVar) {
     return regressionValueWithTrkVar(
       ele->p(),
       ele->superCluster()->rawEnergy(),
@@ -264,7 +234,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
     std::cout << "Electron : " << ele->pt() << " " << ele->eta() << " " << ele->phi() << "\n";
   }
 
-  if (fVersionType == kNoTrkVar || fVersionType == kNoTrkVarTwoPtBins) {
+  if (fVersionType == kNoTrkVar) {
     return regressionUncertaintyNoTrkVar(
       ele->p(),
       ele->superCluster()->rawEnergy(),
@@ -296,7 +266,6 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
       myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
       myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
       myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-      ele->pt(),
       ietaseed,
       iphiseed,
       etacryseed,
@@ -304,7 +273,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
       ele->superCluster()->preshowerEnergy(),
       printDebug
       );
-  } else if (fVersionType == kWithTrkVar || fVersionType == kWithTrkVarTwoPtBins) {
+  } else if (fVersionType == kWithTrkVar) {
     return regressionUncertaintyWithTrkVar(
       ele->p(),
       ele->superCluster()->rawEnergy(),
@@ -389,7 +358,6 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
 		double E2x5BottomSeed,
 		double E2x5LeftSeed,
 		double E2x5RightSeed,
-		double pt,
 		double IEtaSeed,
 		double IPhiSeed,
 		double EtaCrySeed,
@@ -500,29 +468,6 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     }
   }
 
-  else if (fVersionType == kNoTrkVarTwoPtBins) {
-    if (fabs(scEta) <= 1.479) {
-      if (pt <= 15) {
-        regressionResult = electronP * forestCorrection_lowPt_eb->GetResponse(vals);
-        BinIndex = 0;
-      }
-      else {
-        regressionResult = SCRawEnergy * forestCorrection_highPt_eb->GetResponse(vals);
-        BinIndex = 1;
-      }
-    }
-    else {
-      if (pt <= 15) {
-        regressionResult = electronP * forestCorrection_lowPt_ee->GetResponse(vals);
-        BinIndex = 2;
-      }
-      else {
-        regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestCorrection_highPt_ee->GetResponse(vals);
-        BinIndex = 3;
-      }
-    }
-  }
-  
   //print debug
   if (printDebug) {    
     if (scEta <= 1.479) {
@@ -536,7 +481,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
       std::cout << "\n";
     }
     std::cout << "BinIndex : " << BinIndex << "\n";
-    std::cout << "pt = " << pt << " : SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
     std::cout << "regression energy = " << regressionResult << std::endl;
   }
   
@@ -547,43 +492,42 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
 }
 
 double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
-                double electronP, 
-		double SCRawEnergy,
-		double scEta,
-		double scPhi,
-		double R9,
-		double etawidth,
-		double phiwidth,
-		double NClusters,
-		double HoE,
-		double rho,
-		double vertices,
-		double EtaSeed,
-		double PhiSeed,
-		double ESeed,
-		double E3x3Seed,
-		double E5x5Seed,
-		double see,
-		double spp,
-		double sep,
-		double EMaxSeed,
-		double E2ndSeed,
-		double ETopSeed,
-		double EBottomSeed,
-		double ELeftSeed,
-		double ERightSeed,
-		double E2x5MaxSeed,
-		double E2x5TopSeed,
-		double E2x5BottomSeed,
-		double E2x5LeftSeed,
-		double E2x5RightSeed,
-		double pt,
-		double IEtaSeed,
-		double IPhiSeed,
-		double EtaCrySeed,
-		double PhiCrySeed,
-		double PreShowerOverRaw, 
-                bool printDebug) 
+                                                                       double electronP, 
+                                                                       double SCRawEnergy,
+                                                                       double scEta,
+                                                                       double scPhi,
+                                                                       double R9,
+                                                                       double etawidth,
+                                                                       double phiwidth,
+                                                                       double NClusters,
+                                                                       double HoE,
+                                                                       double rho,
+                                                                       double vertices,
+                                                                       double EtaSeed,
+                                                                       double PhiSeed,
+                                                                       double ESeed,
+                                                                       double E3x3Seed,
+                                                                       double E5x5Seed,
+                                                                       double see,
+                                                                       double spp,
+                                                                       double sep,
+                                                                       double EMaxSeed,
+                                                                       double E2ndSeed,
+                                                                       double ETopSeed,
+                                                                       double EBottomSeed,
+                                                                       double ELeftSeed,
+                                                                       double ERightSeed,
+                                                                       double E2x5MaxSeed,
+                                                                       double E2x5TopSeed,
+                                                                       double E2x5BottomSeed,
+                                                                       double E2x5LeftSeed,
+                                                                       double E2x5RightSeed,
+                                                                       double IEtaSeed,
+                                                                       double IPhiSeed,
+                                                                       double EtaCrySeed,
+                                                                       double PhiCrySeed,
+                                                                       double PreShowerOverRaw, 
+                                                                       bool printDebug) 
 {
   // Checking if instance has been initialized
   if (fIsInitialized == kFALSE) {
@@ -688,29 +632,6 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
     }
   }
 
-  else if (fVersionType == kNoTrkVarTwoPtBins) {
-    if (fabs(scEta) <= 1.479) {
-      if (pt <= 15) {
-        regressionResult = electronP * forestUncertainty_lowPt_eb->GetResponse(vals);
-        BinIndex = 0;
-      }
-      else {
-        regressionResult = SCRawEnergy * forestUncertainty_highPt_eb->GetResponse(vals);
-        BinIndex = 1;
-      }
-    }
-    else {
-      if (pt <= 15) {
-        regressionResult = electronP * forestUncertainty_lowPt_ee->GetResponse(vals);
-        BinIndex = 2;
-      }
-      else {
-        regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestUncertainty_highPt_ee->GetResponse(vals);
-        BinIndex = 3;
-      }
-    }
-  }
-
   //print debug
   if (printDebug) {    
     if (scEta <= 1.479) {
@@ -724,7 +645,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
       std::cout << "\n";
     }
     std::cout << "BinIndex : " << BinIndex << "\n";
-    std::cout << "pt = " << pt << " : SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
     std::cout << "regression energy uncertainty = " << regressionResult << std::endl;
   }
   
@@ -736,47 +657,47 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
 
 
 double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
-                double electronP, 
-		double SCRawEnergy,                
-		double scEta,
-		double scPhi,
-		double R9,
-		double etawidth,
-		double phiwidth,
-		double NClusters,
-		double HoE,
-		double rho,
-		double vertices,
-		double EtaSeed,
-		double PhiSeed,
-		double ESeed,
-		double E3x3Seed,
-		double E5x5Seed,
-		double see,
-		double spp,
-		double sep,
-		double EMaxSeed,
-		double E2ndSeed,
-		double ETopSeed,
-		double EBottomSeed,
-		double ELeftSeed,
-		double ERightSeed,
-		double E2x5MaxSeed,
-		double E2x5TopSeed,
-		double E2x5BottomSeed,
-		double E2x5LeftSeed,
-		double E2x5RightSeed,
-		double pt,
-		double GsfTrackPIn,
-		double fbrem,
-		double Charge,
-		double EoP,
-		double IEtaSeed,
-		double IPhiSeed,
-		double EtaCrySeed,
-		double PhiCrySeed,
-		double PreShowerOverRaw, 
-                bool printDebug) 
+                                                                   double electronP, 
+                                                                   double SCRawEnergy,                
+                                                                   double scEta,
+                                                                   double scPhi,
+                                                                   double R9,
+                                                                   double etawidth,
+                                                                   double phiwidth,
+                                                                   double NClusters,
+                                                                   double HoE,
+                                                                   double rho,
+                                                                   double vertices,
+                                                                   double EtaSeed,
+                                                                   double PhiSeed,
+                                                                   double ESeed,
+                                                                   double E3x3Seed,
+                                                                   double E5x5Seed,
+                                                                   double see,
+                                                                   double spp,
+                                                                   double sep,
+                                                                   double EMaxSeed,
+                                                                   double E2ndSeed,
+                                                                   double ETopSeed,
+                                                                   double EBottomSeed,
+                                                                   double ELeftSeed,
+                                                                   double ERightSeed,
+                                                                   double E2x5MaxSeed,
+                                                                   double E2x5TopSeed,
+                                                                   double E2x5BottomSeed,
+                                                                   double E2x5LeftSeed,
+                                                                   double E2x5RightSeed,
+                                                                   double pt,
+                                                                   double GsfTrackPIn,
+                                                                   double fbrem,
+                                                                   double Charge,
+                                                                   double EoP,
+                                                                   double IEtaSeed,
+                                                                   double IPhiSeed,
+                                                                   double EtaCrySeed,
+                                                                   double PhiCrySeed,
+                                                                   double PreShowerOverRaw, 
+                                                                   bool printDebug) 
 {
   // Checking if instance has been initialized
   if (fIsInitialized == kFALSE) {
@@ -785,7 +706,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
   }
 
   // Checking if fVersionType is correct
-  assert(fVersionType == kWithTrkVar || fVersionType == kWithTrkVarTwoPtBins);
+  assert(fVersionType == kWithTrkVar);
 
   float *vals = (fabs(scEta) <= 1.479) ? new float[43] : new float[36];
   if (fabs(scEta) <= 1.479) {		// Barrel
@@ -881,17 +802,6 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
     else regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestCorrection_ee->GetResponse(vals);
   }
 
-  else if (fVersionType == kWithTrkVarTwoPtBins) {
-    if (fabs(scEta) <= 1.479) {
-      if (pt <= 15) regressionResult = electronP * forestCorrection_lowPt_eb->GetResponse(vals);
-      else regressionResult = SCRawEnergy * forestCorrection_highPt_eb->GetResponse(vals);
-    }
-    else {
-      if (pt <= 15) regressionResult = electronP * forestCorrection_lowPt_ee->GetResponse(vals);
-      else regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestCorrection_highPt_ee->GetResponse(vals);
-    }
-  }
-
 
   //print debug
   if (printDebug) {
@@ -918,47 +828,47 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
 
 
 double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
-                double electronP, 
-		double SCRawEnergy,                
-		double scEta,
-		double scPhi,
-		double R9,
-		double etawidth,
-		double phiwidth,
-		double NClusters,
-		double HoE,
-		double rho,
-		double vertices,
-		double EtaSeed,
-		double PhiSeed,
-		double ESeed,
-		double E3x3Seed,
-		double E5x5Seed,
-		double see,
-		double spp,
-		double sep,
-		double EMaxSeed,
-		double E2ndSeed,
-		double ETopSeed,
-		double EBottomSeed,
-		double ELeftSeed,
-		double ERightSeed,
-		double E2x5MaxSeed,
-		double E2x5TopSeed,
-		double E2x5BottomSeed,
-		double E2x5LeftSeed,
-		double E2x5RightSeed,
-		double pt,
-		double GsfTrackPIn,
-		double fbrem,
-		double Charge,
-		double EoP,
-		double IEtaSeed,
-		double IPhiSeed,
-		double EtaCrySeed,
-		double PhiCrySeed,
-		double PreShowerOverRaw, 
-                bool printDebug) 
+                                                                         double electronP, 
+                                                                         double SCRawEnergy,                
+                                                                         double scEta,
+                                                                         double scPhi,
+                                                                         double R9,
+                                                                         double etawidth,
+                                                                         double phiwidth,
+                                                                         double NClusters,
+                                                                         double HoE,
+                                                                         double rho,
+                                                                         double vertices,
+                                                                         double EtaSeed,
+                                                                         double PhiSeed,
+                                                                         double ESeed,
+                                                                         double E3x3Seed,
+                                                                         double E5x5Seed,
+                                                                         double see,
+                                                                         double spp,
+                                                                         double sep,
+                                                                         double EMaxSeed,
+                                                                         double E2ndSeed,
+                                                                         double ETopSeed,
+                                                                         double EBottomSeed,
+                                                                         double ELeftSeed,
+                                                                         double ERightSeed,
+                                                                         double E2x5MaxSeed,
+                                                                         double E2x5TopSeed,
+                                                                         double E2x5BottomSeed,
+                                                                         double E2x5LeftSeed,
+                                                                         double E2x5RightSeed,
+                                                                         double pt,
+                                                                         double GsfTrackPIn,
+                                                                         double fbrem,
+                                                                         double Charge,
+                                                                         double EoP,
+                                                                         double IEtaSeed,
+                                                                         double IPhiSeed,
+                                                                         double EtaCrySeed,
+                                                                         double PhiCrySeed,
+                                                                         double PreShowerOverRaw, 
+                                                                         bool printDebug) 
 {
   // Checking if instance has been initialized
   if (fIsInitialized == kFALSE) {
@@ -967,7 +877,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
   }
 
   // Checking if fVersionType is correct
-  assert(fVersionType == kWithTrkVar || fVersionType == kWithTrkVarTwoPtBins);
+  assert(fVersionType == kWithTrkVar);
 
   float *vals = (fabs(scEta) <= 1.479) ? new float[43] : new float[36];
   if (fabs(scEta) <= 1.479) {		// Barrel
@@ -1061,17 +971,6 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
   if (fVersionType == kWithTrkVar) {
     if (fabs(scEta) <= 1.479) regressionResult = SCRawEnergy * forestUncertainty_eb->GetResponse(vals);
     else regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestUncertainty_ee->GetResponse(vals);
-  }
-
-  else if (fVersionType == kWithTrkVarTwoPtBins) {
-    if (fabs(scEta) <= 1.479) {
-      if (pt <= 15) regressionResult = electronP * forestUncertainty_lowPt_eb->GetResponse(vals);
-      else regressionResult = SCRawEnergy * forestUncertainty_highPt_eb->GetResponse(vals);
-    }
-    else {
-      if (pt <= 15) regressionResult = electronP * forestUncertainty_lowPt_ee->GetResponse(vals);
-      else regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestUncertainty_highPt_ee->GetResponse(vals);
-    }
   }
 
   //print debug

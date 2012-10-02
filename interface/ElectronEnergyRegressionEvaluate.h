@@ -5,7 +5,7 @@
 //
 // Helper Class for applying electron energy regression calculation
 //
-// Authors: A.Takeda, S.Xie
+// Authors: A.Takeda, S.Xie, E. Di Marco
 //--------------------------------------------------------------------------------------------------
 
 
@@ -38,9 +38,7 @@ class ElectronEnergyRegressionEvaluate{
 
     enum ElectronEnergyRegressionType {
       kNoTrkVar,
-      kWithTrkVar,
-      kNoTrkVarTwoPtBins,
-      kWithTrkVarTwoPtBins
+      kWithTrkVar
     };
 
     void initialize(std::string weightsFile,
@@ -93,7 +91,6 @@ class ElectronEnergyRegressionEvaluate{
       double E2x5BottomSeed,
       double E2x5LeftSeed,
       double E2x5RightSeed,
-      double pt,
       double IEtaSeed,
       double IPhiSeed,
       double EtaCrySeed,
@@ -133,7 +130,6 @@ class ElectronEnergyRegressionEvaluate{
       double E2x5BottomSeed,
       double E2x5LeftSeed,
       double E2x5RightSeed,
-      double pt,
       double IEtaSeed,
       double IPhiSeed,
       double EtaCrySeed,
@@ -189,65 +185,56 @@ class ElectronEnergyRegressionEvaluate{
 
     // Evaluates regression using tracker variables
     double regressionUncertaintyWithTrkVar(				
-      double electronP,
-      double SCRawEnergy,
-      double scEta,
-      double scPhi,
-      double R9,
-      double etawidth,
-      double phiwidth,
-      double NClusters,
-      double HoE,
-      double rho,
-      double vertices,
-      double EtaSeed,
-      double PhiSeed,
-      double ESeed,
-      double E3x3Seed,
-      double E5x5Seed,
-      double see,
-      double spp,
-      double sep,
-      double EMaxSeed,
-      double E2ndSeed,
-      double ETopSeed,
-      double EBottomSeed,
-      double ELeftSeed,
-      double ERightSeed,
-      double E2x5MaxSeed,
-      double E2x5TopSeed,
-      double E2x5BottomSeed,
-      double E2x5LeftSeed,
-      double E2x5RightSeed,
-      double pt,
-      double GsfTrackPIn,
-      double fbrem,
-      double Charge,
-      double EoP,
-      double IEtaSeed,
-      double IPhiSeed,
-      double EtaCrySeed,
-      double PhiCrySeed,
-      double PreShowerOverRaw,
-      bool printDebug = false );
+                                           double electronP,
+                                           double SCRawEnergy,
+                                           double scEta,
+                                           double scPhi,
+                                           double R9,
+                                           double etawidth,
+                                           double phiwidth,
+                                           double NClusters,
+                                           double HoE,
+                                           double rho,
+                                           double vertices,
+                                           double EtaSeed,
+                                           double PhiSeed,
+                                           double ESeed,
+                                           double E3x3Seed,
+                                           double E5x5Seed,
+                                           double see,
+                                           double spp,
+                                           double sep,
+                                           double EMaxSeed,
+                                           double E2ndSeed,
+                                           double ETopSeed,
+                                           double EBottomSeed,
+                                           double ELeftSeed,
+                                           double ERightSeed,
+                                           double E2x5MaxSeed,
+                                           double E2x5TopSeed,
+                                           double E2x5BottomSeed,
+                                           double E2x5LeftSeed,
+                                           double E2x5RightSeed,
+                                           double pt,
+                                           double GsfTrackPIn,
+                                           double fbrem,
+                                           double Charge,
+                                           double EoP,
+                                           double IEtaSeed,
+                                           double IPhiSeed,
+                                           double EtaCrySeed,
+                                           double PhiCrySeed,
+                                           double PreShowerOverRaw,
+                                           bool printDebug = false );
 
-  private:
+ private:
     bool fIsInitialized;
     ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionType fVersionType;
     GBRForest *forestCorrection_eb;		// Pointer to the GBRForest for barrel
     GBRForest *forestCorrection_ee;		// Pointer to the GBRForest for endcap
-    GBRForest *forestCorrection_lowPt_eb;	// Pointer to the GBRForest for barrel, low Pt
-    GBRForest *forestCorrection_lowPt_ee;	// Pointer to the GBRForest for endcap, low Pt
-    GBRForest *forestCorrection_highPt_eb;	// Pointer to the GBRForest for barrel, high Pt
-    GBRForest *forestCorrection_highPt_ee;	// Pointer to the GBRForest for endcap, high Pt
 
     GBRForest *forestUncertainty_eb;	
     GBRForest *forestUncertainty_ee;		
-    GBRForest *forestUncertainty_lowPt_eb;	
-    GBRForest *forestUncertainty_lowPt_ee;	
-    GBRForest *forestUncertainty_highPt_eb;	
-    GBRForest *forestUncertainty_highPt_ee;	
-
 };
 
 #endif
