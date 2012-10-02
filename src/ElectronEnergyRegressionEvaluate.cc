@@ -9,6 +9,7 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
 #include "DataFormats/EcalDetId/interface/EEDetId.h"
+#include "FWCore/ParameterSet/interface/FileInPath.h"
 #endif
 
 ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionEvaluate() : 
