@@ -133,7 +133,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
                                    iphiseed,
                                    etacryseed,
                                    phicryseed,
-                                   ele->superCluster()->preshowerEnergy(),
+                                   ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
                                    printDebug
                                    );
   } else if (fVersionType == kWithTrkVar) {
@@ -177,7 +177,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
                                      iphiseed,
                                      etacryseed,
                                      phicryseed,
-                                     ele->superCluster()->preshowerEnergy(),
+                                     ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
                                      printDebug
                                      );
   } else {
@@ -269,7 +269,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
                                          iphiseed,
                                          etacryseed,
                                          phicryseed,
-                                         ele->superCluster()->preshowerEnergy(),
+                                         ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
                                          printDebug
                                          );
   } else if (fVersionType == kWithTrkVar) {
@@ -313,7 +313,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
                                            iphiseed,
                                            etacryseed,
                                            phicryseed,
-                                           ele->superCluster()->preshowerEnergy(),
+                                           ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
                                            printDebug
                                            );
   } else {
