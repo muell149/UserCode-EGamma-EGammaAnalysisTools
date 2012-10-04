@@ -68,7 +68,7 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
   if (!isnan(vCov[2])) spp = sqrt (vCov[2]);
   double sep;
   if (ele->sigmaIetaIeta()*spp > 0) {
-    sep = vCov[1] / ele->sigmaIetaIeta()*spp;
+    sep = vCov[1] / (ele->sigmaIetaIeta()*spp);
   } else if (vCov[1] > 0) {
     sep = 1.0;
   } else {
@@ -468,9 +468,9 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
 
   //print debug
   if (printDebug) {    
-    if (scEta <= 1.479) {
+    if ( fabs(scEta) <= 1.479) {
       std::cout << "Barrel :";
-      for (uint v=0; v < 39; ++v) std::cout << vals[v] << ", ";
+      for (uint v=0; v < 38; ++v) std::cout << vals[v] << ", ";
       std::cout << "\n";
     }
     else {
@@ -631,9 +631,9 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
 
   //print debug
   if (printDebug) {    
-    if (scEta <= 1.479) {
+    if (fabs(scEta) <= 1.479) {
       std::cout << "Barrel :";
-      for (uint v=0; v < 39; ++v) std::cout << vals[v] << ", ";
+      for (uint v=0; v < 38; ++v) std::cout << vals[v] << ", ";
       std::cout << "\n";
     }
     else {
