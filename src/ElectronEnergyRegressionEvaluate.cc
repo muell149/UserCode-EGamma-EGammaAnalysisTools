@@ -475,7 +475,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     }
     else {
       std::cout << "Endcap :";
-      for (uint v=0; v < 32; ++v) std::cout << vals[v] << ", ";
+      for (uint v=0; v < 31; ++v) std::cout << vals[v] << ", ";
       std::cout << "\n";
     }
     std::cout << "BinIndex : " << BinIndex << "\n";
@@ -638,7 +638,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
     }
     else {
       std::cout << "Endcap :";
-      for (uint v=0; v < 32; ++v) std::cout << vals[v] << ", ";
+      for (uint v=0; v < 31; ++v) std::cout << vals[v] << ", ";
       std::cout << "\n";
     }
     std::cout << "BinIndex : " << BinIndex << "\n";
