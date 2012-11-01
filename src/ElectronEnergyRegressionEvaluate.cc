@@ -136,56 +136,58 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
                                    ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
                                    printDebug
                                    );
-  } else if (fVersionType == kWithTrkVar) {
-    return regressionValueWithTrkVar(
-                                     ele->p(),
-                                     ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->eta(),
-                                     ele->superCluster()->phi(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->etaWidth(),
-                                     ele->superCluster()->phiWidth(),
-                                     ele->superCluster()->clustersSize(),
-                                     ele->hadronicOverEm(),
-                                     rho,
-                                     nvertices,
-                                     ele->superCluster()->seed()->eta(),
-                                     ele->superCluster()->seed()->phi(),
-                                     ele->superCluster()->seed()->energy(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                     myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                     ele->sigmaIetaIeta(),
-                                     spp,
-                                     sep,
-                                     myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                     myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                     myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                     myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                     ele->pt(),      
-                                     ele->trackMomentumAtVtx().R(),
-                                     ele->fbrem(),
-                                     ele->charge(),
-                                     ele->eSuperClusterOverP(),
-                                     ietaseed,
-                                     iphiseed,
-                                     etacryseed,
-                                     phicryseed,
-                                     ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                     printDebug
-                                     );
-  } else {
+  } 
+//   else if (fVersionType == kWithTrkVar) {
+//     return regressionValueWithTrkVar(
+//                                      ele->p(),
+//                                      ele->superCluster()->rawEnergy(),
+//                                      ele->superCluster()->eta(),
+//                                      ele->superCluster()->phi(),
+//                                      myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
+//                                      ele->superCluster()->etaWidth(),
+//                                      ele->superCluster()->phiWidth(),
+//                                      ele->superCluster()->clustersSize(),
+//                                      ele->hadronicOverEm(),
+//                                      rho,
+//                                      nvertices,
+//                                      ele->superCluster()->seed()->eta(),
+//                                      ele->superCluster()->seed()->phi(),
+//                                      ele->superCluster()->seed()->energy(),
+//                                      myEcalCluster.e3x3(*ele->superCluster()->seed()),
+//                                      myEcalCluster.e5x5(*ele->superCluster()->seed()),
+//                                      ele->sigmaIetaIeta(),
+//                                      spp,
+//                                      sep,
+//                                      myEcalCluster.eMax(*ele->superCluster()->seed()),
+//                                      myEcalCluster.e2nd(*ele->superCluster()->seed()),
+//                                      myEcalCluster.eTop(*ele->superCluster()->seed()),
+//                                      myEcalCluster.eBottom(*ele->superCluster()->seed()),
+//                                      myEcalCluster.eLeft(*ele->superCluster()->seed()),
+//                                      myEcalCluster.eRight(*ele->superCluster()->seed()),
+//                                      myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
+//                                      myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
+//                                      myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
+//                                      myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
+//                                      myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
+//                                      ele->pt(),      
+//                                      ele->trackMomentumAtVtx().R(),
+//                                      ele->fbrem(),
+//                                      ele->charge(),
+//                                      ele->eSuperClusterOverP(),
+//                                      ietaseed,
+//                                      iphiseed,
+//                                      etacryseed,
+//                                      phicryseed,
+//                                      ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
+//                                      printDebug
+//                                      );
+//   } 
+  else {
     std::cout << "Warning: Electron Regression Type " << fVersionType << " is not supported. Reverting to default electron momentum.\n"; 
     return ele->p();
   }
 
-
+  
 }
 
 double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(const reco::GsfElectron *ele, 
@@ -272,56 +274,56 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
                                          ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
                                          printDebug
                                          );
-  } else if (fVersionType == kWithTrkVar) {
-    return regressionUncertaintyWithTrkVar(
-                                           ele->p(),
-                                           ele->superCluster()->rawEnergy(),
-                                           ele->superCluster()->eta(),
-                                           ele->superCluster()->phi(),
-                                           myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                           ele->superCluster()->etaWidth(),
-                                           ele->superCluster()->phiWidth(),
-                                           ele->superCluster()->clustersSize(),
-                                           ele->hadronicOverEm(),
-                                           rho,
-                                           nvertices,
-                                           ele->superCluster()->seed()->eta(),
-                                           ele->superCluster()->seed()->phi(),
-                                           ele->superCluster()->seed()->energy(),
-                                           myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                           myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                           ele->sigmaIetaIeta(),
-                                           spp,
-                                           sep,
-                                           myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                           myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                           myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                           myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                           myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                           myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                           myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                           myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                           myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                           myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                           myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                           ele->pt(),      
-                                           ele->trackMomentumAtVtx().R(),
-                                           ele->fbrem(),
-                                           ele->charge(),
-                                           ele->eSuperClusterOverP(),
-                                           ietaseed,
-                                           iphiseed,
-                                           etacryseed,
-                                           phicryseed,
-                                           ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                           printDebug
-                                           );
-  } else {
+  } 
+//   else if (fVersionType == kWithTrkVar) {
+//     return regressionUncertaintyWithTrkVar(
+//                                            ele->p(),
+//                                            ele->superCluster()->rawEnergy(),
+//                                            ele->superCluster()->eta(),
+//                                            ele->superCluster()->phi(),
+//                                            myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
+//                                            ele->superCluster()->etaWidth(),
+//                                            ele->superCluster()->phiWidth(),
+//                                            ele->superCluster()->clustersSize(),
+//                                            ele->hadronicOverEm(),
+//                                            rho,
+//                                            nvertices,
+//                                            ele->superCluster()->seed()->eta(),
+//                                            ele->superCluster()->seed()->phi(),
+//                                            ele->superCluster()->seed()->energy(),
+//                                            myEcalCluster.e3x3(*ele->superCluster()->seed()),
+//                                            myEcalCluster.e5x5(*ele->superCluster()->seed()),
+//                                            ele->sigmaIetaIeta(),
+//                                            spp,
+//                                            sep,
+//                                            myEcalCluster.eMax(*ele->superCluster()->seed()),
+//                                            myEcalCluster.e2nd(*ele->superCluster()->seed()),
+//                                            myEcalCluster.eTop(*ele->superCluster()->seed()),
+//                                            myEcalCluster.eBottom(*ele->superCluster()->seed()),
+//                                            myEcalCluster.eLeft(*ele->superCluster()->seed()),
+//                                            myEcalCluster.eRight(*ele->superCluster()->seed()),
+//                                            myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
+//                                            myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
+//                                            myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
+//                                            myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
+//                                            myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
+//                                            ele->pt(),      
+//                                            ele->trackMomentumAtVtx().R(),
+//                                            ele->fbrem(),
+//                                            ele->charge(),
+//                                            ele->eSuperClusterOverP(),
+//                                            ietaseed,
+//                                            iphiseed,
+//                                            etacryseed,
+//                                            phicryseed,
+//                                            ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
+//                                            printDebug
+//                                            );
+//   } 
+  else {
     std::cout << "Warning: Electron Regression Type " << fVersionType << " is not supported. Reverting to default electron momentum.\n"; 
     return ele->p();
   }
-
-
 }
 #endif
 
@@ -652,9 +654,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
   return regressionResult;
 }
 
-
-double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
-                                                                   double electronP, 
+double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV1(
                                                                    double SCRawEnergy,                
                                                                    double scEta,
                                                                    double scPhi,
@@ -683,17 +683,17 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
                                                                    double E2x5TopSeed,
                                                                    double E2x5BottomSeed,
                                                                    double E2x5LeftSeed,
-                                                                   double E2x5RightSeed,
-                                                                   double pt,
-                                                                   double GsfTrackPIn,
-                                                                   double fbrem,
-                                                                   double Charge,
-                                                                   double EoP,
+                                                                   double E2x5RightSeed,                                                                   
                                                                    double IEtaSeed,
                                                                    double IPhiSeed,
                                                                    double EtaCrySeed,
                                                                    double PhiCrySeed,
-                                                                   double PreShowerOverRaw, 
+                                                                   double PreShowerOverRaw,                             
+                                                                   double GsfTrackPIn,
+                                                                   double fbrem,
+                                                                   double Charge,
+                                                                   double EoP,
+                                                                   double TrackMomentumError,                                                                 
                                                                    bool printDebug) 
 {
   // Checking if instance has been initialized
@@ -737,11 +737,11 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
     vals[27] = E2x5BottomSeed/ESeed;
     vals[28] = E2x5LeftSeed/ESeed;
     vals[29] = E2x5RightSeed/ESeed;
-    vals[30] = pt;
-    vals[31] = GsfTrackPIn;
-    vals[32] = fbrem;
-    vals[33] = Charge;
-    vals[34] = EoP;
+    vals[30] = GsfTrackPIn;
+    vals[31] = fbrem;
+    vals[32] = Charge;
+    vals[33] = EoP;
+    vals[34] = TrackMomentumError/GsfTrackPIn;
     vals[35] = IEtaSeed;
     vals[36] = IPhiSeed;
     vals[37] = ((int) IEtaSeed)%5;
@@ -783,11 +783,11 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
     vals[27] = E2x5BottomSeed/ESeed;
     vals[28] = E2x5LeftSeed/ESeed;
     vals[29] = E2x5RightSeed/ESeed;
-    vals[30] = pt;
-    vals[31] = GsfTrackPIn;
-    vals[32] = fbrem;
-    vals[33] = Charge;
-    vals[34] = EoP;
+    vals[30] = GsfTrackPIn;
+    vals[31] = fbrem;
+    vals[32] = Charge;
+    vals[33] = EoP;
+    vals[34] = TrackMomentumError/GsfTrackPIn;
     vals[35] = PreShowerOverRaw;
   }
 
@@ -812,7 +812,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
       for (uint v=0; v < 36; ++v) std::cout << vals[v] << ", ";
       std::cout << "\n";
     }
-    std::cout << "pt = " << pt << " : SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
     std::cout << "regression energy = " << regressionResult << std::endl;
   }
 
@@ -824,8 +824,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
 
 
 
-double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
-                                                                         double electronP, 
+double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV1(
                                                                          double SCRawEnergy,                
                                                                          double scEta,
                                                                          double scPhi,
@@ -855,16 +854,16 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
                                                                          double E2x5BottomSeed,
                                                                          double E2x5LeftSeed,
                                                                          double E2x5RightSeed,
-                                                                         double pt,
-                                                                         double GsfTrackPIn,
-                                                                         double fbrem,
-                                                                         double Charge,
-                                                                         double EoP,
                                                                          double IEtaSeed,
                                                                          double IPhiSeed,
                                                                          double EtaCrySeed,
                                                                          double PhiCrySeed,
-                                                                         double PreShowerOverRaw, 
+                                                                         double PreShowerOverRaw,                             
+                                                                         double GsfTrackPIn,
+                                                                         double fbrem,
+                                                                         double Charge,
+                                                                         double EoP,
+                                                                         double TrackMomentumError,    
                                                                          bool printDebug) 
 {
   // Checking if instance has been initialized
@@ -908,11 +907,11 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
     vals[27] = E2x5BottomSeed/ESeed;
     vals[28] = E2x5LeftSeed/ESeed;
     vals[29] = E2x5RightSeed/ESeed;
-    vals[30] = pt;
-    vals[31] = GsfTrackPIn;
-    vals[32] = fbrem;
-    vals[33] = Charge;
-    vals[34] = EoP;
+    vals[30] = GsfTrackPIn;
+    vals[31] = fbrem;
+    vals[32] = Charge;
+    vals[33] = EoP;
+    vals[34] = TrackMomentumError/GsfTrackPIn;
     vals[35] = IEtaSeed;
     vals[36] = IPhiSeed;
     vals[37] = ((int) IEtaSeed)%5;
@@ -954,11 +953,11 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
     vals[27] = E2x5BottomSeed/ESeed;
     vals[28] = E2x5LeftSeed/ESeed;
     vals[29] = E2x5RightSeed/ESeed;
-    vals[30] = pt;
-    vals[31] = GsfTrackPIn;
-    vals[32] = fbrem;
-    vals[33] = Charge;
-    vals[34] = EoP;
+    vals[30] = GsfTrackPIn;
+    vals[31] = fbrem;
+    vals[32] = Charge;
+    vals[33] = EoP;
+    vals[34] = TrackMomentumError/GsfTrackPIn;
     vals[35] = PreShowerOverRaw;
   }
 
@@ -982,7 +981,389 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
       for (uint v=0; v < 36; ++v) std::cout << vals[v] << ", ";
       std::cout << "\n";
     }
-    std::cout << "pt = " << pt << " : SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << " SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "regression energy uncertainty = " << regressionResult << std::endl;
+  }
+
+
+  // Cleaning up and returning
+  delete[] vals;
+  return regressionResult;
+}
+
+
+
+
+double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV2(
+                                                                   double SCRawEnergy,                
+                                                                   double scEta,
+                                                                   double scPhi,
+                                                                   double R9,
+                                                                   double etawidth,
+                                                                   double phiwidth,
+                                                                   double NClusters,
+                                                                   double HoE,
+                                                                   double rho,
+                                                                   double vertices,
+                                                                   double EtaSeed,
+                                                                   double PhiSeed,
+                                                                   double ESeed,
+                                                                   double E3x3Seed,
+                                                                   double E5x5Seed,
+                                                                   double see,
+                                                                   double spp,
+                                                                   double sep,
+                                                                   double EMaxSeed,
+                                                                   double E2ndSeed,
+                                                                   double ETopSeed,
+                                                                   double EBottomSeed,
+                                                                   double ELeftSeed,
+                                                                   double ERightSeed,
+                                                                   double E2x5MaxSeed,
+                                                                   double E2x5TopSeed,
+                                                                   double E2x5BottomSeed,
+                                                                   double E2x5LeftSeed,
+                                                                   double E2x5RightSeed,                                                                   
+                                                                   double IEtaSeed,
+                                                                   double IPhiSeed,
+                                                                   double EtaCrySeed,
+                                                                   double PhiCrySeed,
+                                                                   double PreShowerOverRaw,                             
+                                                                   double GsfTrackPIn,
+                                                                   double fbrem,
+                                                                   double Charge,
+                                                                   double EoP,
+                                                                   double TrackMomentumError,
+                                                                   double detaIn,
+                                                                   double dphiIn,
+                                                                   double detaCalo,
+                                                                   double dphiCalo,
+                                                                   double GsfTrackChiSqr,
+                                                                   double KFTrackNLayers,
+                                                                   double ElectronEnergyOverPout,
+                                                                   bool printDebug) 
+{
+  // Checking if instance has been initialized
+  if (fIsInitialized == kFALSE) {
+    printf("ElectronEnergyRegressionEvaluate instance not initialized !!!");
+    return 0;
+  }
+
+  // Checking if fVersionType is correct
+  assert(fVersionType == kWithTrkVar);
+
+  float *vals = (fabs(scEta) <= 1.479) ? new float[50] : new float[43];
+  if (fabs(scEta) <= 1.479) {		// Barrel
+    vals[0]  = SCRawEnergy;
+    vals[1]  = scEta;
+    vals[2]  = scPhi;
+    vals[3]  = R9;
+    vals[4]  = E5x5Seed/SCRawEnergy;
+    vals[5]  = etawidth;
+    vals[6]  = phiwidth;
+    vals[7]  = NClusters;
+    vals[8]  = HoE;
+    vals[9]  = rho;
+    vals[10] = vertices;
+    vals[11] = EtaSeed - scEta;
+    vals[12] = atan2(sin(PhiSeed-scPhi),cos(PhiSeed-scPhi));
+    vals[13] = ESeed/SCRawEnergy;
+    vals[14] = E3x3Seed/ESeed;
+    vals[15] = E5x5Seed/ESeed;
+    vals[16] = see;
+    vals[17] = spp;
+    vals[18] = sep;
+    vals[19] = EMaxSeed/ESeed;
+    vals[20] = E2ndSeed/ESeed;
+    vals[21] = ETopSeed/ESeed;
+    vals[22] = EBottomSeed/ESeed;
+    vals[23] = ELeftSeed/ESeed;
+    vals[24] = ERightSeed/ESeed;
+    vals[25] = E2x5MaxSeed/ESeed;
+    vals[26] = E2x5TopSeed/ESeed;
+    vals[27] = E2x5BottomSeed/ESeed;
+    vals[28] = E2x5LeftSeed/ESeed;
+    vals[29] = E2x5RightSeed/ESeed;
+    vals[30] = GsfTrackPIn;
+    vals[31] = fbrem;
+    vals[32] = Charge;
+    vals[33] = EoP;
+    vals[34] = TrackMomentumError/GsfTrackPIn;
+    vals[35] = detaIn;
+    vals[36] = dphiIn;
+    vals[37] = detaCalo;
+    vals[38] = dphiCalo;
+    vals[39] = GsfTrackChiSqr;
+    vals[40] = KFTrackNLayers;
+    vals[41] = ElectronEnergyOverPout;
+    vals[42] = IEtaSeed;
+    vals[43] = IPhiSeed;
+    vals[44] = ((int) IEtaSeed)%5;
+    vals[45] = ((int) IPhiSeed)%2;
+    vals[46] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[47] = ((int) IPhiSeed)%20;
+    vals[48] = EtaCrySeed;
+    vals[49] = PhiCrySeed;
+  }
+
+  else {	// Endcap
+    vals[0]  = SCRawEnergy;
+    vals[1]  = scEta;
+    vals[2]  = scPhi;
+    vals[3]  = R9;
+    vals[4]  = E5x5Seed/SCRawEnergy;
+    vals[5]  = etawidth;
+    vals[6]  = phiwidth;
+    vals[7]  = NClusters;
+    vals[8]  = HoE;
+    vals[9]  = rho;
+    vals[10] = vertices;
+    vals[11] = EtaSeed - scEta;
+    vals[12] = atan2(sin(PhiSeed-scPhi),cos(PhiSeed-scPhi));
+    vals[13] = ESeed/SCRawEnergy;
+    vals[14] = E3x3Seed/ESeed;
+    vals[15] = E5x5Seed/ESeed;
+    vals[16] = see;
+    vals[17] = spp;
+    vals[18] = sep;
+    vals[19] = EMaxSeed/ESeed;
+    vals[20] = E2ndSeed/ESeed;
+    vals[21] = ETopSeed/ESeed;
+    vals[22] = EBottomSeed/ESeed;
+    vals[23] = ELeftSeed/ESeed;
+    vals[24] = ERightSeed/ESeed;
+    vals[25] = E2x5MaxSeed/ESeed;
+    vals[26] = E2x5TopSeed/ESeed;
+    vals[27] = E2x5BottomSeed/ESeed;
+    vals[28] = E2x5LeftSeed/ESeed;
+    vals[29] = E2x5RightSeed/ESeed;
+    vals[30] = GsfTrackPIn;
+    vals[31] = fbrem;
+    vals[32] = Charge;
+    vals[33] = EoP;
+    vals[34] = TrackMomentumError/GsfTrackPIn;
+    vals[35] = detaIn;
+    vals[36] = dphiIn;
+    vals[37] = detaCalo;
+    vals[38] = dphiCalo;
+    vals[39] = GsfTrackChiSqr;
+    vals[40] = KFTrackNLayers;
+    vals[41] = ElectronEnergyOverPout;
+    vals[42] = PreShowerOverRaw;
+  }
+
+  // Now evaluating the regression
+  double regressionResult = 0;
+
+  if (fVersionType == kWithTrkVar) {
+    if (fabs(scEta) <= 1.479) regressionResult = SCRawEnergy * forestCorrection_eb->GetResponse(vals);
+    else regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestCorrection_ee->GetResponse(vals);
+  }
+
+
+  //print debug
+  if (printDebug) {
+    if (scEta <= 1.479) {
+      std::cout << "Barrel :";
+      for (uint v=0; v < 50; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    else {
+      std::cout << "Endcap :";
+      for (uint v=0; v < 43; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    std::cout << "SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "regression energy = " << regressionResult << std::endl;
+  }
+
+  // Cleaning up and returning
+  delete[] vals;
+  return regressionResult;
+}
+
+
+
+
+double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV2(
+                                                                         double SCRawEnergy,                
+                                                                         double scEta,
+                                                                         double scPhi,
+                                                                         double R9,
+                                                                         double etawidth,
+                                                                         double phiwidth,
+                                                                         double NClusters,
+                                                                         double HoE,
+                                                                         double rho,
+                                                                         double vertices,
+                                                                         double EtaSeed,
+                                                                         double PhiSeed,
+                                                                         double ESeed,
+                                                                         double E3x3Seed,
+                                                                         double E5x5Seed,
+                                                                         double see,
+                                                                         double spp,
+                                                                         double sep,
+                                                                         double EMaxSeed,
+                                                                         double E2ndSeed,
+                                                                         double ETopSeed,
+                                                                         double EBottomSeed,
+                                                                         double ELeftSeed,
+                                                                         double ERightSeed,
+                                                                         double E2x5MaxSeed,
+                                                                         double E2x5TopSeed,
+                                                                         double E2x5BottomSeed,
+                                                                         double E2x5LeftSeed,
+                                                                         double E2x5RightSeed,
+                                                                         double IEtaSeed,
+                                                                         double IPhiSeed,
+                                                                         double EtaCrySeed,
+                                                                         double PhiCrySeed,
+                                                                         double PreShowerOverRaw,                             
+                                                                         double GsfTrackPIn,
+                                                                         double fbrem,
+                                                                         double Charge,
+                                                                         double EoP,
+                                                                         double TrackMomentumError,
+                                                                         double detaIn,
+                                                                         double dphiIn,
+                                                                         double detaCalo,
+                                                                         double dphiCalo,
+                                                                         double GsfTrackChiSqr,
+                                                                         double KFTrackNLayers,
+                                                                         double ElectronEnergyOverPout,
+                                                                         bool printDebug) 
+{
+  // Checking if instance has been initialized
+  if (fIsInitialized == kFALSE) {
+    printf("ElectronEnergyRegressionEvaluate instance not initialized !!!");
+    return 0;
+  }
+
+  // Checking if fVersionType is correct
+  assert(fVersionType == kWithTrkVar);
+
+  float *vals = (fabs(scEta) <= 1.479) ? new float[50] : new float[43];
+  if (fabs(scEta) <= 1.479) {		// Barrel
+    vals[0]  = SCRawEnergy;
+    vals[1]  = scEta;
+    vals[2]  = scPhi;
+    vals[3]  = R9;
+    vals[4]  = E5x5Seed/SCRawEnergy;
+    vals[5]  = etawidth;
+    vals[6]  = phiwidth;
+    vals[7]  = NClusters;
+    vals[8]  = HoE;
+    vals[9]  = rho;
+    vals[10] = vertices;
+    vals[11] = EtaSeed - scEta;
+    vals[12] = atan2(sin(PhiSeed-scPhi),cos(PhiSeed-scPhi));
+    vals[13] = ESeed/SCRawEnergy;
+    vals[14] = E3x3Seed/ESeed;
+    vals[15] = E5x5Seed/ESeed;
+    vals[16] = see;
+    vals[17] = spp;
+    vals[18] = sep;
+    vals[19] = EMaxSeed/ESeed;
+    vals[20] = E2ndSeed/ESeed;
+    vals[21] = ETopSeed/ESeed;
+    vals[22] = EBottomSeed/ESeed;
+    vals[23] = ELeftSeed/ESeed;
+    vals[24] = ERightSeed/ESeed;
+    vals[25] = E2x5MaxSeed/ESeed;
+    vals[26] = E2x5TopSeed/ESeed;
+    vals[27] = E2x5BottomSeed/ESeed;
+    vals[28] = E2x5LeftSeed/ESeed;
+    vals[29] = E2x5RightSeed/ESeed;
+    vals[30] = GsfTrackPIn;
+    vals[31] = fbrem;
+    vals[32] = Charge;
+    vals[33] = EoP;
+    vals[34] = TrackMomentumError/GsfTrackPIn;
+    vals[35] = detaIn;
+    vals[36] = dphiIn;
+    vals[37] = detaCalo;
+    vals[38] = dphiCalo;
+    vals[39] = GsfTrackChiSqr;
+    vals[40] = KFTrackNLayers;
+    vals[41] = ElectronEnergyOverPout;
+    vals[42] = IEtaSeed;
+    vals[43] = IPhiSeed;
+    vals[44] = ((int) IEtaSeed)%5;
+    vals[45] = ((int) IPhiSeed)%2;
+    vals[46] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[47] = ((int) IPhiSeed)%20;
+    vals[48] = EtaCrySeed;
+    vals[49] = PhiCrySeed;
+  }
+
+  else {	// Endcap
+    vals[0]  = SCRawEnergy;
+    vals[1]  = scEta;
+    vals[2]  = scPhi;
+    vals[3]  = R9;
+    vals[4]  = E5x5Seed/SCRawEnergy;
+    vals[5]  = etawidth;
+    vals[6]  = phiwidth;
+    vals[7]  = NClusters;
+    vals[8]  = HoE;
+    vals[9]  = rho;
+    vals[10] = vertices;
+    vals[11] = EtaSeed - scEta;
+    vals[12] = atan2(sin(PhiSeed-scPhi),cos(PhiSeed-scPhi));
+    vals[13] = ESeed/SCRawEnergy;
+    vals[14] = E3x3Seed/ESeed;
+    vals[15] = E5x5Seed/ESeed;
+    vals[16] = see;
+    vals[17] = spp;
+    vals[18] = sep;
+    vals[19] = EMaxSeed/ESeed;
+    vals[20] = E2ndSeed/ESeed;
+    vals[21] = ETopSeed/ESeed;
+    vals[22] = EBottomSeed/ESeed;
+    vals[23] = ELeftSeed/ESeed;
+    vals[24] = ERightSeed/ESeed;
+    vals[25] = E2x5MaxSeed/ESeed;
+    vals[26] = E2x5TopSeed/ESeed;
+    vals[27] = E2x5BottomSeed/ESeed;
+    vals[28] = E2x5LeftSeed/ESeed;
+    vals[29] = E2x5RightSeed/ESeed;
+    vals[30] = GsfTrackPIn;
+    vals[31] = fbrem;
+    vals[32] = Charge;
+    vals[33] = EoP;
+    vals[34] = TrackMomentumError/GsfTrackPIn;
+    vals[35] = detaIn;
+    vals[36] = dphiIn;
+    vals[37] = detaCalo;
+    vals[38] = dphiCalo;
+    vals[39] = GsfTrackChiSqr;
+    vals[40] = KFTrackNLayers;
+    vals[41] = ElectronEnergyOverPout;
+    vals[42] = PreShowerOverRaw;
+  }
+
+  // Now evaluating the regression
+  double regressionResult = 0;
+
+  if (fVersionType == kWithTrkVar) {
+    if (fabs(scEta) <= 1.479) regressionResult = SCRawEnergy * forestUncertainty_eb->GetResponse(vals);
+    else regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestUncertainty_ee->GetResponse(vals);
+  }
+
+  //print debug
+  if (printDebug) {
+    if (scEta <= 1.479) {
+      std::cout << "Barrel :";
+      for (uint v=0; v < 50; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    else {
+      std::cout << "Endcap :";
+      for (uint v=0; v < 43; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    std::cout << "SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
     std::cout << "regression energy uncertainty = " << regressionResult << std::endl;
   }
 
