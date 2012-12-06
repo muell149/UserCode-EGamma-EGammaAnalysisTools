@@ -38,7 +38,8 @@ class ElectronEnergyRegressionEvaluate{
 
   enum ElectronEnergyRegressionType {
     kNoTrkVar,
-    kWithTrkVar
+    kWithTrkVarV1,
+    kWithTrkVarV2
   };
 
   void initialize(std::string weightsFile,
@@ -95,6 +96,7 @@ class ElectronEnergyRegressionEvaluate{
                                  double EtaCrySeed,
                                  double PhiCrySeed,
                                  double PreShowerOverRaw,
+                                 int    IsEcalDriven,
                                  bool printDebug = false);
 
   // Evaluates regression without tracker variables
@@ -133,6 +135,7 @@ class ElectronEnergyRegressionEvaluate{
                                        double EtaCrySeed,
                                        double PhiCrySeed,
                                        double PreShowerOverRaw,
+                                       int    IsEcalDriven,
                                        bool printDebug = false);
 
 
@@ -172,17 +175,19 @@ class ElectronEnergyRegressionEvaluate{
                                    double EtaCrySeed,
                                    double PhiCrySeed,
                                    double PreShowerOverRaw, 
+                                   int    IsEcalDriven,
                                    double GsfTrackPIn,
                                    double fbrem,
                                    double Charge,
                                    double EoP,
                                    double TrackMomentumError,
+                                   double EcalEnergyError,
+                                   int    Classification,                           
                                    bool printDebug = false );
 
 
   // Evaluates regression using tracker variables
   double regressionUncertaintyWithTrkVarV1(				
-                                         double electronP,
                                          double SCRawEnergy,
                                          double scEta,
                                          double scPhi,
@@ -217,11 +222,21 @@ class ElectronEnergyRegressionEvaluate{
                                          double EtaCrySeed,
                                          double PhiCrySeed,
                                          double PreShowerOverRaw,                   
+                                         int    IsEcalDriven,
                                          double GsfTrackPIn,
                                          double fbrem,
                                          double Charge,
                                          double EoP,
+                                         double TrackMomentumError,
+                                         double EcalEnergyError,
+                                         int    Classification,
                                          bool printDebug = false );
+
+    double regressionValueWithTrkVarV1( std::vector<double> &inputvars, 			                                                         
+                                        bool printDebug = false );
+    double regressionUncertaintyWithTrkVarV1( std::vector<double> &inputvars, 			                                                         
+                                              bool printDebug = false );
+    
 
   // Evaluates regression using tracker variables
   double regressionValueWithTrkVarV2(				
@@ -259,11 +274,14 @@ class ElectronEnergyRegressionEvaluate{
                                    double EtaCrySeed,
                                    double PhiCrySeed,
                                    double PreShowerOverRaw, 
+                                   int    IsEcalDriven,
                                    double GsfTrackPIn,
                                    double fbrem,
                                    double Charge,
                                    double EoP,
                                    double TrackMomentumError,
+                                   double EcalEnergyError,
+                                   int    Classification,
                                    double detaIn,
                                    double dphiIn,
                                    double detaCalo,
@@ -310,11 +328,14 @@ class ElectronEnergyRegressionEvaluate{
                                          double EtaCrySeed,
                                          double PhiCrySeed,
                                          double PreShowerOverRaw,                   
+                                         int    IsEcalDriven,
                                          double GsfTrackPIn,
                                          double fbrem,
                                          double Charge,
                                          double EoP,
                                          double TrackMomentumError,
+                                         double EcalEnergyError,
+                                         int    Classification,
                                          double detaIn,
                                          double dphiIn,
                                          double detaCalo,
@@ -323,6 +344,12 @@ class ElectronEnergyRegressionEvaluate{
                                          double KFTrackNLayers,
                                          double ElectronEnergyOverPout,
                                          bool printDebug = false );
+
+    double regressionValueWithTrkVarV2( std::vector<double> &inputvars, 			                                                         
+                                        bool printDebug = false );
+    double regressionUncertaintyWithTrkVarV2( std::vector<double> &inputvars, 			                                                         
+                                              bool printDebug = false );
+
 
  private:
   bool fIsInitialized;
