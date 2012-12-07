@@ -930,7 +930,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV1(
 
   //print debug
   if (printDebug) {
-    if (scEta <= 1.479) {
+    if (fabs(scEta) <= 1.479) {
       std::cout << "Barrel :";
       for (uint v=0; v < 46; ++v) std::cout << vals[v] << ", ";
       std::cout << "\n";
@@ -1108,7 +1108,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV1(
 
   //print debug
   if (printDebug) {
-    if (scEta <= 1.479) {
+    if (fabs(scEta) <= 1.479) {
       std::cout << "Barrel :";
       for (uint v=0; v < 46; ++v) std::cout << vals[v] << ", ";
       std::cout << "\n";
