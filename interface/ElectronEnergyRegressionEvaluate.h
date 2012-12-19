@@ -39,6 +39,7 @@ class ElectronEnergyRegressionEvaluate{
   enum ElectronEnergyRegressionType {
     kNoTrkVar,
     kNoTrkVarV1,
+    kWithTrkVar,
     kWithTrkVarV1,
     kWithTrkVarV2
   };
@@ -214,6 +215,99 @@ class ElectronEnergyRegressionEvaluate{
                                        double PreShowerOverRaw,
                                        int    IsEcalDriven,
                                        bool printDebug = false);
+
+  // Evaluates regression using tracker variables
+  // This option is now deprecated. we keep it only
+  // for backwards compatibility
+  double regressionValueWithTrkVar(				
+                                   double electronP,
+                                   double SCRawEnergy,
+                                   double scEta,
+                                   double scPhi,
+                                   double R9,
+                                   double etawidth,
+                                   double phiwidth,
+                                   double NClusters,
+                                   double HoE,
+                                   double rho,
+                                   double vertices,
+                                   double EtaSeed,
+                                   double PhiSeed,
+                                   double ESeed,
+                                   double E3x3Seed,
+                                   double E5x5Seed,
+                                   double see,
+                                   double spp,
+                                   double sep,
+                                   double EMaxSeed,
+                                   double E2ndSeed,
+                                   double ETopSeed,
+                                   double EBottomSeed,
+                                   double ELeftSeed,
+                                   double ERightSeed,
+                                   double E2x5MaxSeed,
+                                   double E2x5TopSeed,
+                                   double E2x5BottomSeed,
+                                   double E2x5LeftSeed,
+                                   double E2x5RightSeed,
+                                   double pt,
+                                   double GsfTrackPIn,
+                                   double fbrem,
+                                   double Charge,
+                                   double EoP,
+                                   double IEtaSeed,
+                                   double IPhiSeed,
+                                   double EtaCrySeed,
+                                   double PhiCrySeed,
+                                   double PreShowerOverRaw,
+                                   bool printDebug = false );
+
+
+  // Evaluates regression using tracker variables
+  // This option is now deprecated. we keep it only
+  // for backwards compatibility
+  double regressionUncertaintyWithTrkVar(				
+                                         double electronP,
+                                         double SCRawEnergy,
+                                         double scEta,
+                                         double scPhi,
+                                         double R9,
+                                         double etawidth,
+                                         double phiwidth,
+                                         double NClusters,
+                                         double HoE,
+                                         double rho,
+                                         double vertices,
+                                         double EtaSeed,
+                                         double PhiSeed,
+                                         double ESeed,
+                                         double E3x3Seed,
+                                         double E5x5Seed,
+                                         double see,
+                                         double spp,
+                                         double sep,
+                                         double EMaxSeed,
+                                         double E2ndSeed,
+                                         double ETopSeed,
+                                         double EBottomSeed,
+                                         double ELeftSeed,
+                                         double ERightSeed,
+                                         double E2x5MaxSeed,
+                                         double E2x5TopSeed,
+                                         double E2x5BottomSeed,
+                                         double E2x5LeftSeed,
+                                         double E2x5RightSeed,
+                                         double pt,
+                                         double GsfTrackPIn,
+                                         double fbrem,
+                                         double Charge,
+                                         double EoP,
+                                         double IEtaSeed,
+                                         double IPhiSeed,
+                                         double EtaCrySeed,
+                                         double PhiCrySeed,
+                                         double PreShowerOverRaw,
+                                         bool printDebug = false );
 
 
   // Evaluates regression using tracker variables
