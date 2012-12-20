@@ -651,21 +651,41 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(Double_t fbrem,
   fMVAVar_d0              = d0;
   fMVAVar_ip3d            = ip3d;
 
-  fMVAVar_ChargedIso_DR0p0To0p1 = ChargedIso_DR0p0To0p1;
-  fMVAVar_ChargedIso_DR0p1To0p2 = ChargedIso_DR0p1To0p2;
-  fMVAVar_ChargedIso_DR0p2To0p3 = ChargedIso_DR0p2To0p3;
-  fMVAVar_ChargedIso_DR0p3To0p4 = ChargedIso_DR0p3To0p4;
-  fMVAVar_ChargedIso_DR0p4To0p5 = ChargedIso_DR0p4To0p5;
-  fMVAVar_GammaIso_DR0p0To0p1 = GammaIso_DR0p0To0p1;
-  fMVAVar_GammaIso_DR0p1To0p2 = GammaIso_DR0p1To0p2;
-  fMVAVar_GammaIso_DR0p2To0p3 = GammaIso_DR0p2To0p3;
-  fMVAVar_GammaIso_DR0p3To0p4 = GammaIso_DR0p3To0p4;
-  fMVAVar_GammaIso_DR0p4To0p5 = GammaIso_DR0p4To0p5;
-  fMVAVar_NeutralHadronIso_DR0p0To0p1 = NeutralHadronIso_DR0p0To0p1;
-  fMVAVar_NeutralHadronIso_DR0p1To0p2 = NeutralHadronIso_DR0p1To0p2;
-  fMVAVar_NeutralHadronIso_DR0p2To0p3 = NeutralHadronIso_DR0p2To0p3;
-  fMVAVar_NeutralHadronIso_DR0p3To0p4 = NeutralHadronIso_DR0p3To0p4;
-  fMVAVar_NeutralHadronIso_DR0p4To0p5 = NeutralHadronIso_DR0p4To0p5;
+  if (fMVAType == kTrigIDIsoCombinedPUCorrected) {
+    fMVAVar_ChargedIso_DR0p0To0p1 = ChargedIso_DR0p0To0p1;
+    fMVAVar_ChargedIso_DR0p1To0p2 = ChargedIso_DR0p1To0p2;
+    fMVAVar_ChargedIso_DR0p2To0p3 = ChargedIso_DR0p2To0p3;
+    fMVAVar_ChargedIso_DR0p3To0p4 = ChargedIso_DR0p3To0p4;
+    fMVAVar_ChargedIso_DR0p4To0p5 = ChargedIso_DR0p4To0p5;
+    fMVAVar_GammaIso_DR0p0To0p1 = GammaIso_DR0p0To0p1;
+    fMVAVar_GammaIso_DR0p1To0p2 = GammaIso_DR0p1To0p2;
+    fMVAVar_GammaIso_DR0p2To0p3 = GammaIso_DR0p2To0p3;
+    fMVAVar_GammaIso_DR0p3To0p4 = GammaIso_DR0p3To0p4;
+    fMVAVar_GammaIso_DR0p4To0p5 = GammaIso_DR0p4To0p5;
+    fMVAVar_NeutralHadronIso_DR0p0To0p1 = NeutralHadronIso_DR0p0To0p1;
+    fMVAVar_NeutralHadronIso_DR0p1To0p2 = NeutralHadronIso_DR0p1To0p2;
+    fMVAVar_NeutralHadronIso_DR0p2To0p3 = NeutralHadronIso_DR0p2To0p3;
+    fMVAVar_NeutralHadronIso_DR0p3To0p4 = NeutralHadronIso_DR0p3To0p4;
+    fMVAVar_NeutralHadronIso_DR0p4To0p5 = NeutralHadronIso_DR0p4To0p5;
+  } else if (fMVAType == kTrigIDIsoCombined) {
+    fMVAVar_ChargedIso_DR0p0To0p1 = ChargedIso_DR0p0To0p1;
+    fMVAVar_ChargedIso_DR0p1To0p2 = ChargedIso_DR0p1To0p2/ 0.03;
+    fMVAVar_ChargedIso_DR0p2To0p3 = ChargedIso_DR0p2To0p3/ 0.05;
+    fMVAVar_ChargedIso_DR0p3To0p4 = ChargedIso_DR0p3To0p4/ 0.07;
+    fMVAVar_ChargedIso_DR0p4To0p5 = ChargedIso_DR0p4To0p5/ 0.09;
+    fMVAVar_GammaIso_DR0p0To0p1 = GammaIso_DR0p0To0p1;
+    fMVAVar_GammaIso_DR0p1To0p2 = GammaIso_DR0p1To0p2/ 0.03;
+    fMVAVar_GammaIso_DR0p2To0p3 = GammaIso_DR0p2To0p3/ 0.05;
+    fMVAVar_GammaIso_DR0p3To0p4 = GammaIso_DR0p3To0p4/ 0.07;
+    fMVAVar_GammaIso_DR0p4To0p5 = GammaIso_DR0p4To0p5/ 0.09;
+    fMVAVar_NeutralHadronIso_DR0p0To0p1 = NeutralHadronIso_DR0p0To0p1;
+    fMVAVar_NeutralHadronIso_DR0p1To0p2 = NeutralHadronIso_DR0p1To0p2/ 0.03;
+    fMVAVar_NeutralHadronIso_DR0p2To0p3 = NeutralHadronIso_DR0p2To0p3/ 0.05;
+    fMVAVar_NeutralHadronIso_DR0p3To0p4 = NeutralHadronIso_DR0p3To0p4/ 0.07;
+    fMVAVar_NeutralHadronIso_DR0p4To0p5 = NeutralHadronIso_DR0p4To0p5/ 0.09;    
+  } else {
+    cout << "Warning: Type " << fMVAType << " is not supported.\n";
+  }
 
   fMVAVar_rho             = Rho;
   fMVAVar_eta             = eta;
@@ -700,22 +720,22 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(Double_t fbrem,
 	 << " PreShowerOverRaw " << fMVAVar_PreShowerOverRaw  
 	 << " d0 " << fMVAVar_d0  
 	 << " ip3d " << fMVAVar_ip3d  
-         << " ChargedIso_DR0p0To0p1 " <<  ChargedIso_DR0p0To0p1
-         << " ChargedIso_DR0p1To0p2 " <<  ChargedIso_DR0p1To0p2
-         << " ChargedIso_DR0p2To0p3 " <<  ChargedIso_DR0p2To0p3
-         << " ChargedIso_DR0p3To0p4 " <<  ChargedIso_DR0p3To0p4
-         << " ChargedIso_DR0p4To0p5 " <<  ChargedIso_DR0p4To0p5
-         << " GammaIso_DR0p0To0p1 " <<  GammaIso_DR0p0To0p1
-         << " GammaIso_DR0p1To0p2 " <<  GammaIso_DR0p1To0p2
-         << " GammaIso_DR0p2To0p3 " <<  GammaIso_DR0p2To0p3
-         << " GammaIso_DR0p3To0p4 " <<  GammaIso_DR0p3To0p4
-         << " GammaIso_DR0p4To0p5 " <<  GammaIso_DR0p4To0p5
-         << " NeutralHadronIso_DR0p0To0p1 " <<  NeutralHadronIso_DR0p0To0p1
-         << " NeutralHadronIso_DR0p1To0p2 " <<  NeutralHadronIso_DR0p1To0p2
-         << " NeutralHadronIso_DR0p2To0p3 " <<  NeutralHadronIso_DR0p2To0p3
-         << " NeutralHadronIso_DR0p3To0p4 " <<  NeutralHadronIso_DR0p3To0p4
-         << " NeutralHadronIso_DR0p4To0p5 " <<  NeutralHadronIso_DR0p4To0p5
-         << " Rho " <<  Rho
+         << " ChargedIso_DR0p0To0p1 " <<  fMVAVar_ChargedIso_DR0p0To0p1
+         << " ChargedIso_DR0p1To0p2 " <<  fMVAVar_ChargedIso_DR0p1To0p2
+         << " ChargedIso_DR0p2To0p3 " <<  fMVAVar_ChargedIso_DR0p2To0p3
+         << " ChargedIso_DR0p3To0p4 " <<  fMVAVar_ChargedIso_DR0p3To0p4
+         << " ChargedIso_DR0p4To0p5 " <<  fMVAVar_ChargedIso_DR0p4To0p5
+         << " GammaIso_DR0p0To0p1 " <<  fMVAVar_GammaIso_DR0p0To0p1
+         << " GammaIso_DR0p1To0p2 " <<  fMVAVar_GammaIso_DR0p1To0p2
+         << " GammaIso_DR0p2To0p3 " <<  fMVAVar_GammaIso_DR0p2To0p3
+         << " GammaIso_DR0p3To0p4 " <<  fMVAVar_GammaIso_DR0p3To0p4
+         << " GammaIso_DR0p4To0p5 " <<  fMVAVar_GammaIso_DR0p4To0p5
+         << " NeutralHadronIso_DR0p0To0p1 " <<  fMVAVar_NeutralHadronIso_DR0p0To0p1
+         << " NeutralHadronIso_DR0p1To0p2 " <<  fMVAVar_NeutralHadronIso_DR0p1To0p2
+         << " NeutralHadronIso_DR0p2To0p3 " <<  fMVAVar_NeutralHadronIso_DR0p2To0p3
+         << " NeutralHadronIso_DR0p3To0p4 " <<  fMVAVar_NeutralHadronIso_DR0p3To0p4
+         << " NeutralHadronIso_DR0p4To0p5 " <<  fMVAVar_NeutralHadronIso_DR0p4To0p5
+         << " Rho " <<  fMVAVar_rho
 	 << " eta " << fMVAVar_eta  
 	 << " pt " << fMVAVar_pt << endl;
     cout << " ### MVA " << mva << endl;
@@ -1239,7 +1259,10 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
   Double_t tmpNeutralHadronIso_DR0p2To0p3  = 0;
   Double_t tmpNeutralHadronIso_DR0p3To0p4  = 0;
   Double_t tmpNeutralHadronIso_DR0p4To0p5  = 0;
-
+  
+  //************************************************************
+  //Note: Input collection is assumed to be PFNoPU collection
+  //************************************************************
   for (reco::PFCandidateCollection::const_iterator iP = PFCandidates.begin(); 
        iP != PFCandidates.end(); ++iP) {
       
@@ -1258,6 +1281,12 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
       //************************************************************
       // Footprint Veto
       if (fabs(fMVAVar_eta) > 1.479 && dr < 0.015) passVeto = kFALSE;
+      if (iP->superClusterRef().isNonnull() && 
+          iP->superClusterRef() == ele.superCluster()) passVeto = kFALSE;
+      if (iP->gsfTrackRef().isNonnull() && ele.gsfTrack().isNonnull() && 
+          iP->gsfTrackRef() == ele.gsfTrack()) passVeto = kFALSE;
+      if (iP->trackRef().isNonnull() && ele.closestCtfTrackRef().isNonnull() && 
+          iP->trackRef() == ele.closestCtfTrackRef()) passVeto = kFALSE;
       //************************************************************
       if (passVeto) {
         if (dr < 0.1) tmpChargedIso_DR0p0To0p1 += iP->pt();
@@ -1272,6 +1301,7 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
       //************************************************************
       // Footprint Veto
       if (fabs(fMVAVar_eta) > 1.479 && dr < 0.08) passVeto = kFALSE;
+      if (iP->superClusterRef() == ele.superCluster()) passVeto = kFALSE;
       //************************************************************	
       if (passVeto) {
         if (dr < 0.1) tmpGammaIso_DR0p0To0p1 += iP->pt();
@@ -1309,20 +1339,20 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
     fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5 - Rho*ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleNeutralHadronIsoDR0p4To0p5, fMVAVar_eta, EATarget))/ele.pt(), 2.5), 0.0);
   } else if (fMVAType == kTrigIDIsoCombined) {
     fMVAVar_ChargedIso_DR0p0To0p1   = TMath::Min((tmpChargedIso_DR0p0To0p1)/ele.pt(), 2.5);
-    fMVAVar_ChargedIso_DR0p1To0p2   = TMath::Min((tmpChargedIso_DR0p1To0p2)/ele.pt(), 2.5);
-    fMVAVar_ChargedIso_DR0p2To0p3 = TMath::Min((tmpChargedIso_DR0p2To0p3)/ele.pt(), 2.5);
-    fMVAVar_ChargedIso_DR0p3To0p4 = TMath::Min((tmpChargedIso_DR0p3To0p4)/ele.pt(), 2.5);
-    fMVAVar_ChargedIso_DR0p4To0p5 = TMath::Min((tmpChargedIso_DR0p4To0p5)/ele.pt(), 2.5); 
+    fMVAVar_ChargedIso_DR0p1To0p2   = TMath::Min((tmpChargedIso_DR0p1To0p2)/ele.pt(), 2.5) / 0.03;
+    fMVAVar_ChargedIso_DR0p2To0p3 = TMath::Min((tmpChargedIso_DR0p2To0p3)/ele.pt(), 2.5) / 0.05;
+    fMVAVar_ChargedIso_DR0p3To0p4 = TMath::Min((tmpChargedIso_DR0p3To0p4)/ele.pt(), 2.5) / 0.07;
+    fMVAVar_ChargedIso_DR0p4To0p5 = TMath::Min((tmpChargedIso_DR0p4To0p5)/ele.pt(), 2.5) / 0.09; 
     fMVAVar_GammaIso_DR0p0To0p1 = TMath::Max(TMath::Min((tmpGammaIso_DR0p0To0p1)/ele.pt(), 2.5), 0.0);
-    fMVAVar_GammaIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpGammaIso_DR0p1To0p2)/ele.pt(), 2.5), 0.0);
-    fMVAVar_GammaIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpGammaIso_DR0p2To0p3)/ele.pt(), 2.5), 0.0);
-    fMVAVar_GammaIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpGammaIso_DR0p3To0p4)/ele.pt(), 2.5), 0.0);
-    fMVAVar_GammaIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpGammaIso_DR0p4To0p5)/ele.pt(), 2.5), 0.0);
+    fMVAVar_GammaIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpGammaIso_DR0p1To0p2)/ele.pt(), 2.5), 0.0) / 0.03;
+    fMVAVar_GammaIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpGammaIso_DR0p2To0p3)/ele.pt(), 2.5), 0.0) / 0.05;
+    fMVAVar_GammaIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpGammaIso_DR0p3To0p4)/ele.pt(), 2.5), 0.0) / 0.07;
+    fMVAVar_GammaIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpGammaIso_DR0p4To0p5)/ele.pt(), 2.5), 0.0) / 0.09;
     fMVAVar_NeutralHadronIso_DR0p0To0p1 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p0To0p1)/ele.pt(), 2.5), 0.0);
-    fMVAVar_NeutralHadronIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p1To0p2)/ele.pt(), 2.5), 0.0);
-    fMVAVar_NeutralHadronIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p2To0p3)/ele.pt(), 2.5), 0.0);
-    fMVAVar_NeutralHadronIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p3To0p4)/ele.pt(), 2.5), 0.0);
-    fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5)/ele.pt(), 2.5), 0.0);
+    fMVAVar_NeutralHadronIso_DR0p1To0p2 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p1To0p2)/ele.pt(), 2.5), 0.0) / 0.03;
+    fMVAVar_NeutralHadronIso_DR0p2To0p3 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p2To0p3)/ele.pt(), 2.5), 0.0) / 0.05;
+    fMVAVar_NeutralHadronIso_DR0p3To0p4 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p3To0p4)/ele.pt(), 2.5), 0.0) / 0.07;
+    fMVAVar_NeutralHadronIso_DR0p4To0p5 = TMath::Max(TMath::Min((tmpNeutralHadronIso_DR0p4To0p5)/ele.pt(), 2.5), 0.0) / 0.09;
     fMVAVar_rho = Rho;
   } else {
     cout << "Warning: Type " << fMVAType << " is not supported.\n";
@@ -1380,7 +1410,7 @@ Double_t EGammaMvaEleEstimator::IDIsoCombinedMvaValue(const reco::GsfElectron& e
           << fMVAVar_NeutralHadronIso_DR0p3To0p4 << " "
           << fMVAVar_NeutralHadronIso_DR0p4To0p5 << " "
           << endl;
-    cout  << "Rho : " << Rho << endl;
+    cout  << "Rho : " << fMVAVar_rho << endl;
     cout << " ### MVA " << mva << endl;
   }
 
