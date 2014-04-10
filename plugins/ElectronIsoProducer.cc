@@ -17,7 +17,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
-#include "EgammaAnalysis/ElectronTools/src/PFIsolationEstimator.cc"
+#include "EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc"
 //
 // class declaration
 //

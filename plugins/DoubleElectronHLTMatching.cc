@@ -13,7 +13,7 @@
 //
 // Original Author:  Matteo Sani,40 3-A02,+41227671577,
 //         Created:  Wed Mar 28 18:07:47 CEST 2012
-// $Id: DoubleElectronHLTMatching.cc,v 1.1 2012/04/04 14:28:22 sani Exp $
+// $Id: DoubleElectronHLTMatching.cc,v 1.2 2012/04/27 16:03:28 sani Exp $
 //
 //
 
